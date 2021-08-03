@@ -22,10 +22,9 @@ namespace FileCabinetApp
             return Array.Empty<FileCabinetRecord>();
         }
 
-        public int GetStart()
+        public int GetStat()
         {
-            // TODO: добавьте реализацию метода
-            return 0;
+            return this.records.Count;
         }
     }
 }
