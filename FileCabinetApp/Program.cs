@@ -4,7 +4,7 @@ namespace FileCabinetApp
 {
     public static class Program
     {
-        private const string DeveloperName = "Vasili Vasilyev";
+        private const string DeveloperName = "Alexandr Alexeevich";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
