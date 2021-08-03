@@ -1,2 +1,0 @@
-# Study_Project_1
-EarlyPuppyAlreadyMaster
