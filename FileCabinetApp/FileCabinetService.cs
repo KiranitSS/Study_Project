@@ -44,6 +44,7 @@ namespace FileCabinetApp
                     ShortProp = this.records[i].ShortProp,
                     MoneyCount = this.records[i].MoneyCount,
                     CharProp = this.records[i].CharProp,
+                    Id = this.records[i].Id,
                 };
             }
 
@@ -84,17 +85,17 @@ namespace FileCabinetApp
 
             if (dateOfBirth.Year < 1950 || dateOfBirth > DateTime.Today)
             {
-                throw new ArgumentException("First name length can't be lower than 2 or bigger than 60");
+                throw new ArgumentException("Incorrect date of birth");
             }
 
             if (!char.IsLetter(charProp))
             {
-                throw new ArgumentException($"{charProp} must be letter");
+                throw new ArgumentException($"{nameof(charProp)} must be letter");
             }
 
             if (shortProp < 200)
             {
-                throw new ArgumentException($"{charProp} must be bigger than 200");
+                throw new ArgumentException($"{nameof(charProp)} must be bigger than 200");
             }
         }
     }

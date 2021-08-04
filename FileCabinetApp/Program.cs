@@ -75,47 +75,119 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
-            Console.Write("First name: ");
-            string firstName = Console.ReadLine();
 
-            Console.Write("\nLast name: ");
-            string lastName = Console.ReadLine();
+            string firstName = GetAnyName("First");
 
-            Console.Write("\nDate of birth: ");
-            DateTime birth;
+            string lastName = GetAnyName("Last");
 
-            while (!DateTime.TryParse(Console.ReadLine(), out birth))
+            DateTime birth = GetBirthDate();
+
+            decimal moneyCount = GetMoney();
+
+            short anyShort = GetShortValue();
+
+            char letter = GetChatValue();
+
+            int recId = fileCabinetService.CreateRecord(firstName, lastName, birth, anyShort, moneyCount, letter);
+
+            Console.WriteLine($"Record #{recId} is created.");
+        }
+
+        private static char GetChatValue()
+        {
+            char letter = default(char);
+            bool isCorrect = false;
+
+            while (!isCorrect)
             {
-                Console.Write("\nWrite correct date (date format month/day/year): ");
+                Console.Write("\nWrite any letter: ");
+                while (!char.TryParse(Console.ReadLine(), out letter))
+                {
+                    Console.Write("\nWrite correct symbol (One symbol!): ");
+                }
+
+                if (char.IsLetter(letter))
+                {
+                    isCorrect = true;
+                }
             }
 
-            Console.Write("\nMoney count: ");
-            decimal moneyCount;
+            return letter;
+        }
 
-            while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
-            {
-                Console.Write("\nWrite correct money count (must contains only digits and be bigger than 200): ");
-            }
-
+        private static short GetShortValue()
+        {
             Console.WriteLine("\nShort numbers: ");
             short anyShort;
 
             while (!short.TryParse(Console.ReadLine(), out anyShort))
             {
-                Console.Write("\nWrite correct short number (digits count from 1 to 5): ");
+                Console.Write("\nWrite correct short number: ");
             }
 
-            Console.Write("\nWrite any letter: ");
-            char anyChar;
+            return anyShort;
+        }
 
-            while (!char.TryParse(Console.ReadLine(), out anyChar))
+        private static decimal GetMoney()
+        {
+            decimal moneyCount = 0;
+            bool isCorrect = false;
+
+            while (!isCorrect)
             {
-                Console.Write("\nWrite correct symbol (One symbol!): ");
+                Console.Write("\nMoney count: ");
+                while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
+                {
+                    Console.Write("\nWrite correct money count (must contains only digits): ");
+                }
+
+                if (moneyCount > 200)
+                {
+                    isCorrect = true;
+                    continue;
+                }
+
+                Console.WriteLine("Money count must be bigger than 200!");
             }
 
-            int recId = fileCabinetService.CreateRecord(firstName, lastName, birth, anyShort, moneyCount, anyChar);
+            return moneyCount;
+        }
 
-            Console.WriteLine($"Record #{recId} is created.");
+        private static DateTime GetBirthDate()
+        {
+            DateTime birth = DateTime.Now;
+            bool isCorrect = false;
+
+            while (!isCorrect)
+            {
+                Console.Write("\nDate of birth: ");
+                while (!DateTime.TryParse(Console.ReadLine(), out birth))
+                {
+                    Console.Write("\nWrite correct date (date format month/day/year): ");
+                }
+
+                if (birth < DateTime.Today && birth.Year > 1950)
+                {
+                    isCorrect = true;
+                    continue;
+                }
+
+                Console.WriteLine("Write your real date of birth!");
+            }
+
+            return birth;
+        }
+
+        private static string GetAnyName(string message)
+        {
+            string name;
+            do
+            {
+                Console.Write($"{message} name: ");
+                name = Console.ReadLine();
+            }
+            while (name.Length < 2 || name.Length > 60);
+            return name;
         }
 
         private static void List(string command)
