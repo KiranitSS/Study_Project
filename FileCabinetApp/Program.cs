@@ -18,6 +18,7 @@ namespace FileCabinetApp
         {
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("stat", Stat),
+            new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -26,6 +27,7 @@ namespace FileCabinetApp
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
+            new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -83,12 +85,29 @@ namespace FileCabinetApp
 
             while (!DateTime.TryParse(Console.ReadLine(), out birth))
             {
-                Console.Write("\nWrite correct date (date format **/**/****): ");
+                Console.Write("\nWrite correct date (date format month/day/year): ");
             }
 
             int recId = fileCabinetService.CreateRecord(firstName, lastName, birth);
 
             Console.WriteLine($"Record #{recId} is created.");
+        }
+
+        private static void List(string command)
+        {
+            var records = fileCabinetService.GetRecords();
+
+            if (records.Length == 0)
+            {
+                Console.WriteLine("There are no any records");
+                return;
+            }
+
+            foreach (var record in records)
+            {
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}");
+            }
         }
 
         private static void Stat(string parameters)
