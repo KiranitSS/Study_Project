@@ -94,7 +94,7 @@ namespace FileCabinetApp
 
             while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
             {
-                Console.Write("\nWrite correct money count (only digits!): ");
+                Console.Write("\nWrite correct money count (must contains only digits and be bigger than 200): ");
             }
 
             Console.WriteLine("\nShort numbers: ");
@@ -105,7 +105,7 @@ namespace FileCabinetApp
                 Console.Write("\nWrite correct short number (digits count from 1 to 5): ");
             }
 
-            Console.Write("\nWrite any symbol: ");
+            Console.Write("\nWrite any letter: ");
             char anyChar;
 
             while (!char.TryParse(Console.ReadLine(), out anyChar))
@@ -132,7 +132,7 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                     $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                    $"{record.ShortProp}, {record.MoneyCount}, {record.CharProp}");
+                    $"{record.ShortProp}, {record.MoneyCount}, ${record.CharProp}");
             }
         }
 

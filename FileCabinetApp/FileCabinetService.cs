@@ -12,6 +12,8 @@ namespace FileCabinetApp
 
         public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short shortProp, decimal money, char charProp)
         {
+            CheckCreation(firstName, lastName, charProp, dateOfBirth, money);
+
             var record = new FileCabinetRecord
             {
                 Id = this.records.Count + 1,
@@ -34,13 +36,15 @@ namespace FileCabinetApp
 
             for (int i = 0; i < this.records.Count; i++)
             {
-                recordsCopy[i] = new FileCabinetRecord();
-                recordsCopy[i].FirstName = this.records[i].FirstName;
-                recordsCopy[i].LastName = this.records[i].LastName;
-                recordsCopy[i].DateOfBirth = this.records[i].DateOfBirth;
-                recordsCopy[i].ShortProp = this.records[i].ShortProp;
-                recordsCopy[i].MoneyCount = this.records[i].MoneyCount;
-                recordsCopy[i].CharProp = this.records[i].CharProp;
+                recordsCopy[i] = new FileCabinetRecord
+                {
+                    FirstName = this.records[i].FirstName,
+                    LastName = this.records[i].LastName,
+                    DateOfBirth = this.records[i].DateOfBirth,
+                    ShortProp = this.records[i].ShortProp,
+                    MoneyCount = this.records[i].MoneyCount,
+                    CharProp = this.records[i].CharProp,
+                };
             }
 
             return recordsCopy;
@@ -49,6 +53,49 @@ namespace FileCabinetApp
         public int GetStat()
         {
             return this.records.Count;
+        }
+
+        private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal shortProp)
+        {
+            if (string.IsNullOrWhiteSpace(firstName))
+            {
+                throw new ArgumentNullException($"{nameof(firstName)} can't be empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(lastName))
+            {
+                throw new ArgumentNullException($"{nameof(lastName)} can't be empty");
+            }
+
+            if (charProp == default(char))
+            {
+                throw new ArgumentNullException($"{nameof(charProp)} can't be empty");
+            }
+
+            if (firstName.Length < 2 || firstName.Length > 60)
+            {
+                throw new ArgumentException("First name length can't be lower than 2 or bigger than 60");
+            }
+
+            if (firstName.Length < 2 || firstName.Length > 60)
+            {
+                throw new ArgumentException("Last name length can't be lower than 2 or bigger than 60");
+            }
+
+            if (dateOfBirth.Year < 1950 || dateOfBirth > DateTime.Today)
+            {
+                throw new ArgumentException("First name length can't be lower than 2 or bigger than 60");
+            }
+
+            if (!char.IsLetter(charProp))
+            {
+                throw new ArgumentException($"{charProp} must be letter");
+            }
+
+            if (shortProp < 200)
+            {
+                throw new ArgumentException($"{charProp} must be bigger than 200");
+            }
         }
     }
 }
