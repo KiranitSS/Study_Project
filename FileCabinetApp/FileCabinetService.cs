@@ -10,7 +10,7 @@ namespace FileCabinetApp
     {
         private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
-        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth)
+        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short shortProp, decimal money, char charProp)
         {
             var record = new FileCabinetRecord
             {
@@ -18,6 +18,9 @@ namespace FileCabinetApp
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = dateOfBirth,
+                ShortProp = shortProp,
+                MoneyCount = money,
+                CharProp = charProp,
             };
 
             this.records.Add(record);
@@ -35,7 +38,9 @@ namespace FileCabinetApp
                 recordsCopy[i].FirstName = this.records[i].FirstName;
                 recordsCopy[i].LastName = this.records[i].LastName;
                 recordsCopy[i].DateOfBirth = this.records[i].DateOfBirth;
-                recordsCopy[i].Id = this.records[i].Id;
+                recordsCopy[i].ShortProp = this.records[i].ShortProp;
+                recordsCopy[i].MoneyCount = this.records[i].MoneyCount;
+                recordsCopy[i].CharProp = this.records[i].CharProp;
             }
 
             return recordsCopy;

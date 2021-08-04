@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace FileCabinetApp
@@ -88,7 +89,31 @@ namespace FileCabinetApp
                 Console.Write("\nWrite correct date (date format month/day/year): ");
             }
 
-            int recId = fileCabinetService.CreateRecord(firstName, lastName, birth);
+            Console.Write("\nMoney count: ");
+            decimal moneyCount;
+
+            while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
+            {
+                Console.Write("\nWrite correct money count (only digits!): ");
+            }
+
+            Console.WriteLine("\nShort numbers: ");
+            short anyShort;
+
+            while (!short.TryParse(Console.ReadLine(), out anyShort))
+            {
+                Console.Write("\nWrite correct short number (digits count from 1 to 5): ");
+            }
+
+            Console.Write("\nWrite any symbol: ");
+            char anyChar;
+
+            while (!char.TryParse(Console.ReadLine(), out anyChar))
+            {
+                Console.Write("\nWrite correct symbol (One symbol!): ");
+            }
+
+            int recId = fileCabinetService.CreateRecord(firstName, lastName, birth, anyShort, moneyCount, anyChar);
 
             Console.WriteLine($"Record #{recId} is created.");
         }
@@ -106,7 +131,8 @@ namespace FileCabinetApp
             foreach (var record in records)
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}");
+                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                    $"{record.ShortProp}, {record.MoneyCount}, {record.CharProp}");
             }
         }
 
