@@ -56,6 +56,17 @@ namespace FileCabinetApp
             return this.records.Count;
         }
 
+        public void EditRecord(int id)
+        {
+            if (id > this.records.Count + 1)
+            {
+                throw new ArgumentException("ID can't be bigger than records count");
+            }
+
+            this.records[id - 1] = RecordsUtils.GetRecordData();
+            this.records[id - 1].Id = id;
+        }
+
         private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal shortProp)
         {
             if (string.IsNullOrWhiteSpace(firstName))
