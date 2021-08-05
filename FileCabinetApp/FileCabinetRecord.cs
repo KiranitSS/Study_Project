@@ -9,6 +9,18 @@ namespace FileCabinetApp
 {
     public class FileCabinetRecord
     {
+        public FileCabinetRecord() { }
+
+        public FileCabinetRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short shortProp, char charProp)
+        {
+            this.FirstName = firstName;
+            this.LastName = lastName;
+            this.DateOfBirth = dateOfBirth;
+            this.MoneyCount = moneyCount;
+            this.ShortProp = shortProp;
+            this.CharProp = charProp;
+        }
+
         public int Id { get; set; }
 
         public string FirstName { get; set; }

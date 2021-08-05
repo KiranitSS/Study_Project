@@ -18,6 +18,7 @@ namespace FileCabinetApp
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("help", PrintHelp),
@@ -27,6 +28,7 @@ namespace FileCabinetApp
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
+            new string[] { "create", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
@@ -73,49 +75,16 @@ namespace FileCabinetApp
             Console.WriteLine();
         }
 
-        private static void Create(string parameters)
+        private static void Create(string command)
         {
-            Console.Write("First name: ");
-            string firstName = Console.ReadLine();
+            RecordsUtils.AddRecord(fileCabinetService);
+        }
 
-            Console.Write("\nLast name: ");
-            string lastName = Console.ReadLine();
+        private static void Edit(string command)
+        {
+            int id = GetId();
 
-            Console.Write("\nDate of birth: ");
-            DateTime birth;
-
-            while (!DateTime.TryParse(Console.ReadLine(), out birth))
-            {
-                Console.Write("\nWrite correct date (date format month/day/year): ");
-            }
-
-            Console.Write("\nMoney count: ");
-            decimal moneyCount;
-
-            while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
-            {
-                Console.Write("\nWrite correct money count (only digits!): ");
-            }
-
-            Console.WriteLine("\nShort numbers: ");
-            short anyShort;
-
-            while (!short.TryParse(Console.ReadLine(), out anyShort))
-            {
-                Console.Write("\nWrite correct short number (digits count from 1 to 5): ");
-            }
-
-            Console.Write("\nWrite any symbol: ");
-            char anyChar;
-
-            while (!char.TryParse(Console.ReadLine(), out anyChar))
-            {
-                Console.Write("\nWrite correct symbol (One symbol!): ");
-            }
-
-            int recId = fileCabinetService.CreateRecord(firstName, lastName, birth, anyShort, moneyCount, anyChar);
-
-            Console.WriteLine($"Record #{recId} is created.");
+            fileCabinetService.EditRecord(id);
         }
 
         private static void List(string command)
@@ -132,13 +101,13 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                     $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                    $"{record.ShortProp}, {record.MoneyCount}, {record.CharProp}");
+                    $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
             }
         }
 
         private static void Stat(string parameters)
         {
-            var recordsCount = Program.fileCabinetService.GetStat();
+            var recordsCount = fileCabinetService.GetStat();
             Console.WriteLine($"Here {recordsCount} record(s).");
         }
 
@@ -173,6 +142,33 @@ namespace FileCabinetApp
         {
             Console.WriteLine("Exiting an application...");
             isRunning = false;
+        }
+
+        private static int GetId()
+        {
+            Console.Write("\nRecord ID: ");
+
+            int id = -1;
+            bool isCorrect = false;
+
+            while (!isCorrect)
+            {
+                while (!int.TryParse(Console.ReadLine(), out id))
+                {
+                    Console.Write("\nWrite correct ID: ");
+                }
+
+                if (id > 0 && id < fileCabinetService.GetStat() + 1)
+                {
+                    isCorrect = true;
+                    continue;
+                }
+
+                Console.WriteLine("Record is not found.");
+                Console.Write("\nWrite correct ID: ");
+            }
+
+            return id;
         }
     }
 }
