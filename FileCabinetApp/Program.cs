@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 
 namespace FileCabinetApp
 {
@@ -133,7 +134,9 @@ namespace FileCabinetApp
 
             string targetName = GetTargetName(parameters, targetProp);
 
-            PrintTargetRecords(targetName);
+            var targetRecords = FindTargetRecords(targetName, targetProp);
+
+            PrintTargetRecords(targetRecords);
         }
 
         private static void Stat(string parameters)
@@ -216,10 +219,28 @@ namespace FileCabinetApp
                 parameters.Length - (targetProp.Length + 1));
         }
 
-        private static void PrintTargetRecords(string targetName)
+        private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)
         {
-            var targetRecords = fileCabinetService.FindByFirstName(targetName);
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByFirstName(targetValue);
+            }
 
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByBirthDate(targetValue);
+            }
+
+            return Array.Empty<FileCabinetRecord>();
+        }
+
+        private static void PrintTargetRecords(FileCabinetRecord[] targetRecords)
+        {
             if (targetRecords.Length == 0)
             {
                 Console.WriteLine("There are no suitable entries");

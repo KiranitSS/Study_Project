@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,9 +69,20 @@ namespace FileCabinetApp
             this.records[id - 1].Id = id;
         }
 
+        public FileCabinetRecord[] FindByLastName(string lastname)
+        {
+            return this.records.Where(rec => rec.LastName.Equals(lastname, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        }
+
         public FileCabinetRecord[] FindByFirstName(string firstName)
         {
-            return this.records.Where(rec => rec.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)).ToArray();
+            return this.records.Where(rec => rec.FirstName.Equals(firstName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        }
+
+        public FileCabinetRecord[] FindByBirthDate(string dateOfBirth)
+        {
+            return this.records.Where(
+                rec => rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture).Equals(dateOfBirth)).ToArray();
         }
 
         private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal shortProp)
