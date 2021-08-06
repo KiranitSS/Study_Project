@@ -21,6 +21,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
+            new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -31,6 +32,7 @@ namespace FileCabinetApp
             new string[] { "create", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
+            new string[] { "find", "find matched the records", "The 'find' command prints found records." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -99,10 +101,39 @@ namespace FileCabinetApp
 
             foreach (var record in records)
             {
-                Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                    $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+                PrintRecord(record);
             }
+        }
+
+        private static void Find(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("There are no suitable entries");
+                return;
+            }
+
+            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (startIndex == -1)
+            {
+                Console.WriteLine("There are no suitable entries");
+                return;
+            }
+
+            targetProp = targetProp.Substring(0, startIndex);
+
+            if (parameters.Length == targetProp.Length)
+            {
+                Console.WriteLine("There are no suitable entries");
+                return;
+            }
+
+            string targetName = GetTargetName(parameters, targetProp);
+
+            PrintTargetRecords(targetName);
         }
 
         private static void Stat(string parameters)
@@ -169,6 +200,37 @@ namespace FileCabinetApp
             }
 
             return id;
+        }
+
+        private static void PrintRecord(FileCabinetRecord record)
+        {
+            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+        }
+
+        private static string GetTargetName(string parameters, string targetProp)
+        {
+            return parameters.Substring(
+                targetProp.Length + 1,
+                parameters.Length - (targetProp.Length + 1));
+        }
+
+        private static void PrintTargetRecords(string targetName)
+        {
+            var targetRecords = fileCabinetService.FindByFirstName(targetName);
+
+            if (targetRecords.Length == 0)
+            {
+                Console.WriteLine("There are no suitable entries");
+            }
+            else
+            {
+                foreach (var record in targetRecords)
+                {
+                    PrintRecord(record);
+                }
+            }
         }
     }
 }

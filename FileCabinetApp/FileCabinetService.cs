@@ -67,6 +67,11 @@ namespace FileCabinetApp
             this.records[id - 1].Id = id;
         }
 
+        public FileCabinetRecord[] FindByFirstName(string firstName)
+        {
+            return this.records.Where(rec => rec.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)).ToArray();
+        }
+
         private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal shortProp)
         {
             if (string.IsNullOrWhiteSpace(firstName))
