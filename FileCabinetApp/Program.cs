@@ -30,10 +30,10 @@ namespace FileCabinetApp
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
-            new string[] { "create", "edit record", "The 'edit' command edit record by id." },
+            new string[] { "edit", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
-            new string[] { "find", "find matched the records", "The 'find' command prints found records." },
+            new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -112,7 +112,7 @@ namespace FileCabinetApp
 
             if (string.IsNullOrEmpty(targetProp))
             {
-                Console.WriteLine("There are no suitable entries");
+                Console.WriteLine("Property name missed");
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace FileCabinetApp
 
             if (startIndex == -1)
             {
-                Console.WriteLine("There are no suitable entries");
+                Console.WriteLine("Property value missed");
                 return;
             }
 
@@ -128,7 +128,7 @@ namespace FileCabinetApp
 
             if (parameters.Length == targetProp.Length)
             {
-                Console.WriteLine("There are no suitable entries");
+                Console.WriteLine("Property value missed");
                 return;
             }
 
