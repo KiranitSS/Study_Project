@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 
 namespace FileCabinetApp
 {
@@ -21,6 +22,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
+            new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -28,9 +30,10 @@ namespace FileCabinetApp
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
-            new string[] { "create", "edit record", "The 'edit' command edit record by id." },
+            new string[] { "edit", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
+            new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -99,10 +102,41 @@ namespace FileCabinetApp
 
             foreach (var record in records)
             {
-                Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                    $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+                PrintRecord(record);
             }
+        }
+
+        private static void Find(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("Property name missed");
+                return;
+            }
+
+            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (startIndex == -1)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            targetProp = targetProp.Substring(0, startIndex);
+
+            if (parameters.Length == targetProp.Length)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            string targetName = GetTargetName(parameters, targetProp);
+
+            var targetRecords = FindTargetRecords(targetName, targetProp);
+
+            PrintTargetRecords(targetRecords);
         }
 
         private static void Stat(string parameters)
@@ -169,6 +203,55 @@ namespace FileCabinetApp
             }
 
             return id;
+        }
+
+        private static void PrintRecord(FileCabinetRecord record)
+        {
+            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+        }
+
+        private static string GetTargetName(string parameters, string targetProp)
+        {
+            return parameters.Substring(
+                targetProp.Length + 1,
+                parameters.Length - (targetProp.Length + 1));
+        }
+
+        private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)
+        {
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByFirstName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByBirthDate(targetValue);
+            }
+
+            return Array.Empty<FileCabinetRecord>();
+        }
+
+        private static void PrintTargetRecords(FileCabinetRecord[] targetRecords)
+        {
+            if (targetRecords.Length == 0)
+            {
+                Console.WriteLine("There are no suitable entries");
+            }
+            else
+            {
+                foreach (var record in targetRecords)
+                {
+                    PrintRecord(record);
+                }
+            }
         }
     }
 }
