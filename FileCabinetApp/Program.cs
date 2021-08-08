@@ -80,14 +80,20 @@ namespace FileCabinetApp
 
         private static void Create(string command)
         {
-            RecordsUtils.AddRecord(fileCabinetService);
+            AddRecord(fileCabinetService);
         }
 
         private static void Edit(string command)
         {
-            int id = GetId();
+            int id = RecordConsoleDataInput.GetId(fileCabinetService);
 
-            fileCabinetService.EditRecord(id);
+            if (id > fileCabinetService.GetStat())
+            {
+                Console.WriteLine("Incorrect ID");
+            }
+
+            FileCabinetRecord record = RecordConsoleDataInput.GetRecordData();
+            fileCabinetService.EditRecord(id, record.FirstName, record.LastName, record.DateOfBirth, record.ShortProp, record.MoneyCount, record.CharProp);
         }
 
         private static void List(string command)
@@ -132,11 +138,26 @@ namespace FileCabinetApp
                 return;
             }
 
-            string targetName = GetTargetName(parameters, targetProp);
+            string targetName = GetTargetName(parameters, targetProp.Length);
 
             var targetRecords = FindTargetRecords(targetName, targetProp);
 
             PrintTargetRecords(targetRecords);
+        }
+
+        private static void AddRecord(FileCabinetService fileCabinetService)
+        {
+            if (fileCabinetService is null)
+            {
+                throw new ArgumentNullException(nameof(fileCabinetService));
+            }
+
+            var tmpRecord = RecordConsoleDataInput.GetRecordData();
+
+            int recId = fileCabinetService.CreateRecord(
+                tmpRecord.FirstName, tmpRecord.LastName, tmpRecord.DateOfBirth, tmpRecord.ShortProp, tmpRecord.MoneyCount, tmpRecord.CharProp);
+
+            Console.WriteLine($"Record #{recId} is created.");
         }
 
         private static void Stat(string parameters)
@@ -178,33 +199,6 @@ namespace FileCabinetApp
             isRunning = false;
         }
 
-        private static int GetId()
-        {
-            Console.Write("\nRecord ID: ");
-
-            int id = -1;
-            bool isCorrect = false;
-
-            while (!isCorrect)
-            {
-                while (!int.TryParse(Console.ReadLine(), out id))
-                {
-                    Console.Write("\nWrite correct ID: ");
-                }
-
-                if (id > 0 && id < fileCabinetService.GetStat() + 1)
-                {
-                    isCorrect = true;
-                    continue;
-                }
-
-                Console.WriteLine("Record is not found.");
-                Console.Write("\nWrite correct ID: ");
-            }
-
-            return id;
-        }
-
         private static void PrintRecord(FileCabinetRecord record)
         {
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
@@ -212,11 +206,9 @@ namespace FileCabinetApp
                 $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
         }
 
-        private static string GetTargetName(string parameters, string targetProp)
+        private static string GetTargetName(string parameters, int targetPropLength)
         {
-            return parameters.Substring(
-                targetProp.Length + 1,
-                parameters.Length - (targetProp.Length + 1));
+            return parameters[(targetPropLength + 1) ..];
         }
 
         private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)

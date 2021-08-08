@@ -6,29 +6,46 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
-    public static class RecordsUtils
+    public static class RecordConsoleDataInput
     {
-        public static void AddRecord(FileCabinetService fileCabinetService)
-        {
-            if (fileCabinetService is null)
-            {
-                throw new ArgumentNullException(nameof(fileCabinetService));
-            }
-
-            FileCabinetRecord record = GetRecordData();
-
-            int recId = fileCabinetService.CreateRecord(
-                record.FirstName, record.LastName, record.DateOfBirth, record.ShortProp, record.MoneyCount, record.CharProp);
-
-            Console.WriteLine($"Record #{recId} is created.");
-        }
-
         public static FileCabinetRecord GetRecordData()
         {
             FileCabinetRecord record = new FileCabinetRecord(
                 GetAnyName("First"), GetAnyName("Last"), GetBirthDate(), GetMoney(), GetShortValue(), GetCharValue());
 
             return record;
+        }
+
+        public static int GetId(FileCabinetService fileCabinetService)
+        {
+            if (fileCabinetService is null)
+            {
+                throw new ArgumentNullException(nameof(fileCabinetService));
+            }
+
+            Console.Write("\nRecord ID: ");
+
+            int id = -1;
+            bool isCorrect = false;
+
+            while (!isCorrect)
+            {
+                while (!int.TryParse(Console.ReadLine(), out id))
+                {
+                    Console.Write("\nWrite correct ID: ");
+                }
+
+                if (id > 0 && id < fileCabinetService.GetStat() + 1)
+                {
+                    isCorrect = true;
+                    continue;
+                }
+
+                Console.WriteLine("Record is not found.");
+                Console.Write("\nWrite correct ID: ");
+            }
+
+            return id;
         }
 
         private static char GetCharValue()

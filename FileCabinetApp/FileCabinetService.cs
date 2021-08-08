@@ -32,7 +32,7 @@ namespace FileCabinetApp
                 CharProp = charProp,
             };
 
-            this.AddRecordToDict(record);
+            this.AddRecordToFilterDictionaries(record);
 
             this.records.Add(record);
 
@@ -65,7 +65,7 @@ namespace FileCabinetApp
             return this.records.Count;
         }
 
-        public void EditRecord(int id)
+        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short shortProp, decimal money, char charProp)
         {
             if (id > this.records.Count + 1)
             {
@@ -77,27 +77,34 @@ namespace FileCabinetApp
 
             currentRecords.Remove(currentRecord);
 
-            this.records[id - 1] = RecordsUtils.GetRecordData();
-            this.records[id - 1].Id = id;
+            currentRecord.FirstName = firstName;
+            currentRecord.LastName = lastName;
+            currentRecord.DateOfBirth = dateOfBirth;
+            currentRecord.ShortProp = shortProp;
+            currentRecord.MoneyCount = money;
+            currentRecord.CharProp = charProp;
 
-            this.AddRecordToDict(this.records[id - 1]);
+            this.AddRecordToFilterDictionaries(currentRecord);
         }
 
         public FileCabinetRecord[] FindByFirstName(string firstName)
         {
-            bool contains = this.firstNameDictionary.TryGetValue(firstName, out List<FileCabinetRecord> currentRecords);
-
-            if (!contains)
-            {
-                return Array.Empty<FileCabinetRecord>();
-            }
-
-            return currentRecords.ToArray();
+            return FindByKey(firstName, this.firstNameDictionary);
         }
 
         public FileCabinetRecord[] FindByLastName(string lastname)
         {
-            bool contains = this.lastNameDictionary.TryGetValue(lastname, out List<FileCabinetRecord> currentRecords);
+            return FindByKey(lastname, this.lastNameDictionary);
+        }
+
+        public FileCabinetRecord[] FindByBirthDate(string dateOfBirth)
+        {
+            return FindByKey(dateOfBirth, this.birthdateDictionary);
+        }
+
+        private static FileCabinetRecord[] FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
+        {
+            bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
 
             if (!contains)
             {
@@ -107,16 +114,22 @@ namespace FileCabinetApp
             return currentRecords.ToArray();
         }
 
-        public FileCabinetRecord[] FindByBirthDate(string dateOfBirth)
+        private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
-            bool contains = this.birthdateDictionary.TryGetValue(dateOfBirth, out List<FileCabinetRecord> currentRecords);
+            List<FileCabinetRecord> currentRecords;
+            filterDictionary.TryGetValue(key, out currentRecords);
 
-            if (!contains)
+            if (currentRecords == null)
             {
-                return Array.Empty<FileCabinetRecord>();
+                currentRecords = new List<FileCabinetRecord>();
             }
 
-            return currentRecords.ToArray();
+            currentRecords.Add(record);
+
+            if (!filterDictionary.ContainsKey(key))
+            {
+                filterDictionary.Add(key, currentRecords);
+            }
         }
 
         private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal shortProp)
@@ -162,65 +175,12 @@ namespace FileCabinetApp
             }
         }
 
-        private void AddRecordToDict(FileCabinetRecord record)
+        private void AddRecordToFilterDictionaries(FileCabinetRecord record)
         {
-            this.AddRecordToDictByFirstname(record);
-            this.AddRecordToDictByLastName(record);
-            this.AddRecordToDictByBirthDate(record);
-        }
-
-        private void AddRecordToDictByFirstname(FileCabinetRecord record)
-        {
-            List<FileCabinetRecord> currentRecords;
-            this.firstNameDictionary.TryGetValue(record.FirstName, out currentRecords);
-
-            if (currentRecords == null)
-            {
-                currentRecords = new List<FileCabinetRecord>();
-            }
-
-            currentRecords.Add(record);
-
-            if (!this.firstNameDictionary.ContainsKey(record.FirstName))
-            {
-                this.firstNameDictionary.Add(record.FirstName, currentRecords);
-            }
-        }
-
-        private void AddRecordToDictByLastName(FileCabinetRecord record)
-        {
-            List<FileCabinetRecord> currentRecords;
-            this.lastNameDictionary.TryGetValue(record.LastName, out currentRecords);
-
-            if (currentRecords == null)
-            {
-                currentRecords = new List<FileCabinetRecord>();
-            }
-
-            currentRecords.Add(record);
-
-            if (!this.lastNameDictionary.ContainsKey(record.LastName))
-            {
-                this.lastNameDictionary.Add(record.LastName, currentRecords);
-            }
-        }
-
-        private void AddRecordToDictByBirthDate(FileCabinetRecord record)
-        {
-            List<FileCabinetRecord> currentRecords;
-            this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out currentRecords);
-
-            if (currentRecords == null)
-            {
-                currentRecords = new List<FileCabinetRecord>();
-            }
-
-            currentRecords.Add(record);
-
-            if (!this.birthdateDictionary.ContainsKey(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)))
-            {
-                this.birthdateDictionary.Add(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), currentRecords);
-            }
+            string dateOfBirthKey = record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture);
+            AddRecordToDictionary(record, record.FirstName, this.firstNameDictionary);
+            AddRecordToDictionary(record, record.LastName, this.lastNameDictionary);
+            AddRecordToDictionary(record, dateOfBirthKey, this.birthdateDictionary);
         }
     }
 }
