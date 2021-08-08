@@ -6,16 +6,28 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Utils which is used get console input for records creating.
+    /// </summary>
     public static class RecordConsoleDataInput
     {
+        /// <summary>
+        /// Fills <see cref="FileCabinetRecord"/> object properties values.
+        /// </summary>
+        /// <returns>Returns <see cref="FileCabinetRecord"/> object filled by console input.</returns>
         public static FileCabinetRecord GetRecordData()
         {
             FileCabinetRecord record = new FileCabinetRecord(
-                GetAnyName("First"), GetAnyName("Last"), GetBirthDate(), GetMoney(), GetShortValue(), GetCharValue());
+                GetAnyName("First"), GetAnyName("Last"), GetBirthDate(), GetMoney(), GetPINValue(), GetCharValue());
 
             return record;
         }
 
+        /// <summary>
+        /// Gets id using console input.
+        /// </summary>
+        /// <param name="fileCabinetService">Service from which is taken records count.</param>
+        /// <returns>Returns id from console input.</returns>
         public static int GetId(FileCabinetService fileCabinetService)
         {
             if (fileCabinetService is null)
@@ -70,17 +82,17 @@ namespace FileCabinetApp
             return letter;
         }
 
-        private static short GetShortValue()
+        private static short GetPINValue()
         {
-            Console.Write("\nShort number: ");
-            short anyShort;
+            Console.Write("\nPIN number: ");
+            short anyPIN;
 
-            while (!short.TryParse(Console.ReadLine(), out anyShort))
+            while (!short.TryParse(Console.ReadLine(), out anyPIN))
             {
-                Console.Write("\nWrite correct short number: ");
+                Console.Write("\nWrite correct five digit PIN: ");
             }
 
-            return anyShort;
+            return anyPIN;
         }
 
         private static decimal GetMoney()

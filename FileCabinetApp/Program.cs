@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Main program class.
+    /// </summary>
     public static class Program
     {
         private const string DeveloperName = "Alexandr Alexeevich";
@@ -38,6 +41,10 @@ namespace FileCabinetApp
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
+        /// <summary>
+        /// Program entry point.
+        /// </summary>
+        /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
@@ -93,7 +100,7 @@ namespace FileCabinetApp
             }
 
             FileCabinetRecord record = RecordConsoleDataInput.GetRecordData();
-            fileCabinetService.EditRecord(id, record.FirstName, record.LastName, record.DateOfBirth, record.ShortProp, record.MoneyCount, record.CharProp);
+            fileCabinetService.EditRecord(id, record.FirstName, record.LastName, record.DateOfBirth, record.MoneyCount, record.PINProp,  record.CharProp);
         }
 
         private static void List(string command)
@@ -155,7 +162,7 @@ namespace FileCabinetApp
             var tmpRecord = RecordConsoleDataInput.GetRecordData();
 
             int recId = fileCabinetService.CreateRecord(
-                tmpRecord.FirstName, tmpRecord.LastName, tmpRecord.DateOfBirth, tmpRecord.ShortProp, tmpRecord.MoneyCount, tmpRecord.CharProp);
+                tmpRecord.FirstName, tmpRecord.LastName, tmpRecord.DateOfBirth, tmpRecord.MoneyCount, tmpRecord.PINProp,  tmpRecord.CharProp);
 
             Console.WriteLine($"Record #{recId} is created.");
         }
@@ -203,7 +210,7 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                 $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+                $"{record.PINProp}, {record.MoneyCount}$, {record.CharProp}");
         }
 
         private static string GetTargetName(string parameters, int targetPropLength)
