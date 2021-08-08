@@ -15,9 +15,9 @@ namespace FileCabinetApp
         /// Fills <see cref="FileCabinetRecord"/> object properties values.
         /// </summary>
         /// <returns>Returns <see cref="FileCabinetRecord"/> object filled by console input.</returns>
-        public static FileCabinetRecord GetRecordData()
+        public static RecordParameters GetRecordData()
         {
-            FileCabinetRecord record = new FileCabinetRecord(
+            var record = new RecordParameters(
                 GetAnyName("First"), GetAnyName("Last"), GetBirthDate(), GetMoney(), GetPINValue(), GetCharValue());
 
             return record;

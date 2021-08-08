@@ -23,26 +23,26 @@ namespace FileCabinetApp
         /// <summary>
         /// Add new <see cref="FileCabinetRecord"/> to records list and dictionaries.
         /// </summary>
-        /// <param name="firstName">Persons firstname.</param>
-        /// <param name="lastName">Persons lastname.</param>
-        /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <param name="moneyCount">Count of persons money.</param>
-        /// <param name="fiveDigitPIN">Security money code.</param>
-        /// <param name="charProp">Simple char prop.</param>
+        /// <param name="parameters">Contains creating parameters.</param>
         /// <returns> Returns ID of new record.</returns>
-        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN,  char charProp)
+        public int CreateRecord(RecordParameters parameters)
         {
-            CheckCreation(firstName, lastName, charProp, dateOfBirth, moneyCount);
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            CheckCreation(parameters.FirstName, parameters.LastName, parameters.CharProp, parameters.DateOfBirth, parameters.MoneyCount);
 
             var record = new FileCabinetRecord
             {
                 Id = this.records.Count + 1,
-                FirstName = firstName,
-                LastName = lastName,
-                DateOfBirth = dateOfBirth,
-                PINProp = fiveDigitPIN,
-                MoneyCount = moneyCount,
-                CharProp = charProp,
+                FirstName = parameters.FirstName,
+                LastName = parameters.LastName,
+                DateOfBirth = parameters.DateOfBirth,
+                FiveDigitPIN = parameters.FiveDigitPIN,
+                MoneyCount = parameters.MoneyCount,
+                CharProp = parameters.CharProp,
             };
 
             this.AddRecordToFilterDictionaries(record);
@@ -67,7 +67,7 @@ namespace FileCabinetApp
                     FirstName = this.records[i].FirstName,
                     LastName = this.records[i].LastName,
                     DateOfBirth = this.records[i].DateOfBirth,
-                    PINProp = this.records[i].PINProp,
+                    FiveDigitPIN = this.records[i].FiveDigitPIN,
                     MoneyCount = this.records[i].MoneyCount,
                     CharProp = this.records[i].CharProp,
                     Id = this.records[i].Id,
@@ -90,13 +90,8 @@ namespace FileCabinetApp
         /// Edits records properties.
         /// </summary>
         /// <param name="id">Persons ID.</param>
-        /// <param name="firstName">Persons firstname.</param>
-        /// <param name="lastName">Persons lastname.</param>
-        /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <param name="moneyCount">Count of persons money.</param>
-        /// <param name="fiveDigitPIN">Security money code.</param>
-        /// <param name="charProp">Simple char prop.</param>
-        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN,  char charProp)
+        /// <param name="parameters">Contains edit records parameters.</param>
+        public void EditRecord(int id, RecordParameters parameters)
         {
             if (id > this.records.Count + 1)
             {
@@ -108,12 +103,12 @@ namespace FileCabinetApp
 
             currentRecords.Remove(currentRecord);
 
-            currentRecord.FirstName = firstName;
-            currentRecord.LastName = lastName;
-            currentRecord.DateOfBirth = dateOfBirth;
-            currentRecord.PINProp = fiveDigitPIN;
-            currentRecord.MoneyCount = moneyCount;
-            currentRecord.CharProp = charProp;
+            currentRecord.FirstName = parameters.FirstName;
+            currentRecord.LastName = parameters.LastName;
+            currentRecord.DateOfBirth = parameters.DateOfBirth;
+            currentRecord.FiveDigitPIN = parameters.FiveDigitPIN;
+            currentRecord.MoneyCount = parameters.MoneyCount;
+            currentRecord.CharProp = parameters.CharProp;
 
             this.AddRecordToFilterDictionaries(currentRecord);
         }

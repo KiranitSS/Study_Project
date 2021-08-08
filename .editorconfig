@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA9998: FxCopAnalyzers package has been deprecated in favor of 'Microsoft.CodeAnalysis.NetAnalyzers', that ships with the .NET SDK. Please refer to https://docs.microsoft.com/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers to migrate to .NET analyzers.
+dotnet_diagnostic.CA9998.severity = none

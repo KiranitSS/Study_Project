@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,25 +7,20 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents an <see cref="FileCabinetRecord"/> object for saving persons data and perform actions on it.
-    /// </summary>
-    public class FileCabinetRecord
+    /// Contains records creating parameters.
+    /// </summary>>
+    public class RecordParameters
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
+        /// Initializes a new instance of the <see cref="RecordParameters"/> class.
         /// </summary>
-        public FileCabinetRecord() { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
-        /// </summary>
-        /// <param name="firstName">Persons firstname.</param>
-        /// <param name="lastName">Persons lastname.</param>
-        /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <param name="moneyCount">Count of persons money.</param>
-        /// <param name="fiveDigitPIN">Security money code.</param>
-        /// <param name="charProp">Simple char prop.</param>
-        public FileCabinetRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN, char charProp)
+        /// <param name="firstName">Firstname.</param>
+        /// <param name="lastName">Lastname.</param>
+        /// <param name="dateOfBirth">Date of birth.</param>
+        /// <param name="moneyCount">Count of money.</param>
+        /// <param name="fiveDigitPIN">Security code.</param>
+        /// <param name="charProp">Simple char property.</param>
+        public RecordParameters(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN, char charProp)
         {
             this.FirstName = firstName;
             this.LastName = lastName;
@@ -35,14 +29,6 @@ namespace FileCabinetApp
             this.FiveDigitPIN = fiveDigitPIN;
             this.CharProp = charProp;
         }
-
-        /// <summary>
-        /// Gets or sets persons ID.
-        /// </summary>
-        /// <value>
-        /// Persons ID.
-        /// </value>
-        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets persons firstname.

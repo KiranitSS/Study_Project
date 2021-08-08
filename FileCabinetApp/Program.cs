@@ -99,8 +99,8 @@ namespace FileCabinetApp
                 Console.WriteLine("Incorrect ID");
             }
 
-            FileCabinetRecord record = RecordConsoleDataInput.GetRecordData();
-            fileCabinetService.EditRecord(id, record.FirstName, record.LastName, record.DateOfBirth, record.MoneyCount, record.PINProp,  record.CharProp);
+            var tmpRecord = RecordConsoleDataInput.GetRecordData();
+            fileCabinetService.EditRecord(id, tmpRecord);
         }
 
         private static void List(string command)
@@ -161,8 +161,7 @@ namespace FileCabinetApp
 
             var tmpRecord = RecordConsoleDataInput.GetRecordData();
 
-            int recId = fileCabinetService.CreateRecord(
-                tmpRecord.FirstName, tmpRecord.LastName, tmpRecord.DateOfBirth, tmpRecord.MoneyCount, tmpRecord.PINProp,  tmpRecord.CharProp);
+            int recId = fileCabinetService.CreateRecord(tmpRecord);
 
             Console.WriteLine($"Record #{recId} is created.");
         }
@@ -210,7 +209,7 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                 $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.PINProp}, {record.MoneyCount}$, {record.CharProp}");
+                $"{record.FiveDigitPIN}, {record.MoneyCount}$, {record.CharProp}");
         }
 
         private static string GetTargetName(string parameters, int targetPropLength)
