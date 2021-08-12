@@ -11,7 +11,7 @@ namespace FileCabinetApp
     /// <summary>
     /// Represents a service for actions on <see cref="FileCabinetRecord"/>.
     /// </summary>
-    public class FileCabinetService
+    public abstract class FileCabinetService
     {
         private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
         private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
