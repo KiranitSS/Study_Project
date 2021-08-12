@@ -63,20 +63,11 @@ namespace FileCabinetApp
         private static char GetCharValue()
         {
             char letter = default(char);
-            bool isCorrect = false;
+            Console.Write("\nWrite any letter: ");
 
-            while (!isCorrect)
+            while (!char.TryParse(Console.ReadLine(), out letter))
             {
-                Console.Write("\nWrite any letter: ");
-                while (!char.TryParse(Console.ReadLine(), out letter))
-                {
-                    Console.Write("\nWrite correct symbol (One symbol!): ");
-                }
-
-                if (char.IsLetter(letter))
-                {
-                    isCorrect = true;
-                }
+                Console.Write("\nWrite correct symbol (One symbol!): ");
             }
 
             return letter;
@@ -84,37 +75,25 @@ namespace FileCabinetApp
 
         private static short GetPINValue()
         {
+            short pin;
             Console.Write("\nPIN number: ");
-            short anyPIN;
 
-            while (!short.TryParse(Console.ReadLine(), out anyPIN))
+            while (!short.TryParse(Console.ReadLine(), out pin))
             {
-                Console.Write("\nWrite correct five digit PIN: ");
+                Console.Write("\nWrite correct PIN: ");
             }
 
-            return anyPIN;
+            return pin;
         }
 
         private static decimal GetMoney()
         {
-            decimal moneyCount = 0;
-            bool isCorrect = false;
+            decimal moneyCount;
+            Console.Write("\nMoney count: ");
 
-            while (!isCorrect)
+            while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
             {
-                Console.Write("\nMoney count: ");
-                while (!decimal.TryParse(Console.ReadLine(), out moneyCount))
-                {
-                    Console.Write("\nWrite correct money count (must contains only digits): ");
-                }
-
-                if (moneyCount > 200)
-                {
-                    isCorrect = true;
-                    continue;
-                }
-
-                Console.WriteLine("Money count must be bigger than 200!");
+                Console.Write("\nWrite correct money count (must contains only digits): ");
             }
 
             return moneyCount;
@@ -122,24 +101,12 @@ namespace FileCabinetApp
 
         private static DateTime GetBirthDate()
         {
-            DateTime birth = DateTime.Now;
-            bool isCorrect = false;
+            DateTime birth;
+            Console.Write("\nDate of birth: ");
 
-            while (!isCorrect)
+            while (!DateTime.TryParse(Console.ReadLine(), out birth))
             {
-                Console.Write("\nDate of birth: ");
-                while (!DateTime.TryParse(Console.ReadLine(), out birth))
-                {
-                    Console.Write("\nWrite correct date (date format month/day/year): ");
-                }
-
-                if (birth < DateTime.Today && birth.Year > 1950)
-                {
-                    isCorrect = true;
-                    continue;
-                }
-
-                Console.WriteLine("Write your real date of birth!");
+                Console.Write("\nWrite correct date (date format month/day/year): ");
             }
 
             return birth;
@@ -147,14 +114,8 @@ namespace FileCabinetApp
 
         private static string GetAnyName(string message)
         {
-            string name;
-            do
-            {
-                Console.Write($"{message} name: ");
-                name = Console.ReadLine();
-            }
-            while (name.Length < 2 || name.Length > 60);
-            return name;
+            Console.Write($"{message} name: ");
+            return Console.ReadLine();
         }
     }
 }

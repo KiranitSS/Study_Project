@@ -24,15 +24,15 @@ namespace FileCabinetApp
         /// <param name="lastName">Persons lastname.</param>
         /// <param name="dateOfBirth">Persons date of birth.</param>
         /// <param name="moneyCount">Count of persons money.</param>
-        /// <param name="fiveDigitPIN">Security money code.</param>
+        /// <param name="pin">Security money code.</param>
         /// <param name="charProp">Simple char prop.</param>
-        public FileCabinetRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN, char charProp)
+        public FileCabinetRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short pin, char charProp)
         {
             this.FirstName = firstName;
             this.LastName = lastName;
             this.DateOfBirth = dateOfBirth;
             this.MoneyCount = moneyCount;
-            this.FiveDigitPIN = fiveDigitPIN;
+            this.PIN = pin;
             this.CharProp = charProp;
         }
 
@@ -82,7 +82,7 @@ namespace FileCabinetApp
         /// <value>
         /// Persons security code.
         /// </value>
-        public short FiveDigitPIN { get; set; }
+        public short PIN { get; set; }
 
         /// <summary>
         /// Gets or sets simple char prop.

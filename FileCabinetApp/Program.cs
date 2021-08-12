@@ -15,7 +15,7 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static FileCabinetService fileCabinetService = new FileCabinetService();
+        private static FileCabinetService fileCabinetService;
 
         private static bool isRunning = true;
 
@@ -48,6 +48,9 @@ namespace FileCabinetApp
         public static void Main(string[] args)
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+
+            fileCabinetService = SetValidationMode(args);
+
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -77,6 +80,48 @@ namespace FileCabinetApp
                 }
             }
             while (isRunning);
+        }
+
+        private static FileCabinetService SetValidationMode(string[] mainParams)
+        {
+            if (mainParams is null || mainParams.Length == 0)
+            {
+                Console.WriteLine("Using default validation rules.");
+                return new FileCabinetDefaultService();
+            }
+
+            string validationMode;
+            string validationModeMessage = "-validation-rules=";
+            string shortValidationModeMessage = "-v";
+            string customValidationModeText = "custom";
+
+            if (mainParams.Length > 0 && mainParams[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                validationMode = mainParams[0];
+                validationMode = validationMode.Trim();
+
+                validationMode = validationMode.Replace(validationModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
+
+                if (validationMode.Equals(customValidationModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using custom validation rules.");
+                    return new FileCabinetCustomService();
+                }
+            }
+
+            if (mainParams.Length > 1 && mainParams[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                validationMode = mainParams[1];
+
+                if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using custom validation rules.");
+                    return new FileCabinetCustomService();
+                }
+            }
+
+            Console.WriteLine("Using default validation rules.");
+            return new FileCabinetDefaultService();
         }
 
         private static void PrintMissedCommandInfo(string command)
@@ -163,7 +208,14 @@ namespace FileCabinetApp
 
             int recId = fileCabinetService.CreateRecord(tmpRecord);
 
-            Console.WriteLine($"Record #{recId} is created.");
+            if (recId == -1)
+            {
+                Console.WriteLine($"Record is not created.");
+            }
+            else
+            {
+                Console.WriteLine($"Record #{recId} is created.");
+            }
         }
 
         private static void Stat(string parameters)
@@ -209,12 +261,12 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                 $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.FiveDigitPIN}, {record.MoneyCount}$, {record.CharProp}");
+                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
         }
 
         private static string GetTargetName(string parameters, int targetPropLength)
         {
-            return parameters[(targetPropLength + 1) ..];
+            return parameters[(targetPropLength + 1)..];
         }
 
         private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)

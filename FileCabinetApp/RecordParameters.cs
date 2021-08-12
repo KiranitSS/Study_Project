@@ -18,15 +18,15 @@ namespace FileCabinetApp
         /// <param name="lastName">Lastname.</param>
         /// <param name="dateOfBirth">Date of birth.</param>
         /// <param name="moneyCount">Count of money.</param>
-        /// <param name="fiveDigitPIN">Security code.</param>
+        /// <param name="pin">Security code.</param>
         /// <param name="charProp">Simple char property.</param>
-        public RecordParameters(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short fiveDigitPIN, char charProp)
+        public RecordParameters(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short pin, char charProp)
         {
             this.FirstName = firstName;
             this.LastName = lastName;
             this.DateOfBirth = dateOfBirth;
             this.MoneyCount = moneyCount;
-            this.FiveDigitPIN = fiveDigitPIN;
+            this.PIN = pin;
             this.CharProp = charProp;
         }
 
@@ -68,7 +68,7 @@ namespace FileCabinetApp
         /// <value>
         /// Persons security code.
         /// </value>
-        public short FiveDigitPIN { get; set; }
+        public short PIN { get; set; }
 
         /// <summary>
         /// Gets or sets simple char prop.

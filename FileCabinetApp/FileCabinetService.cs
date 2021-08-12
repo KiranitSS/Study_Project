@@ -32,7 +32,10 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            CheckCreation(parameters.FirstName, parameters.LastName, parameters.CharProp, parameters.DateOfBirth, parameters.MoneyCount);
+            if (!this.ValidateParameters(parameters))
+            {
+                return -1;
+            }
 
             var record = new FileCabinetRecord
             {
@@ -40,7 +43,7 @@ namespace FileCabinetApp
                 FirstName = parameters.FirstName,
                 LastName = parameters.LastName,
                 DateOfBirth = parameters.DateOfBirth,
-                FiveDigitPIN = parameters.FiveDigitPIN,
+                PIN = parameters.PIN,
                 MoneyCount = parameters.MoneyCount,
                 CharProp = parameters.CharProp,
             };
@@ -67,7 +70,7 @@ namespace FileCabinetApp
                     FirstName = this.records[i].FirstName,
                     LastName = this.records[i].LastName,
                     DateOfBirth = this.records[i].DateOfBirth,
-                    FiveDigitPIN = this.records[i].FiveDigitPIN,
+                    PIN = this.records[i].PIN,
                     MoneyCount = this.records[i].MoneyCount,
                     CharProp = this.records[i].CharProp,
                     Id = this.records[i].Id,
@@ -93,6 +96,11 @@ namespace FileCabinetApp
         /// <param name="parameters">Contains edit records parameters.</param>
         public void EditRecord(int id, RecordParameters parameters)
         {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
             if (id > this.records.Count + 1)
             {
                 throw new ArgumentException("ID can't be bigger than records count");
@@ -106,7 +114,7 @@ namespace FileCabinetApp
             currentRecord.FirstName = parameters.FirstName;
             currentRecord.LastName = parameters.LastName;
             currentRecord.DateOfBirth = parameters.DateOfBirth;
-            currentRecord.FiveDigitPIN = parameters.FiveDigitPIN;
+            currentRecord.PIN = parameters.PIN;
             currentRecord.MoneyCount = parameters.MoneyCount;
             currentRecord.CharProp = parameters.CharProp;
 
@@ -143,6 +151,130 @@ namespace FileCabinetApp
             return FindByKey(dateOfBirth, this.birthdateDictionary);
         }
 
+        /// <summary>
+        /// Checks abillity to create a record.
+        /// </summary>
+        /// <param name="parameters">Contains creating parameters.</param>
+        /// <returns>Returns possibility or impossibility to create record.</returns>
+        protected bool ValidateParameters(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                Console.WriteLine("Parameters empty");
+                return false;
+            }
+
+            if (!this.IsCorrectFirstName(parameters.FirstName))
+            {
+                Console.WriteLine("Incorrect firstname!");
+                return false;
+            }
+
+            if (!this.IsCorrectLastName(parameters.LastName))
+            {
+                Console.WriteLine("Incorrect lastname!");
+                return false;
+            }
+
+            if (!this.IsCorrectDateOfBirth(parameters.DateOfBirth))
+            {
+                Console.WriteLine("Incorrect date of birth!");
+                return false;
+            }
+
+            if (!this.IsCorrectMoneyCount(parameters.MoneyCount))
+            {
+                Console.WriteLine("Incorrect count of money!");
+                return false;
+            }
+
+            if (!this.IsCorrectPIN(parameters.PIN))
+            {
+                Console.WriteLine("Incorrect PIN!");
+                return false;
+            }
+
+            if (!this.IsCorrectCharProp(parameters.CharProp))
+            {
+                Console.WriteLine("Incorrect count of money!");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add firstname.
+        /// </summary>
+        /// <param name="firstname">Persons firstname.</param>
+        /// <returns>Returns ability to add firstname to record.</returns>
+        protected virtual bool IsCorrectFirstName(string firstname)
+        {
+            if (string.IsNullOrWhiteSpace(firstname))
+            {
+                Console.WriteLine($"{nameof(firstname)} can't be empty");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add lastname.
+        /// </summary>
+        /// <param name="lastname">Persons lastname.</param>
+        /// <returns>Returns ability to add lastname to record.</returns>
+        protected virtual bool IsCorrectLastName(string lastname)
+        {
+            if (string.IsNullOrWhiteSpace(lastname))
+            {
+                Console.WriteLine($"{nameof(lastname)} can't be empty");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add date of birth.
+        /// </summary>
+        /// <param name="dateOfBirth">Persons date of birth.</param>
+        /// <returns>Returns ability to add date of birth to record.</returns>
+        protected virtual bool IsCorrectDateOfBirth(DateTime dateOfBirth)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add count of money.
+        /// </summary>
+        /// <param name="moneyCount">Persons count of money.</param>
+        /// <returns>Returns ability to add count of money to record.</returns>
+        protected virtual bool IsCorrectMoneyCount(decimal moneyCount)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add PIN.
+        /// </summary>
+        /// <param name="pin">Persons PIN code.</param>
+        /// <returns>Returns ability to add PIN to record.</returns>
+        protected virtual bool IsCorrectPIN(short pin)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Checks ability to add simple char property.
+        /// </summary>
+        /// <param name="charProp">Simple char property.</param>
+        /// <returns>Returns ability to add simple char property to record.</returns>
+        protected virtual bool IsCorrectCharProp(char charProp)
+        {
+            return true;
+        }
+
         private static FileCabinetRecord[] FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
             bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
@@ -170,49 +302,6 @@ namespace FileCabinetApp
             if (!filterDictionary.ContainsKey(key))
             {
                 filterDictionary.Add(key, currentRecords);
-            }
-        }
-
-        private static void CheckCreation(string firstName, string lastName, char charProp, DateTime dateOfBirth, decimal fiveDigitPIN)
-        {
-            if (string.IsNullOrWhiteSpace(firstName))
-            {
-                throw new ArgumentNullException($"{nameof(firstName)} can't be empty");
-            }
-
-            if (string.IsNullOrWhiteSpace(lastName))
-            {
-                throw new ArgumentNullException($"{nameof(lastName)} can't be empty");
-            }
-
-            if (charProp == default(char))
-            {
-                throw new ArgumentNullException($"{nameof(charProp)} can't be empty");
-            }
-
-            if (firstName.Length < 2 || firstName.Length > 60)
-            {
-                throw new ArgumentException("First name length can't be lower than 2 or bigger than 60");
-            }
-
-            if (firstName.Length < 2 || firstName.Length > 60)
-            {
-                throw new ArgumentException("Last name length can't be lower than 2 or bigger than 60");
-            }
-
-            if (dateOfBirth.Year < 1950 || dateOfBirth > DateTime.Today)
-            {
-                throw new ArgumentException("Incorrect date of birth");
-            }
-
-            if (!char.IsLetter(charProp))
-            {
-                throw new ArgumentException($"{nameof(charProp)} must be letter");
-            }
-
-            if (fiveDigitPIN < 200)
-            {
-                throw new ArgumentException($"{nameof(charProp)} must be bigger than 200");
             }
         }
 
