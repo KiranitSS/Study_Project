@@ -20,6 +20,17 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
 
+        private IRecordValidator validator;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileCabinetService"/> class.
+        /// </summary>
+        /// <param name="validator">Records parameters validator.</param>
+        protected FileCabinetService(IRecordValidator validator)
+        {
+            this.validator = validator;
+        }
+
         /// <summary>
         /// Add new <see cref="FileCabinetRecord"/> to records list and dictionaries.
         /// </summary>
