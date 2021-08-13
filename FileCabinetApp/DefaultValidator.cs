@@ -62,7 +62,7 @@ namespace FileCabinetApp
         {
             if (firstname is null)
             {
-                Console.WriteLine($"{nameof(firstname)} can't be empty");
+                Console.WriteLine("First name can't be empty");
                 return false;
             }
 
@@ -79,13 +79,13 @@ namespace FileCabinetApp
         {
             if (string.IsNullOrWhiteSpace(lastname))
             {
-                Console.WriteLine($"{nameof(lastname)} can't be empty");
+                Console.WriteLine("Last name can't be empty");
                 return false;
             }
 
             if (lastname.Length < 2 || lastname.Length > 60)
             {
-                Console.WriteLine("First name length can't be lower than 2 or bigger than 60");
+                Console.WriteLine("Last name length can't be lower than 2 or bigger than 60");
                 return false;
             }
 
@@ -106,7 +106,7 @@ namespace FileCabinetApp
         {
             if (moneyCount < 200)
             {
-                Console.WriteLine($"{nameof(moneyCount)} must be bigger than 200$");
+                Console.WriteLine("Count of money must be bigger than 200$");
                 return false;
             }
 
@@ -117,13 +117,13 @@ namespace FileCabinetApp
         {
             if (charProp == default(char))
             {
-                Console.WriteLine($"{nameof(charProp)} can't be empty");
+                Console.WriteLine("Char prop can't be empty");
                 return false;
             }
 
             if (!char.IsLetter(charProp))
             {
-                Console.WriteLine($"{nameof(charProp)} must be letter");
+                Console.WriteLine("Char prop must be letter");
                 return false;
             }
 

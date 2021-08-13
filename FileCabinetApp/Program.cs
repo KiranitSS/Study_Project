@@ -15,6 +15,7 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
+        private static IRecordValidator validator;
         private static FileCabinetService fileCabinetService;
 
         private static bool isRunning = true;
@@ -49,7 +50,9 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
-            fileCabinetService = SetValidationMode(args);
+            validator = GetValidator(args);
+
+            fileCabinetService = new FileCabinetService(validator);
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -82,12 +85,12 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
-        private static FileCabinetService SetValidationMode(string[] mainParams)
+        private static IRecordValidator GetValidator(string[] mainParams)
         {
             if (mainParams is null || mainParams.Length == 0)
             {
                 Console.WriteLine("Using default validation rules.");
-                return new FileCabinetDefaultService();
+                return new DefaultValidator();
             }
 
             string validationMode;
@@ -105,7 +108,7 @@ namespace FileCabinetApp
                 if (validationMode.Equals(customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using custom validation rules.");
-                    return new FileCabinetCustomService();
+                    return new CustomValidator();
                 }
             }
 
@@ -116,12 +119,12 @@ namespace FileCabinetApp
                 if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using custom validation rules.");
-                    return new FileCabinetCustomService();
+                    return new CustomValidator();
                 }
             }
 
             Console.WriteLine("Using default validation rules.");
-            return new FileCabinetDefaultService();
+            return new DefaultValidator();
         }
 
         private static void PrintMissedCommandInfo(string command)

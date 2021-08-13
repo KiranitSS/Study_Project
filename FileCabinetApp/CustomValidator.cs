@@ -91,7 +91,7 @@ namespace FileCabinetApp
 
             if (firstname is null)
             {
-                Console.WriteLine($"{nameof(firstname)} can't be empty");
+                Console.WriteLine($"First name can't be empty");
                 return false;
             }
 
@@ -115,7 +115,7 @@ namespace FileCabinetApp
 
             if (string.IsNullOrWhiteSpace(lastname))
             {
-                Console.WriteLine($"{nameof(lastname)} can't be empty");
+                Console.WriteLine("Last name can't be empty");
                 return false;
             }
 
@@ -147,7 +147,7 @@ namespace FileCabinetApp
         {
             if (moneyCount < 0)
             {
-                Console.WriteLine($"{nameof(moneyCount)} can't be less than zero.");
+                Console.WriteLine($"Count of money can't be less than zero.");
                 return false;
             }
 

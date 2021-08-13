@@ -11,7 +11,7 @@ namespace FileCabinetApp
     /// <summary>
     /// Represents a service for performing actions on <see cref="FileCabinetRecord"/>.
     /// </summary>
-    public abstract class FileCabinetService
+    public class FileCabinetService
     {
         private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
         private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
@@ -20,13 +20,13 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
 
-        private IRecordValidator validator;
+        private readonly IRecordValidator validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetService"/> class.
         /// </summary>
         /// <param name="validator">Records parameters validator.</param>
-        protected FileCabinetService(IRecordValidator validator)
+        public FileCabinetService(IRecordValidator validator)
         {
             this.validator = validator;
         }
@@ -41,6 +41,11 @@ namespace FileCabinetApp
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (!this.validator.ValidateParameters(parameters))
+            {
+                return -1;
             }
 
             var record = new FileCabinetRecord
@@ -162,8 +167,6 @@ namespace FileCabinetApp
         /// </summary>
         /// <returns>Returns <see cref="IRecordValidator"/> object
         /// which contains record validation settings.</returns>
-        protected abstract IRecordValidator CreateValidator();
-
         private static FileCabinetRecord[] FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
             bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
