@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
@@ -15,7 +16,6 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static IRecordValidator validator;
         private static FileCabinetService fileCabinetService;
 
         private static bool isRunning = true;
@@ -50,8 +50,7 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
-            validator = GetValidator(args);
-
+            IRecordValidator validator = GetValidator(args);
             fileCabinetService = new FileCabinetService(validator);
 
             Console.WriteLine(Program.HintMessage);
@@ -155,7 +154,7 @@ namespace FileCabinetApp
         {
             var records = fileCabinetService.GetRecords();
 
-            if (records.Length == 0)
+            if (records.Count == 0)
             {
                 Console.WriteLine("There are no any records");
                 return;
@@ -273,7 +272,7 @@ namespace FileCabinetApp
             return parameters[(startIndex + 1) ..];
         }
 
-        private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)
+        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
         {
             if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
             {
@@ -290,12 +289,12 @@ namespace FileCabinetApp
                 return fileCabinetService.FindByBirthDate(targetValue);
             }
 
-            return Array.Empty<FileCabinetRecord>();
+            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
         }
 
-        private static void PrintTargetRecords(FileCabinetRecord[] targetRecords)
+        private static void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
         {
-            if (targetRecords.Length == 0)
+            if (targetRecords.Count == 0)
             {
                 Console.WriteLine("There are no suitable entries");
             }

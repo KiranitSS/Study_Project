@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -70,7 +71,7 @@ namespace FileCabinetApp
         /// Create copy of records.
         /// </summary>
         /// <returns>Return copy of records list.</returns>
-        public FileCabinetRecord[] GetRecords()
+        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             var recordsCopy = new FileCabinetRecord[this.records.Count];
 
@@ -88,7 +89,7 @@ namespace FileCabinetApp
                 };
             }
 
-            return recordsCopy;
+            return new ReadOnlyCollection<FileCabinetRecord>(recordsCopy);
         }
 
         /// <summary>
@@ -117,6 +118,12 @@ namespace FileCabinetApp
                 throw new ArgumentException("ID can't be bigger than records count");
             }
 
+            if (!this.validator.ValidateParameters(parameters))
+            {
+                Console.WriteLine("Record not editted.");
+                return;
+            }
+
             var currentRecord = this.records[id - 1];
             this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
 
@@ -137,9 +144,9 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="firstName">Search key.</param>
         /// <returns>Returns record.</returns>
-        public FileCabinetRecord[] FindByFirstName(string firstName)
+        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            return FindByKey(firstName, this.firstNameDictionary);
+            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(firstName, this.firstNameDictionary));
         }
 
         /// <summary>
@@ -147,9 +154,9 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="lastname">Search key.</param>
         /// <returns>>Returns record.</returns>
-        public FileCabinetRecord[] FindByLastName(string lastname)
+        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
         {
-            return FindByKey(lastname, this.lastNameDictionary);
+            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(lastname, this.lastNameDictionary));
         }
 
         /// <summary>
@@ -157,9 +164,9 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="dateOfBirth">Search key.</param>
         /// <returns>>Returns record.</returns>
-        public FileCabinetRecord[] FindByBirthDate(string dateOfBirth)
+        public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
-            return FindByKey(dateOfBirth, this.birthdateDictionary);
+            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
         /// <summary>
@@ -167,16 +174,16 @@ namespace FileCabinetApp
         /// </summary>
         /// <returns>Returns <see cref="IRecordValidator"/> object
         /// which contains record validation settings.</returns>
-        private static FileCabinetRecord[] FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
+        private static ReadOnlyCollection<FileCabinetRecord> FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
             bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
 
             if (!contains)
             {
-                return Array.Empty<FileCabinetRecord>();
+                return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
             }
 
-            return currentRecords.ToArray();
+            return new ReadOnlyCollection<FileCabinetRecord>(currentRecords);
         }
 
         private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
