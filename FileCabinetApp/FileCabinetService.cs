@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents a service for actions on <see cref="FileCabinetRecord"/>.
+    /// Represents a service for performing actions on <see cref="FileCabinetRecord"/>.
     /// </summary>
     public abstract class FileCabinetService
     {
@@ -30,11 +30,6 @@ namespace FileCabinetApp
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
-            }
-
-            if (!this.ValidateParameters(parameters))
-            {
-                return -1;
             }
 
             var record = new FileCabinetRecord
@@ -152,128 +147,11 @@ namespace FileCabinetApp
         }
 
         /// <summary>
-        /// Checks abillity to create a record.
+        /// Creates new record parameters validator.
         /// </summary>
-        /// <param name="parameters">Contains creating parameters.</param>
-        /// <returns>Returns possibility or impossibility to create record.</returns>
-        protected bool ValidateParameters(RecordParameters parameters)
-        {
-            if (parameters is null)
-            {
-                Console.WriteLine("Parameters empty");
-                return false;
-            }
-
-            if (!this.IsCorrectFirstName(parameters.FirstName))
-            {
-                Console.WriteLine("Incorrect firstname!");
-                return false;
-            }
-
-            if (!this.IsCorrectLastName(parameters.LastName))
-            {
-                Console.WriteLine("Incorrect lastname!");
-                return false;
-            }
-
-            if (!this.IsCorrectDateOfBirth(parameters.DateOfBirth))
-            {
-                Console.WriteLine("Incorrect date of birth!");
-                return false;
-            }
-
-            if (!this.IsCorrectMoneyCount(parameters.MoneyCount))
-            {
-                Console.WriteLine("Incorrect count of money!");
-                return false;
-            }
-
-            if (!this.IsCorrectPIN(parameters.PIN))
-            {
-                Console.WriteLine("Incorrect PIN!");
-                return false;
-            }
-
-            if (!this.IsCorrectCharProp(parameters.CharProp))
-            {
-                Console.WriteLine("Incorrect count of money!");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add firstname.
-        /// </summary>
-        /// <param name="firstname">Persons firstname.</param>
-        /// <returns>Returns ability to add firstname to record.</returns>
-        protected virtual bool IsCorrectFirstName(string firstname)
-        {
-            if (string.IsNullOrWhiteSpace(firstname))
-            {
-                Console.WriteLine($"{nameof(firstname)} can't be empty");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add lastname.
-        /// </summary>
-        /// <param name="lastname">Persons lastname.</param>
-        /// <returns>Returns ability to add lastname to record.</returns>
-        protected virtual bool IsCorrectLastName(string lastname)
-        {
-            if (string.IsNullOrWhiteSpace(lastname))
-            {
-                Console.WriteLine($"{nameof(lastname)} can't be empty");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add date of birth.
-        /// </summary>
-        /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <returns>Returns ability to add date of birth to record.</returns>
-        protected virtual bool IsCorrectDateOfBirth(DateTime dateOfBirth)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add count of money.
-        /// </summary>
-        /// <param name="moneyCount">Persons count of money.</param>
-        /// <returns>Returns ability to add count of money to record.</returns>
-        protected virtual bool IsCorrectMoneyCount(decimal moneyCount)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add PIN.
-        /// </summary>
-        /// <param name="pin">Persons PIN code.</param>
-        /// <returns>Returns ability to add PIN to record.</returns>
-        protected virtual bool IsCorrectPIN(short pin)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Checks ability to add simple char property.
-        /// </summary>
-        /// <param name="charProp">Simple char property.</param>
-        /// <returns>Returns ability to add simple char property to record.</returns>
-        protected virtual bool IsCorrectCharProp(char charProp)
-        {
-            return true;
-        }
+        /// <returns>Returns <see cref="IRecordValidator"/> object
+        /// which contains record validation settings.</returns>
+        protected abstract IRecordValidator CreateValidator();
 
         private static FileCabinetRecord[] FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {

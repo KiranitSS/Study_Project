@@ -266,7 +266,8 @@ namespace FileCabinetApp
 
         private static string GetTargetName(string parameters, int targetPropLength)
         {
-            return parameters[(targetPropLength + 1)..];
+            int startIndex = targetPropLength;
+            return parameters[(startIndex + 1) ..];
         }
 
         private static FileCabinetRecord[] FindTargetRecords(string targetValue, string targetProp)
