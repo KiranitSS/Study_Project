@@ -16,7 +16,7 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static FileCabinetService fileCabinetService;
+        private static IFileCabinetService fileCabinetService;
 
         private static bool isRunning = true;
 
@@ -199,7 +199,7 @@ namespace FileCabinetApp
             PrintTargetRecords(targetRecords);
         }
 
-        private static void AddRecord(FileCabinetService fileCabinetService)
+        private static void AddRecord(IFileCabinetService fileCabinetService)
         {
             if (fileCabinetService is null)
             {

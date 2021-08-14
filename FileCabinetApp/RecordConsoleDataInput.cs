@@ -28,7 +28,7 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="fileCabinetService">Service from which is taken records count.</param>
         /// <returns>Returns id from console input.</returns>
-        public static int GetId(FileCabinetService fileCabinetService)
+        public static int GetId(IFileCabinetService fileCabinetService)
         {
             if (fileCabinetService is null)
             {
