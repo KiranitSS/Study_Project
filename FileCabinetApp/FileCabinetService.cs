@@ -44,11 +44,6 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            if (!this.validator.ValidateParameters(parameters))
-            {
-                return -1;
-            }
-
             var record = new FileCabinetRecord
             {
                 Id = this.records.Count + 1,
@@ -116,12 +111,6 @@ namespace FileCabinetApp
             if (id > this.records.Count + 1)
             {
                 throw new ArgumentException("ID can't be bigger than records count");
-            }
-
-            if (!this.validator.ValidateParameters(parameters))
-            {
-                Console.WriteLine("Record not editted.");
-                return;
             }
 
             var currentRecord = this.records[id - 1];

@@ -12,80 +12,9 @@ namespace FileCabinetApp
     /// </summary>
     public class CustomValidator : IRecordValidator
     {
+
         /// <inheritdoc/>
-        public bool ValidateParameters(RecordParameters parameters)
-        {
-            if (parameters is null)
-            {
-                Console.WriteLine("Parameters empty");
-                return false;
-            }
-
-            if (!IsCorrectFirstName(parameters.FirstName))
-            {
-                Console.WriteLine("Incorrect firstname!");
-                return false;
-            }
-
-            if (!IsCorrectLastName(parameters.LastName))
-            {
-                Console.WriteLine("Incorrect lastname!");
-                return false;
-            }
-
-            if (!IsCorrectDateOfBirth(parameters.DateOfBirth))
-            {
-                Console.WriteLine("Incorrect date of birth!");
-                return false;
-            }
-
-            if (!IsCorrectMoneyCount(parameters.MoneyCount))
-            {
-                Console.WriteLine("Incorrect count of money!");
-                return false;
-            }
-
-            if (!IsCorrectPIN(parameters.PIN))
-            {
-                Console.WriteLine("Incorrect PIN!");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks name for contains only letter symbols and capital letter.
-        /// </summary>
-        /// <param name="name">Persons name.</param>
-        /// <param name="message">Name type message.</param>
-        /// <returns>Are name composition is correct.</returns>
-        private static bool IsCorrectNameComposition(string name, string message)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return false;
-            }
-
-            foreach (char symbol in name)
-            {
-                if (!char.IsLetter(symbol))
-                {
-                    Console.WriteLine($"{message} must contains only letters.");
-                    return false;
-                }
-            }
-
-            if (char.IsLower(name[0]))
-            {
-                Console.WriteLine($"{message} must starts with uppercase letter.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsCorrectFirstName(string firstname)
+        public bool IsCorrectFirstName(string firstname)
         {
             string message = "First name";
 
@@ -109,7 +38,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectLastName(string lastname)
+        /// <inheritdoc/>
+        public bool IsCorrectLastName(string lastname)
         {
             string message = "Last name";
 
@@ -133,7 +63,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectDateOfBirth(DateTime dateOfBirth)
+        /// <inheritdoc/>
+        public bool IsCorrectDateOfBirth(DateTime dateOfBirth)
         {
             if (dateOfBirth.Year < 1930 || dateOfBirth > DateTime.Today)
             {
@@ -143,7 +74,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectMoneyCount(decimal moneyCount)
+        /// <inheritdoc/>
+        public bool IsCorrectMoneyCount(decimal moneyCount)
         {
             if (moneyCount < 0)
             {
@@ -154,11 +86,55 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectPIN(short pin)
+        /// <inheritdoc/>
+        public bool IsCorrectPIN(short pin)
         {
             if (pin.ToString(CultureInfo.InvariantCulture).Length < 3)
             {
                 Console.WriteLine("PIN length must be 3 or longer.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public bool IsCorrectCharProp(char charProp)
+        {
+            if (char.IsWhiteSpace(charProp))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks name for contains only letter symbols and capital letter.
+        /// </summary>
+        /// <param name="name">Persons name.</param>
+        /// <param name="message">Name type message.</param>
+        /// <returns>Are name composition is correct.</returns>
+        ///
+        private static bool IsCorrectNameComposition(string name, string message)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            foreach (char symbol in name)
+            {
+                if (!char.IsLetter(symbol))
+                {
+                    Console.WriteLine($"{message} must contains only letters.");
+                    return false;
+                }
+            }
+
+            if (char.IsLower(name[0]))
+            {
+                Console.WriteLine($"{message} must starts with uppercase letter.");
                 return false;
             }
 

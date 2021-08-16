@@ -12,53 +12,8 @@ namespace FileCabinetApp
     /// </summary>
     public class DefaultValidator : IRecordValidator
     {
-        /// <summary>
-        /// Checks abillity to create a record.
-        /// </summary>
-        /// <param name="parameters">Contains creating parameters.</param>
-        /// <returns>Returns possibility or impossibility to create record.</returns>
-        public bool ValidateParameters(RecordParameters parameters)
-        {
-            if (parameters is null)
-            {
-                Console.WriteLine("Parameters empty");
-                return false;
-            }
-
-            if (!IsCorrectFirstName(parameters.FirstName))
-            {
-                Console.WriteLine("Incorrect firstname!");
-                return false;
-            }
-
-            if (!IsCorrectLastName(parameters.LastName))
-            {
-                Console.WriteLine("Incorrect lastname!");
-                return false;
-            }
-
-            if (!IsCorrectDateOfBirth(parameters.DateOfBirth))
-            {
-                Console.WriteLine("Incorrect date of birth!");
-                return false;
-            }
-
-            if (!IsCorrectMoneyCount(parameters.MoneyCount))
-            {
-                Console.WriteLine("Incorrect count of money!");
-                return false;
-            }
-
-            if (!IsCorrectCharProp(parameters.CharProp))
-            {
-                Console.WriteLine("Incorrect count of money!");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsCorrectFirstName(string firstname)
+        /// <inheritdoc/>
+        public bool IsCorrectFirstName(string firstname)
         {
             if (firstname is null)
             {
@@ -75,7 +30,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectLastName(string lastname)
+        /// <inheritdoc/>
+        public bool IsCorrectLastName(string lastname)
         {
             if (string.IsNullOrWhiteSpace(lastname))
             {
@@ -92,7 +48,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectDateOfBirth(DateTime dateOfBirth)
+        /// <inheritdoc/>
+        public bool IsCorrectDateOfBirth(DateTime dateOfBirth)
         {
             if (dateOfBirth.Year < 1950 || dateOfBirth > DateTime.Today)
             {
@@ -102,7 +59,8 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectMoneyCount(decimal moneyCount)
+        /// <inheritdoc/>
+        public bool IsCorrectMoneyCount(decimal moneyCount)
         {
             if (moneyCount < 200)
             {
@@ -113,7 +71,23 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static bool IsCorrectCharProp(char charProp)
+        /// <inheritdoc/>
+        public bool IsCorrectPIN(short pin)
+        {
+            if (pin == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc/> <summary>
+        /// Checks ability to add simple char property.
+        /// </summary>
+        /// <param name="charProp">Simple char property.</param>
+        /// <returns>Returns ability to add simple char property to record.</returns>
+        public bool IsCorrectCharProp(char charProp)
         {
             if (charProp == default(char))
             {
