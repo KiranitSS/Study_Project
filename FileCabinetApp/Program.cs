@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Main program class.
+    /// </summary>
     public static class Program
     {
         private const string DeveloperName = "Alexandr Alexeevich";
@@ -11,8 +16,8 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static FileCabinetService fileCabinetService = new FileCabinetService();
-
+        private static IFileCabinetService fileCabinetService;
+        private static IRecordValidator validator;
         private static bool isRunning = true;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -21,6 +26,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
+            new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -28,16 +34,25 @@ namespace FileCabinetApp
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
-            new string[] { "create", "edit record", "The 'edit' command edit record by id." },
+            new string[] { "edit", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
+            new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
+        /// <summary>
+        /// Program entry point.
+        /// </summary>
+        /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+
+            validator = GetValidator(args);
+            fileCabinetService = new FileCabinetService(validator);
+
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -69,6 +84,48 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
+        private static IRecordValidator GetValidator(string[] mainParams)
+        {
+            if (mainParams is null || mainParams.Length == 0)
+            {
+                Console.WriteLine("Using default validation rules.");
+                return new DefaultValidator();
+            }
+
+            string validationMode;
+            string validationModeMessage = "-validation-rules=";
+            string shortValidationModeMessage = "-v";
+            string customValidationModeText = "custom";
+
+            if (mainParams.Length > 0 && mainParams[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                validationMode = mainParams[0];
+                validationMode = validationMode.Trim();
+
+                validationMode = validationMode.Replace(validationModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
+
+                if (validationMode.Equals(customValidationModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using custom validation rules.");
+                    return new CustomValidator();
+                }
+            }
+
+            if (mainParams.Length > 1 && mainParams[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                validationMode = mainParams[1];
+
+                if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using custom validation rules.");
+                    return new CustomValidator();
+                }
+            }
+
+            Console.WriteLine("Using default validation rules.");
+            return new DefaultValidator();
+        }
+
         private static void PrintMissedCommandInfo(string command)
         {
             Console.WriteLine($"There is no '{command}' command.");
@@ -77,21 +134,51 @@ namespace FileCabinetApp
 
         private static void Create(string command)
         {
-            RecordsUtils.AddRecord(fileCabinetService);
+            AddRecord(fileCabinetService);
         }
 
         private static void Edit(string command)
         {
-            int id = GetId();
+            Console.Write("Write ID:");
+            int id = ReadInput(IDConverter, IDValidator);
 
-            fileCabinetService.EditRecord(id);
+            if (id > fileCabinetService.GetStat())
+            {
+                Console.WriteLine("Incorrect ID");
+            }
+
+            var parameters = GetRecordData();
+            fileCabinetService.EditRecord(id, parameters);
+        }
+
+        private static RecordParameters GetRecordData()
+        {
+            Console.Write("First name: ");
+            string firstname = ReadInput(StringConverter, FirstnameValidator);
+
+            Console.Write("Last name: ");
+            string lastname = ReadInput(StringConverter, LastnameValidator);
+
+            Console.Write("Date of bitrth: ");
+            DateTime dateOfbirth = ReadInput(DateTimeConverter, DateOfBirthValidator);
+
+            Console.Write("Count of money: ");
+            decimal moneyCount = ReadInput(DecimalConverter, MoneyCountValidator);
+
+            Console.Write("PIN code: ");
+            short pin = ReadInput(ShortConverter, PINValidator);
+
+            Console.Write("Char prop: ");
+            char charProp = ReadInput(CharConverter, CharPropValidator);
+
+            return new RecordParameters(firstname, lastname, dateOfbirth, moneyCount, pin, charProp);
         }
 
         private static void List(string command)
         {
             var records = fileCabinetService.GetRecords();
 
-            if (records.Length == 0)
+            if (records.Count == 0)
             {
                 Console.WriteLine("There are no any records");
                 return;
@@ -99,9 +186,60 @@ namespace FileCabinetApp
 
             foreach (var record in records)
             {
-                Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                    $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                    $"{record.ShortProp}, {record.MoneyCount}$, {record.CharProp}");
+                PrintRecord(record);
+            }
+        }
+
+        private static void Find(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("Property name missed");
+                return;
+            }
+
+            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (startIndex == -1)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            targetProp = targetProp.Substring(0, startIndex);
+
+            if (parameters.Length == targetProp.Length)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            string targetName = GetTargetName(parameters, targetProp.Length);
+
+            var targetRecords = FindTargetRecords(targetName, targetProp);
+
+            PrintTargetRecords(targetRecords);
+        }
+
+        private static void AddRecord(IFileCabinetService fileCabinetService)
+        {
+            if (fileCabinetService is null)
+            {
+                throw new ArgumentNullException(nameof(fileCabinetService));
+            }
+
+            var parameters = GetRecordData();
+            int recId = fileCabinetService.CreateRecord(parameters);
+
+            if (recId == -1)
+            {
+                Console.WriteLine($"Record is not created.");
+            }
+            else
+            {
+                Console.WriteLine($"Record #{recId} is created.");
             }
         }
 
@@ -144,31 +282,164 @@ namespace FileCabinetApp
             isRunning = false;
         }
 
-        private static int GetId()
+        private static void PrintRecord(FileCabinetRecord record)
         {
-            Console.Write("\nRecord ID: ");
+            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
+        }
 
-            int id = -1;
-            bool isCorrect = false;
+        private static string GetTargetName(string parameters, int targetPropLength)
+        {
+            int startIndex = targetPropLength;
+            return parameters[(startIndex + 1) ..];
+        }
 
-            while (!isCorrect)
+        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
+        {
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
             {
-                while (!int.TryParse(Console.ReadLine(), out id))
-                {
-                    Console.Write("\nWrite correct ID: ");
-                }
+                return fileCabinetService.FindByFirstName(targetValue);
+            }
 
-                if (id > 0 && id < fileCabinetService.GetStat() + 1)
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return fileCabinetService.FindByBirthDate(targetValue);
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
+        }
+
+        private static void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
+        {
+            if (targetRecords.Count == 0)
+            {
+                Console.WriteLine("There are no suitable entries");
+            }
+            else
+            {
+                foreach (var record in targetRecords)
                 {
-                    isCorrect = true;
+                    PrintRecord(record);
+                }
+            }
+        }
+
+        private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = Console.ReadLine();
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
                     continue;
                 }
 
-                Console.WriteLine("Record is not found.");
-                Console.Write("\nWrite correct ID: ");
+                value = conversionResult.Item3;
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                return value;
+            }
+            while (true);
+        }
+
+        private static Tuple<bool, string, string> StringConverter(string value)
+        {
+            return new (true, value, value);
+        }
+
+        private static Tuple<bool, string, DateTime> DateTimeConverter(string value)
+        {
+            bool result = DateTime.TryParse(value, out DateTime conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, decimal> DecimalConverter(string value)
+        {
+            bool result = decimal.TryParse(value, out decimal conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, short> ShortConverter(string value)
+        {
+            bool result = short.TryParse(value, out short conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, char> CharConverter(string value)
+        {
+            bool result = char.TryParse(value, out char conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, int> IDConverter(string value)
+        {
+            bool result = int.TryParse(value, out int conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string> FirstnameValidator(string value)
+        {
+            bool result = validator.IsCorrectFirstName(value);
+            return new (result, value);
+        }
+
+        private static Tuple<bool, string> LastnameValidator(string value)
+        {
+            bool result = validator.IsCorrectLastName(value);
+            return new (result, value);
+        }
+
+        private static Tuple<bool, string> DateOfBirthValidator(DateTime value)
+        {
+            bool result = validator.IsCorrectDateOfBirth(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> MoneyCountValidator(decimal value)
+        {
+            bool result = validator.IsCorrectMoneyCount(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> PINValidator(short value)
+        {
+            bool result = validator.IsCorrectPIN(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> CharPropValidator(char value)
+        {
+            bool result = validator.IsCorrectCharProp(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> IDValidator(int value)
+        {
+            bool result = false;
+
+            if (value < fileCabinetService.GetStat() + 1 && value > 0)
+            {
+                result = true;
             }
 
-            return id;
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
     }
 }
