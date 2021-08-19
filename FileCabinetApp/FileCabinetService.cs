@@ -158,6 +158,11 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
+        public FileCabinetServiceSnapshot MakeSnapshot()
+        {
+            return new FileCabinetServiceSnapshot(this.records.ToArray());
+        }
+
         /// <summary>
         /// Creates new record parameters validator.
         /// </summary>

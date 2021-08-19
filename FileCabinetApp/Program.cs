@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 
 namespace FileCabinetApp
@@ -27,6 +28,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("find", Find),
+            new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -38,6 +40,7 @@ namespace FileCabinetApp
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "find", "finds matching records", "The 'find' command prints found records." },
+            new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -192,23 +195,7 @@ namespace FileCabinetApp
 
         private static void Find(string parameters)
         {
-            string targetProp = parameters.Trim();
-
-            if (string.IsNullOrEmpty(targetProp))
-            {
-                Console.WriteLine("Property name missed");
-                return;
-            }
-
-            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
-
-            if (startIndex == -1)
-            {
-                Console.WriteLine("Property value missed");
-                return;
-            }
-
-            targetProp = targetProp.Substring(0, startIndex);
+            string targetProp = GetTargetProp(parameters);
 
             if (parameters.Length == targetProp.Length)
             {
@@ -221,6 +208,149 @@ namespace FileCabinetApp
             var targetRecords = FindTargetRecords(targetName, targetProp);
 
             PrintTargetRecords(targetRecords);
+        }
+
+        private static void Export(string parameters)
+        {
+            if (fileCabinetService.GetStat() == 0)
+            {
+                Console.WriteLine("There is no any records.");
+                return;
+            }
+
+            string fileType = "csv";
+            string targetProp = GetTargetProp(parameters);
+
+            if (!IsAbleToExport(parameters, targetProp, fileType))
+            {
+                return;
+            }
+
+            string filePath = parameters[targetProp.Length..].Trim();
+            string fileName = GetFileName(filePath);
+
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (filePath.Length == 0)
+            {
+                filePath = fileName;
+            }
+
+            if (!ValidPath(filePath, fileName))
+            {
+                return;
+            }
+
+            if (!filePath.Contains(".csv"))
+            {
+                filePath += ".csv";
+            }
+
+            if (File.Exists(filePath))
+            {
+                Console.Write($"File is exist - rewrite {filePath}? [Y/n]");
+                string answer;
+
+                do
+                {
+                    answer = Console.ReadLine();
+
+                    if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ExportToFile(filePath, fileName);
+                        return;
+                    }
+
+                    if (answer.Equals("n", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("Operation canceled");
+                        return;
+                    }
+
+                    Console.Write("Incorrect input, retry:");
+                }
+                while (true);
+            }
+            else
+            {
+                ExportToFile(filePath, fileName);
+            }
+        }
+
+        private static bool IsAbleToExport(string parameters, string targetProp, string fileType)
+        {
+            if (targetProp.Equals(fileType, StringComparison.OrdinalIgnoreCase) && parameters.Length != targetProp.Length)
+            {
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Operation failed.");
+                return false;
+            }
+        }
+
+        private static bool ValidPath(string filePath, string fileName)
+        {
+            if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            if (!Directory.Exists(filePath) && filePath != fileName)
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static string GetFileName(string filePath)
+        {
+            if (filePath.Contains("\\"))
+            {
+                return filePath.Substring(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
+            }
+
+            if (filePath.Contains("/"))
+            {
+                return filePath.Substring(filePath.LastIndexOf("/", StringComparison.OrdinalIgnoreCase) + 1);
+            }
+
+            return filePath;
+        }
+
+        private static string GetTargetProp(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("Property name missed");
+                return targetProp;
+            }
+
+            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (startIndex == -1)
+            {
+                Console.WriteLine("Property value missed");
+                return targetProp;
+            }
+
+            return targetProp.Substring(0, startIndex);
+        }
+
+        private static void ExportToFile(string filePath, string fileName)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                FileCabinetServiceSnapshot snapshot = ((FileCabinetService)fileCabinetService).MakeSnapshot();
+                snapshot.SaveToCsv(writer);
+                Console.WriteLine($"All records are exported to file {fileName}");
+            }
         }
 
         private static void AddRecord(IFileCabinetService fileCabinetService)
