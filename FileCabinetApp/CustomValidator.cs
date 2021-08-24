@@ -12,7 +12,6 @@ namespace FileCabinetApp
     /// </summary>
     public class CustomValidator : IRecordValidator
     {
-
         /// <inheritdoc/>
         public bool IsCorrectFirstName(string firstname)
         {
