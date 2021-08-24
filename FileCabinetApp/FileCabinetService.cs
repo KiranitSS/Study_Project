@@ -158,6 +158,10 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
+        /// <summary>
+        /// Creates <see cref="FileCabinetServiceSnapshot"/> instance with avaible now records.
+        /// </summary>
+        /// <returns>Returns <see cref="FileCabinetServiceSnapshot"/> instance.</returns>
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
             return new FileCabinetServiceSnapshot(this.records.ToArray());

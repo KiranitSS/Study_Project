@@ -218,32 +218,57 @@ namespace FileCabinetApp
                 return;
             }
 
-            string fileType = "csv";
-            string targetProp = GetTargetProp(parameters);
+            string fileType = GetTargetProp(parameters);
 
-            if (!IsAbleToExport(parameters, targetProp, fileType))
+            if (IsFileNameMissed(parameters, fileType))
             {
                 return;
             }
 
-            string filePath = parameters[targetProp.Length..].Trim();
+            string filePath = parameters[fileType.Length..].Trim();
             string fileName = GetFileName(filePath);
+
+            if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(fileName))
+            {
+                Console.WriteLine("Operation failed, empty path.");
+                return;
+            }
 
             filePath = filePath.Remove(filePath.Length - fileName.Length);
 
-            if (filePath.Length == 0)
+            if (!fileName.Contains($".{fileType}"))
             {
-                filePath = fileName;
+                fileName += $".{fileType}";
             }
 
-            if (!ValidPath(filePath, fileName))
+            filePath += fileName;
+
+            if (!IsAbleToSave(filePath, fileName))
             {
                 return;
             }
 
-            if (!filePath.Contains(".csv"))
+            using (StreamWriter writer = new StreamWriter(filePath))
             {
-                filePath += ".csv";
+                FileCabinetServiceSnapshot snapshot = ((FileCabinetService)fileCabinetService).MakeSnapshot();
+
+                if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToCsv(writer);
+                }
+
+                if (fileType.Equals("xml", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToXml(writer);
+                }
+            }
+        }
+
+        private static bool IsAbleToSave(string filePath, string fileName)
+        {
+            if (!IsDirectoryValid(filePath, fileName))
+            {
+                return false;
             }
 
             if (File.Exists(filePath))
@@ -257,14 +282,13 @@ namespace FileCabinetApp
 
                     if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        ExportToFile(filePath, fileName);
-                        return;
+                        return true;
                     }
 
                     if (answer.Equals("n", StringComparison.OrdinalIgnoreCase))
                     {
                         Console.WriteLine("Operation canceled");
-                        return;
+                        return false;
                     }
 
                     Console.Write("Incorrect input, retry:");
@@ -273,24 +297,11 @@ namespace FileCabinetApp
             }
             else
             {
-                ExportToFile(filePath, fileName);
-            }
-        }
-
-        private static bool IsAbleToExport(string parameters, string targetProp, string fileType)
-        {
-            if (targetProp.Equals(fileType, StringComparison.OrdinalIgnoreCase) && parameters.Length != targetProp.Length)
-            {
                 return true;
             }
-            else
-            {
-                Console.WriteLine("Operation failed.");
-                return false;
-            }
         }
 
-        private static bool ValidPath(string filePath, string fileName)
+        private static bool IsDirectoryValid(string filePath, string fileName)
         {
             if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
             {
@@ -298,7 +309,9 @@ namespace FileCabinetApp
                 return false;
             }
 
-            if (!Directory.Exists(filePath) && filePath != fileName)
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (!Directory.Exists(filePath) && filePath.Contains("\\"))
             {
                 Console.WriteLine($"Export failed: can't open file {fileName}.");
                 return false;
@@ -307,19 +320,17 @@ namespace FileCabinetApp
             return true;
         }
 
-        private static string GetFileName(string filePath)
+        private static bool IsFileNameMissed(string parameters, string fileType)
         {
-            if (filePath.Contains("\\"))
+            if (parameters.Length != fileType.Length)
             {
-                return filePath.Substring(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
+                return false;
             }
-
-            if (filePath.Contains("/"))
+            else
             {
-                return filePath.Substring(filePath.LastIndexOf("/", StringComparison.OrdinalIgnoreCase) + 1);
+                Console.WriteLine("Operation failed.");
+                return true;
             }
-
-            return filePath;
         }
 
         private static string GetTargetProp(string parameters)
@@ -332,25 +343,25 @@ namespace FileCabinetApp
                 return targetProp;
             }
 
-            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+            int endIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
 
-            if (startIndex == -1)
+            if (endIndex == -1)
             {
                 Console.WriteLine("Property value missed");
                 return targetProp;
             }
 
-            return targetProp.Substring(0, startIndex);
+            return targetProp[..endIndex];
         }
 
-        private static void ExportToFile(string filePath, string fileName)
+        private static string GetFileName(string filePath)
         {
-            using (StreamWriter writer = new StreamWriter(filePath))
+            if (filePath.Contains("\\"))
             {
-                FileCabinetServiceSnapshot snapshot = ((FileCabinetService)fileCabinetService).MakeSnapshot();
-                snapshot.SaveToCsv(writer);
-                Console.WriteLine($"All records are exported to file {fileName}");
+                return filePath[(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1) ..];
             }
+
+            return filePath;
         }
 
         private static void AddRecord(IFileCabinetService fileCabinetService)
