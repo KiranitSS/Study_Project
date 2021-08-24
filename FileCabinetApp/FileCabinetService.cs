@@ -159,6 +159,15 @@ namespace FileCabinetApp
         }
 
         /// <summary>
+        /// Creates <see cref="FileCabinetServiceSnapshot"/> instance with avaible now records.
+        /// </summary>
+        /// <returns>Returns <see cref="FileCabinetServiceSnapshot"/> instance.</returns>
+        public FileCabinetServiceSnapshot MakeSnapshot()
+        {
+            return new FileCabinetServiceSnapshot(this.records.ToArray());
+        }
+
+        /// <summary>
         /// Creates new record parameters validator.
         /// </summary>
         /// <returns>Returns <see cref="IRecordValidator"/> object

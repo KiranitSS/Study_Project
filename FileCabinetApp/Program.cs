@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 
 namespace FileCabinetApp
@@ -27,6 +28,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("find", Find),
+            new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -38,6 +40,7 @@ namespace FileCabinetApp
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "find", "finds matching records", "The 'find' command prints found records." },
+            new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -192,23 +195,7 @@ namespace FileCabinetApp
 
         private static void Find(string parameters)
         {
-            string targetProp = parameters.Trim();
-
-            if (string.IsNullOrEmpty(targetProp))
-            {
-                Console.WriteLine("Property name missed");
-                return;
-            }
-
-            int startIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
-
-            if (startIndex == -1)
-            {
-                Console.WriteLine("Property value missed");
-                return;
-            }
-
-            targetProp = targetProp.Substring(0, startIndex);
+            string targetProp = GetTargetProp(parameters);
 
             if (parameters.Length == targetProp.Length)
             {
@@ -221,6 +208,160 @@ namespace FileCabinetApp
             var targetRecords = FindTargetRecords(targetName, targetProp);
 
             PrintTargetRecords(targetRecords);
+        }
+
+        private static void Export(string parameters)
+        {
+            if (fileCabinetService.GetStat() == 0)
+            {
+                Console.WriteLine("There is no any records.");
+                return;
+            }
+
+            string fileType = GetTargetProp(parameters);
+
+            if (IsFileNameMissed(parameters, fileType))
+            {
+                return;
+            }
+
+            string filePath = parameters[fileType.Length..].Trim();
+            string fileName = GetFileName(filePath);
+
+            if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(fileName))
+            {
+                Console.WriteLine("Operation failed, empty path.");
+                return;
+            }
+
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (!fileName.Contains($".{fileType}"))
+            {
+                fileName += $".{fileType}";
+            }
+
+            filePath += fileName;
+
+            if (!IsAbleToSave(filePath, fileName))
+            {
+                return;
+            }
+
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                FileCabinetServiceSnapshot snapshot = ((FileCabinetService)fileCabinetService).MakeSnapshot();
+
+                if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToCsv(writer);
+                }
+
+                if (fileType.Equals("xml", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToXml(writer);
+                }
+            }
+        }
+
+        private static bool IsAbleToSave(string filePath, string fileName)
+        {
+            if (!IsDirectoryValid(filePath, fileName))
+            {
+                return false;
+            }
+
+            if (File.Exists(filePath))
+            {
+                Console.Write($"File is exist - rewrite {filePath}? [Y/n]");
+                string answer;
+
+                do
+                {
+                    answer = Console.ReadLine();
+
+                    if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    if (answer.Equals("n", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("Operation canceled");
+                        return false;
+                    }
+
+                    Console.Write("Incorrect input, retry:");
+                }
+                while (true);
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private static bool IsDirectoryValid(string filePath, string fileName)
+        {
+            if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (!Directory.Exists(filePath) && filePath.Contains("\\"))
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsFileNameMissed(string parameters, string fileType)
+        {
+            if (parameters.Length != fileType.Length)
+            {
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Operation failed.");
+                return true;
+            }
+        }
+
+        private static string GetTargetProp(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("Property name missed");
+                return targetProp;
+            }
+
+            int endIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (endIndex == -1)
+            {
+                Console.WriteLine("Property value missed");
+                return targetProp;
+            }
+
+            return targetProp[..endIndex];
+        }
+
+        private static string GetFileName(string filePath)
+        {
+            if (filePath.Contains("\\"))
+            {
+                return filePath[(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1) ..];
+            }
+
+            return filePath;
         }
 
         private static void AddRecord(IFileCabinetService fileCabinetService)
