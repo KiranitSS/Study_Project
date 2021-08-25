@@ -53,6 +53,10 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
+            new FileStream("cabinet - records.db", FileMode.Create);
+
+            SetStorage(args);
+
             validator = GetValidator(args);
             fileCabinetService = new FileCabinetMemoryService(validator);
 
@@ -127,6 +131,20 @@ namespace FileCabinetApp
 
             Console.WriteLine("Using default validation rules.");
             return new DefaultValidator();
+        }
+
+        private static void SetStorage(string[] mainParams)
+        {
+            if (mainParams is null || mainParams.Length == 0)
+            {
+                Console.WriteLine("Using memory storage.");
+                return;
+            }
+
+            string storageMode;
+            string storageModeMessage = "-validation-rules=";
+            string shortStorageModeMessage = "-v";
+            string customStorageModeText = "custom";
         }
 
         private static void PrintMissedCommandInfo(string command)
