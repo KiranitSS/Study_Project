@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents a service for performing actions on <see cref="FileCabinetRecord"/>.
+    /// Represents a service for actions on <see cref="FileCabinetRecord"/>.
     /// </summary>
-    public class FileCabinetService : IFileCabinetService
+    public class FileCabinetMemoryService : IFileCabinetService
     {
         private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
         private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
@@ -24,10 +24,10 @@ namespace FileCabinetApp
         private readonly IRecordValidator validator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetService"/> class.
+        /// Initializes a new instance of the <see cref="FileCabinetMemoryService"/> class.
         /// </summary>
         /// <param name="validator">Records parameters validator.</param>
-        public FileCabinetService(IRecordValidator validator)
+        public FileCabinetMemoryService(IRecordValidator validator)
         {
             this.validator = validator;
         }
