@@ -9,7 +9,7 @@ using System.Xml;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents <see cref="FileCabinetService"/> data to save.
+    /// Represents <see cref="FileCabinetMemoryService"/> data to save.
     /// </summary>
     public class FileCabinetServiceSnapshot
     {

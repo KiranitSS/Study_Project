@@ -54,7 +54,7 @@ namespace FileCabinetApp
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             validator = GetValidator(args);
-            fileCabinetService = new FileCabinetService(validator);
+            fileCabinetService = new FileCabinetMemoryService(validator);
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -250,7 +250,7 @@ namespace FileCabinetApp
 
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                FileCabinetServiceSnapshot snapshot = ((FileCabinetService)fileCabinetService).MakeSnapshot();
+                FileCabinetServiceSnapshot snapshot = ((FileCabinetMemoryService)fileCabinetService).MakeSnapshot();
 
                 if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
                 {
