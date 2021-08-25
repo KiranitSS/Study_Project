@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +13,22 @@ namespace FileCabinetApp
     /// </summary>
     public class FileCabinetFilesystemService : IFileCabinetService
     {
+        private readonly FileStream fileStream;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
+        /// </summary>
+        /// <param name="fileStream">Current FileStream.</param>
+        public FileCabinetFilesystemService(FileStream fileStream)
+        {
+            this.fileStream = fileStream;
+        }
+
         /// <inheritdoc/>
         public int CreateRecord(RecordParameters parameters)
         {
             throw new NotImplementedException();
-        }
+        }r4
 
         /// <inheritdoc/>
         public void EditRecord(int id, RecordParameters parameters)
