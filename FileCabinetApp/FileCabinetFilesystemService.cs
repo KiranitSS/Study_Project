@@ -149,7 +149,10 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public int GetStat()
         {
-            throw new NotImplementedException();
+            long offset = 277;
+            using FileStream fs = new FileStream(this.path, FileMode.OpenOrCreate);
+            using BinaryReader reader = new BinaryReader(fs);
+            return (int)(reader.BaseStream.Length / offset);
         }
 
         /// <inheritdoc/>
