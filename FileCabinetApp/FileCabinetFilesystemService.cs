@@ -50,6 +50,7 @@ namespace FileCabinetApp
 
             var data = new RecordDataConverter()
             {
+                Status = 0,
                 Id = ++id,
                 Year = parameters.DateOfBirth.Year,
                 Month = parameters.DateOfBirth.Month,
@@ -102,7 +103,7 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            int size = 275;
+            int size = 277;
             int recordIndex = 0;
             long offset;
 
@@ -119,6 +120,7 @@ namespace FileCabinetApp
                         offset = size * recordIndex;
                         fs.Seek(offset, SeekOrigin.Begin);
 
+                        record.Status = reader.ReadInt16();
                         record.Id = reader.ReadInt32();
 
                         byte[] firstname = reader.ReadBytes(120);
@@ -207,14 +209,17 @@ namespace FileCabinetApp
             {
                 try
                 {
+                    writer.Write(data.Status);
+                    writer.Write(data.Id);
+
                     byte[] firstNameAsBytes = GetBytes(data.GetFirstName().ToArray());
 
-                    writer.Write(data.Id);
                     writer.Write(firstNameAsBytes);
 
                     byte[] lastNameAsBytes = GetBytes(data.GetLastName().ToArray());
 
                     writer.Write(lastNameAsBytes);
+
                     writer.Write(data.Year);
                     writer.Write(data.Month);
                     writer.Write(data.Day);
