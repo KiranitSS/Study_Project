@@ -51,14 +51,14 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
+            args = new string[] { "-s", "file" };
+
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
-            new FileStream("cabinet - records.db", FileMode.Create);
-
-            SetStorage(args);
-
-            validator = GetValidator(args);
-            fileCabinetService = new FileCabinetMemoryService(validator);
+            using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Append))
+            {
+                fileCabinetService = SetStorage(args, fileStream);
+            }
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -133,18 +133,50 @@ namespace FileCabinetApp
             return new DefaultValidator();
         }
 
-        private static void SetStorage(string[] mainParams)
+        private static IFileCabinetService SetStorage(string[] mainParams, FileStream fileStream)
         {
             if (mainParams is null || mainParams.Length == 0)
             {
                 Console.WriteLine("Using memory storage.");
-                return;
+                validator = GetValidator(mainParams);
+                return new FileCabinetMemoryService(validator);
             }
 
             string storageMode;
-            string storageModeMessage = "-validation-rules=";
-            string shortStorageModeMessage = "-v";
-            string customStorageModeText = "custom";
+            string storageModeMessage = "--storage";
+            string shortStorageModeMessage = "-s";
+            string customStorageModeText = "file";
+
+            if (mainParams.Length > 0 && mainParams[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                storageMode = mainParams[0];
+                storageMode = storageMode.Trim();
+
+                storageMode = storageMode.Replace(storageModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
+
+                if (storageMode.Equals(customStorageModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using system storage.");
+                    validator = GetValidator(mainParams);
+                    return new FileCabinetFilesystemService(fileStream);
+                }
+            }
+
+            if (mainParams.Length > 1 && mainParams[0].Equals(shortStorageModeMessage, StringComparison.OrdinalIgnoreCase))
+            {
+                storageMode = mainParams[1];
+
+                if (string.Equals(storageMode, customStorageModeText, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Using system storage.");
+                    validator = GetValidator(mainParams);
+                    return new FileCabinetFilesystemService(fileStream);
+                }
+            }
+
+            Console.WriteLine("Using memory storage.");
+            validator = GetValidator(mainParams);
+            return new FileCabinetMemoryService(validator);
         }
 
         private static void PrintMissedCommandInfo(string command)
