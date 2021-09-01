@@ -79,7 +79,39 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public void EditRecord(int id, RecordParameters parameters)
         {
-            throw new NotImplementedException();
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            List<FileCabinetRecord> records = this.GetRecords().ToList();
+
+            if (id > records.Count || id < 0)
+            {
+                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
+                return;
+            }
+
+            var data = new RecordDataConverter(parameters);
+
+            records[id - 1] = new FileCabinetRecord
+            {
+                Id = id,
+                FirstName = string.Concat(data.GetFirstName()),
+                LastName = string.Concat(data.GetLastName()),
+                DateOfBirth = new DateTime(data.Year, data.Month, data.Day),
+                MoneyCount = data.MoneyCount,
+                PIN = data.PIN,
+                CharProp = data.CharProp,
+            };
+
+            this.fileStream.Dispose();
+            this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+
+            foreach (var record in records)
+            {
+                this.SaveRecord(new RecordDataConverter(record));
+            }
         }
 
         /// <inheritdoc/>
@@ -240,6 +272,14 @@ namespace FileCabinetApp
                     this.fileStream.Dispose();
                 }
             }
+        }
+
+        private int FindStringInBinaryFile(string value)
+        {
+            byte[] byteBuffer = File.ReadAllBytes(this.path);
+            string byteBufferAsString = System.Text.Encoding.UTF8.GetString(byteBuffer);
+
+            return byteBufferAsString.IndexOf(value, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

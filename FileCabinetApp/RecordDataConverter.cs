@@ -23,6 +23,48 @@ namespace FileCabinetApp
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RecordDataConverter"/> class.
+        /// </summary>
+        /// <param name="parameters">Record parameters.</param>
+        public RecordDataConverter(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            this.firstName = parameters.FirstName.ToList();
+            this.lastName = parameters.LastName.ToList();
+            this.Year = parameters.DateOfBirth.Year;
+            this.Month = parameters.DateOfBirth.Month;
+            this.Day = parameters.DateOfBirth.Day;
+            this.MoneyCount = parameters.MoneyCount;
+            this.PIN = parameters.PIN;
+            this.CharProp = parameters.CharProp;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecordDataConverter"/> class.
+        /// </summary>
+        /// <param name="record">Record parameters.</param>
+        public RecordDataConverter(FileCabinetRecord record)
+        {
+            if (record is null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            this.firstName = record.FirstName.ToList();
+            this.lastName = record.LastName.ToList();
+            this.Year = record.DateOfBirth.Year;
+            this.Month = record.DateOfBirth.Month;
+            this.Day = record.DateOfBirth.Day;
+            this.MoneyCount = record.MoneyCount;
+            this.PIN = record.PIN;
+            this.CharProp = record.CharProp;
+        }
+
+        /// <summary>
         /// Gets or sets status.
         /// </summary>
         /// <value>

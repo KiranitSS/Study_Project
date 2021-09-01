@@ -32,11 +32,7 @@ namespace FileCabinetApp
             this.validator = validator;
         }
 
-        /// <summary>
-        /// Add new <see cref="FileCabinetRecord"/> to records list and dictionaries.
-        /// </summary>
-        /// <param name="parameters">Contains creating parameters.</param>
-        /// <returns> Returns ID of new record.</returns>
+        /// <inheritdoc/>
         public int CreateRecord(RecordParameters parameters)
         {
             if (parameters is null)
@@ -62,10 +58,7 @@ namespace FileCabinetApp
             return record.Id;
         }
 
-        /// <summary>
-        /// Create copy of records.
-        /// </summary>
-        /// <returns>Return copy of records list.</returns>
+        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             var recordsCopy = new FileCabinetRecord[this.records.Count];
@@ -87,20 +80,13 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(recordsCopy);
         }
 
-        /// <summary>
-        /// Returns count of records in records list.
-        /// </summary>
-        /// <returns>Returns records count.</returns>
+        /// <inheritdoc/>
         public int GetStat()
         {
             return this.records.Count;
         }
 
-        /// <summary>
-        /// Edits records properties.
-        /// </summary>
-        /// <param name="id">Persons ID.</param>
-        /// <param name="parameters">Contains edit records parameters.</param>
+        /// <inheritdoc/>
         public void EditRecord(int id, RecordParameters parameters)
         {
             if (parameters is null)
@@ -108,9 +94,10 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            if (id > this.records.Count + 1)
+            if (id > this.records.Count + 1 || id < 0)
             {
-                throw new ArgumentException("ID can't be bigger than records count");
+                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
+                return;
             }
 
             var currentRecord = this.records[id - 1];
@@ -128,31 +115,19 @@ namespace FileCabinetApp
             this.AddRecordToFilterDictionaries(currentRecord);
         }
 
-        /// <summary>
-        /// Searches for an entry by firstname.
-        /// </summary>
-        /// <param name="firstName">Search key.</param>
-        /// <returns>Returns record.</returns>
+        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(firstName, this.firstNameDictionary));
         }
 
-        /// <summary>
-        /// Searches for an entry by lastname.
-        /// </summary>
-        /// <param name="lastname">Search key.</param>
-        /// <returns>>Returns record.</returns>
+        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
         {
             return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(lastname, this.lastNameDictionary));
         }
 
-        /// <summary>
-        /// Searches for an entry by date of birth.
-        /// </summary>
-        /// <param name="dateOfBirth">Search key.</param>
-        /// <returns>>Returns record.</returns>
+        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
             return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(dateOfBirth, this.birthdateDictionary));
