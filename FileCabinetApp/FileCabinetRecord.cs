@@ -15,25 +15,8 @@ namespace FileCabinetApp
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
         /// </summary>
-        public FileCabinetRecord() { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
-        /// </summary>
-        /// <param name="firstName">Persons firstname.</param>
-        /// <param name="lastName">Persons lastname.</param>
-        /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <param name="moneyCount">Count of persons money.</param>
-        /// <param name="pin">Security money code.</param>
-        /// <param name="charProp">Simple char prop.</param>
-        public FileCabinetRecord(string firstName, string lastName, DateTime dateOfBirth, decimal moneyCount, short pin, char charProp)
+        public FileCabinetRecord()
         {
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.DateOfBirth = dateOfBirth;
-            this.MoneyCount = moneyCount;
-            this.PIN = pin;
-            this.CharProp = charProp;
         }
 
         /// <summary>

@@ -76,8 +76,10 @@ namespace FileCabinetApp
             string filePath = ((FileStream)writer.BaseStream).Name;
             string fileName = GetFileName(filePath);
 
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
+            XmlWriterSettings settings = new XmlWriterSettings
+            {
+                Indent = true,
+            };
 
             var xmlWriter = XmlWriter.Create(writer, settings);
             xmlWriter.WriteStartDocument();
@@ -102,7 +104,7 @@ namespace FileCabinetApp
         {
             if (filePath.Contains("\\"))
             {
-                return filePath.Substring(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
+                return filePath[(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1) ..];
             }
 
             return filePath;
