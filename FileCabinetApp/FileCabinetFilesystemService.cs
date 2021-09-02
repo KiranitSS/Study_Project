@@ -86,7 +86,7 @@ namespace FileCabinetApp
 
             List<FileCabinetRecord> records = this.GetRecords().ToList();
 
-            if (id > records.Count || id < 0)
+            if (id > records.Count || id < 1)
             {
                 Console.WriteLine("ID can't be bigger than records count or lower than zero.");
                 return;
@@ -106,30 +106,35 @@ namespace FileCabinetApp
             };
 
             this.fileStream.Dispose();
-            this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+            this.fileStream = new FileStream(this.path, FileMode.Create);
 
             foreach (var record in records)
             {
+                this.fileStream.Dispose();
+                this.fileStream = new FileStream(this.path, FileMode.Append);
                 this.SaveRecord(new RecordDataConverter(record));
             }
+
+            this.fileStream.Dispose();
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
-            throw new NotImplementedException();
+            return new (this.GetRecords().Where(rec => rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture).Equals(dateOfBirth)).ToList());
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            throw new NotImplementedException();
+            var records = this.GetRecords();
+            return new (records.Where(rec => rec.FirstName.Replace("\0", string.Empty).Equals(firstName, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
         {
-            throw new NotImplementedException();
+            return new (this.GetRecords().Where(rec => rec.LastName.Replace("\0", string.Empty).Equals(lastname, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
         /// <inheritdoc/>
@@ -267,19 +272,7 @@ namespace FileCabinetApp
                     Console.WriteLine("Failed to write. Reason: " + ex.Message);
                     throw;
                 }
-                finally
-                {
-                    this.fileStream.Dispose();
-                }
             }
-        }
-
-        private int FindStringInBinaryFile(string value)
-        {
-            byte[] byteBuffer = File.ReadAllBytes(this.path);
-            string byteBufferAsString = System.Text.Encoding.UTF8.GetString(byteBuffer);
-
-            return byteBufferAsString.IndexOf(value, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

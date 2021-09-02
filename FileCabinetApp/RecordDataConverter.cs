@@ -32,7 +32,7 @@ namespace FileCabinetApp
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-
+            this.Id = parameters.Id;
             this.firstName = parameters.FirstName.ToList();
             this.lastName = parameters.LastName.ToList();
             this.Year = parameters.DateOfBirth.Year;
@@ -54,6 +54,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(record));
             }
 
+            this.Id = record.Id;
             this.firstName = record.FirstName.ToList();
             this.lastName = record.LastName.ToList();
             this.Year = record.DateOfBirth.Year;
