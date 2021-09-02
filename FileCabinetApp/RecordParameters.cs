@@ -31,6 +31,14 @@ namespace FileCabinetApp
         }
 
         /// <summary>
+        /// Gets or sets persons ID.
+        /// </summary>
+        /// <value>
+        /// Persons ID.
+        /// </value>
+        public int Id { get; set; }
+
+        /// <summary>
         /// Gets or sets persons firstname.
         /// </summary>
         /// <value>
