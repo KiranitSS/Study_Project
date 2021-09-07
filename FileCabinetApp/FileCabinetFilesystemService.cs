@@ -51,7 +51,7 @@ namespace FileCabinetApp
             var data = new RecordDataConverter()
             {
                 Status = 0,
-                Id = ++id,
+                Id = GetIncrementedId(),
                 Year = parameters.DateOfBirth.Year,
                 Month = parameters.DateOfBirth.Month,
                 Day = parameters.DateOfBirth.Day,
@@ -148,7 +148,6 @@ namespace FileCabinetApp
 
             using (FileStream fs = new FileStream(this.path, FileMode.OpenOrCreate))
             {
-
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
@@ -241,6 +240,11 @@ namespace FileCabinetApp
             };
 
             return record;
+        }
+
+        private static int GetIncrementedId()
+        {
+            return ++id;
         }
 
         private void SaveRecord(RecordDataConverter data)
