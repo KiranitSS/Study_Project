@@ -10,7 +10,6 @@ namespace FileCabinetGenerator
     static class Program
     {
         private static string path;
-        private static FileCabinetMemoryService fileCabinetService;
         private static List<string> cmdParams;
         private static int recordsAmount;
         private static int startGeneratingId;
@@ -25,6 +24,15 @@ namespace FileCabinetGenerator
             if (!TrySetOutput(args))
             {
                 return;
+            }
+
+            List<FileCabinetRecord> records = new List<FileCabinetRecord>();
+
+            RecordGenerator generator = new RecordGenerator(startGeneratingId);
+
+            for (int i = 0; i < recordsAmount; i++)
+            {
+                records.Add(generator.GenerateRecord(i));
             }
 
             Console.ReadLine();
@@ -112,14 +120,12 @@ namespace FileCabinetGenerator
 
             if (type.Equals("csv"))
             {
-                fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                 Console.WriteLine("CSV");
                 return true;
             }
 
             if (type.Equals("xml"))
             {
-                fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                 Console.WriteLine("XML");
                 return true;
             }
