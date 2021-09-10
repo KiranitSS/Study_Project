@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using FileCabinetApp;
 using System.IO;
 using System.Xml;
+using System.Text;
 
 namespace FileCabinetGenerator
 {
     static class Program
     {
         private static string path;
+        private static string outputType;
         private static List<string> cmdParams;
         private static int recordsAmount;
         private static int startGeneratingId;
@@ -22,20 +24,59 @@ namespace FileCabinetGenerator
             }
 
             if (!TrySetOutput(args))
-            {
+            { 
                 return;
             }
 
             List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
             RecordGenerator generator = new RecordGenerator(startGeneratingId);
-
+            
             for (int i = 0; i < recordsAmount; i++)
             {
                 records.Add(generator.GenerateRecord(i));
             }
 
+            if (outputType.Equals("csv"))
+            {
+                SaveToCsv(records);
+            }
+
             Console.ReadLine();
+        }
+
+        private static void SaveToCsv(List<FileCabinetRecord> records)
+        {
+            StreamWriter writer = new StreamWriter(path, false);
+            writer.AutoFlush = true;
+
+            FileCabinetRecordCsvWriter csvWriter = new FileCabinetRecordCsvWriter(writer);
+
+            WriteHeader(writer);
+
+            for (int i = 0; i < records.Count; i++)
+            {
+                csvWriter.Write(records[i]);
+            }
+
+            writer.Close();
+        }
+
+        private static void WriteHeader(StreamWriter writer)
+        {
+            var props = typeof(FileCabinetRecord).GetProperties();
+
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < props.Length - 1; i++)
+            {
+                builder.Append(props[i].Name);
+                builder.Append(',');
+            }
+
+            builder.Append(props[^1].Name);
+
+            writer.WriteLine(builder);
         }
 
         private static bool TrySetOutput(string[] args)
@@ -118,15 +159,9 @@ namespace FileCabinetGenerator
                 return false;
             }
 
-            if (type.Equals("csv"))
+            if (type.Equals("csv") || type.Equals("xml"))
             {
-                Console.WriteLine("CSV");
-                return true;
-            }
-
-            if (type.Equals("xml"))
-            {
-                Console.WriteLine("XML");
+                outputType = type;
                 return true;
             }
 
@@ -166,7 +201,7 @@ namespace FileCabinetGenerator
                 return false;
             }
 
-            if (int.TryParse(amount, out recordsAmount))
+            if (int.TryParse(amount, out recordsAmount) && recordsAmount >= 0)
             {
                 return true;
             }
@@ -188,5 +223,5 @@ namespace FileCabinetGenerator
 
             return false;
         }
-    }
+    }  
 }
