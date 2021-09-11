@@ -5,6 +5,7 @@ using FileCabinetApp;
 using System.IO;
 using System.Xml;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace FileCabinetGenerator
 {
@@ -24,25 +25,39 @@ namespace FileCabinetGenerator
             }
 
             if (!TrySetOutput(args))
-            { 
+            {
                 return;
             }
 
             List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
             RecordGenerator generator = new RecordGenerator(startGeneratingId);
-            
+
             for (int i = 0; i < recordsAmount; i++)
             {
                 records.Add(generator.GenerateRecord(i));
             }
 
+            ExportRecordsData(records);
+
+            Console.ReadLine();
+        }
+
+        private static void ExportRecordsData(List<FileCabinetRecord> records)
+        {
             if (outputType.Equals("csv"))
             {
                 SaveToCsv(records);
+                return;
             }
 
-            Console.ReadLine();
+            if (outputType.Equals("xml"))
+            {
+                SaveToXml(records);
+                return;
+            }
+
+            Console.WriteLine("Export failed");
         }
 
         private static void SaveToCsv(List<FileCabinetRecord> records)
@@ -59,6 +74,21 @@ namespace FileCabinetGenerator
                 csvWriter.Write(records[i]);
             }
 
+            writer.Close();
+        }
+
+        private static void SaveToXml(List<FileCabinetRecord> records)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(FileCabinetRecord));
+            StreamWriter writer = new StreamWriter(path);
+            XmlSerializerNamespaces xns = new XmlSerializerNamespaces();
+            xns.Add(string.Empty, string.Empty);
+
+            foreach (var record in records)
+            {
+                serializer.Serialize(writer, record, xns);
+            }
+            
             writer.Close();
         }
 

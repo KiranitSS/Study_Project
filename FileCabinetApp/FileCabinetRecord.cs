@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+
     /// <summary>
     /// Represents an <see cref="FileCabinetRecord"/> object for saving persons data and perform actions on it.
     /// </summary>
+    [Serializable]
     public class FileCabinetRecord
     {
         /// <summary>
