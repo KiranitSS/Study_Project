@@ -63,7 +63,7 @@ namespace FileCabinetGenerator
 
         private static decimal GenerateMoneyCount(Random rnd)
         {
-            return (decimal)(rnd.Next(200, short.MaxValue) + rnd.NextDouble());
+            return (decimal)(rnd.Next(200, short.MaxValue) + rnd.NextDouble()) ;
         }
 
         private static short GeneratePin(Random rnd)

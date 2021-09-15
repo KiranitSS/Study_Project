@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -29,6 +30,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
+            new Tuple<string, Action<string>>("import", Import),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -41,6 +43,7 @@ namespace FileCabinetApp
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
+            new string[] { "import", "imports the records", "The 'imports' command imports records from external file." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -310,6 +313,51 @@ namespace FileCabinetApp
                     snapshot.SaveToXml(writer);
                 }
             }
+        }
+
+        private static void Import(string parameters)
+        {
+            parameters = parameters.Trim();
+
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Not enougth parameters");
+                return;
+            }
+
+            string[] importParams = parameters.Split(" ");
+
+            if (!IsAbleToImport(importParams))
+            {
+                return;
+            }
+
+            using (StreamReader reader = new StreamReader(importParams[1]))
+            {
+                if (importParams[0].Equals("csv"))
+                {
+                    FileCabinetServiceSnapshot snapshot = ((FileCabinetMemoryService)fileCabinetService).MakeSnapshot();
+                    snapshot.LoadFromCsv(reader, validator);
+                    ((FileCabinetMemoryService)fileCabinetService).Restore(snapshot);
+                }
+            }
+        }
+
+        private static bool IsAbleToImport(string[] importParams)
+        {
+            if (importParams.Length != 2)
+            {
+                Console.WriteLine("Incorrect input parameters");
+                return false;
+            }
+
+            if (!File.Exists(importParams[1]))
+            {
+                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
+                return false;
+            }
+
+            return true;
         }
 
         private static bool IsAbleToSave(string filePath, string fileName)

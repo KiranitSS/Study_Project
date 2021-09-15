@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using System.Text;
 using System.Xml.Serialization;
+using System.Globalization;
 
 namespace FileCabinetGenerator
 {
@@ -16,8 +17,9 @@ namespace FileCabinetGenerator
         private static List<string> cmdParams;
         private static int recordsAmount;
         private static int startGeneratingId;
+
         static void Main(string[] args)
-        {
+        {            
             if (args is null)
             {
                 Console.WriteLine($"{nameof(args)} is null");
@@ -62,8 +64,10 @@ namespace FileCabinetGenerator
 
         private static void SaveToCsv(List<FileCabinetRecord> records)
         {
-            StreamWriter writer = new StreamWriter(path, false);
-            writer.AutoFlush = true;
+            StreamWriter writer = new StreamWriter(path, false)
+            {
+                AutoFlush = true
+            };
 
             FileCabinetRecordCsvWriter csvWriter = new FileCabinetRecordCsvWriter(writer);
 
@@ -163,7 +167,6 @@ namespace FileCabinetGenerator
                 }
 
                 return false;
-
             }
 
             if (cmdParams.Count < 2)

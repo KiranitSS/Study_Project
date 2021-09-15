@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace FileCabinetApp
     /// </summary>
     public class FileCabinetServiceSnapshot
     {
-        private readonly FileCabinetRecord[] records;
+        private FileCabinetRecord[] records;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetServiceSnapshot"/> class.
@@ -25,14 +26,22 @@ namespace FileCabinetApp
         }
 
         /// <summary>
-        /// Save records data to csv file.
+        /// Gets records.
+        /// </summary>
+        /// <value>
+        /// Records.
+        /// </value>
+        public ReadOnlyCollection<FileCabinetRecord> Records { get => new (this.records); }
+
+        /// <summary>
+        /// Saves records data to csv file.
         /// </summary>
         /// <param name="writer">Writer with established path.</param>
         public void SaveToCsv(StreamWriter writer)
         {
             if (writer is null)
             {
-                throw new ArgumentNullException($"{nameof(writer)} is null.");
+                throw new ArgumentNullException(nameof(writer));
             }
 
             string filePath = ((FileStream)writer.BaseStream).Name;
@@ -63,14 +72,14 @@ namespace FileCabinetApp
         }
 
         /// <summary>
-        /// Save records data to xml file.
+        /// Saves records data to xml file.
         /// </summary>
         /// <param name="writer">Writer with established path.</param>
         public void SaveToXml(StreamWriter writer)
         {
             if (writer is null)
             {
-                throw new ArgumentNullException($"{nameof(writer)} is null.");
+                throw new ArgumentNullException(nameof(writer));
             }
 
             string filePath = ((FileStream)writer.BaseStream).Name;
@@ -100,6 +109,54 @@ namespace FileCabinetApp
             Console.WriteLine($"All records are exported to file {fileName}");
         }
 
+        /// <summary>
+        /// Loads records from csv file.
+        /// </summary>
+        /// <param name="reader">Reader with established path.</param>
+        /// <param name="validator">Checks records correctness.</param>
+        public void LoadFromCsv(StreamReader reader, IRecordValidator validator)
+        {
+            FileCabinetRecordCsvReader csvReader = new FileCabinetRecordCsvReader(reader);
+            this.records = csvReader.ReadAll().ToArray();
+
+            this.RemoveIncorrectRecords(validator);
+        }
+
+        private static bool IsValidRecord(FileCabinetRecord record, IRecordValidator validator)
+        {
+            if (!validator.IsCorrectFirstName(record.FirstName))
+            {
+                return false;
+            }
+
+            if (!validator.IsCorrectLastName(record.LastName))
+            {
+                return false;
+            }
+
+            if (!validator.IsCorrectDateOfBirth(record.DateOfBirth))
+            {
+                return false;
+            }
+
+            if (!validator.IsCorrectMoneyCount(record.MoneyCount))
+            {
+                return false;
+            }
+
+            if (!validator.IsCorrectPIN(record.PIN))
+            {
+                return false;
+            }
+
+            if (!validator.IsCorrectCharProp(record.CharProp))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private static string GetFileName(string filePath)
         {
             if (filePath.Contains("\\"))
@@ -108,6 +165,22 @@ namespace FileCabinetApp
             }
 
             return filePath;
+        }
+
+        private void RemoveIncorrectRecords(IRecordValidator validator)
+        {
+            List<FileCabinetRecord> validRecords = this.records.ToList();
+
+            foreach (var record in this.records)
+            {
+                if (!IsValidRecord(record, validator))
+                {
+                    Console.WriteLine($"Record with Id {record.Id}, is incorrect.");
+                    validRecords.Remove(record);
+                }
+            }
+
+            this.records = validRecords.ToArray();
         }
     }
 }

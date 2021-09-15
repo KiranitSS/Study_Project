@@ -14,6 +14,13 @@ namespace FileCabinetApp
         /// <summary>
         /// Initializes a new instance of the <see cref="RecordParameters"/> class.
         /// </summary>
+        public RecordParameters()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecordParameters"/> class.
+        /// </summary>
         /// <param name="firstName">Firstname.</param>
         /// <param name="lastName">Lastname.</param>
         /// <param name="dateOfBirth">Date of birth.</param>
