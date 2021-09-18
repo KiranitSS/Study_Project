@@ -19,7 +19,7 @@ namespace FileCabinetGenerator
         private static int startGeneratingId;
 
         static void Main(string[] args)
-        {            
+        {
             if (args is null)
             {
                 Console.WriteLine($"{nameof(args)} is null");

@@ -117,9 +117,11 @@ namespace FileCabinetApp
         public void LoadFromCsv(StreamReader reader, IRecordValidator validator)
         {
             FileCabinetRecordCsvReader csvReader = new FileCabinetRecordCsvReader(reader);
-            this.records = csvReader.ReadAll().ToArray();
+            List<FileCabinetRecord> importedRecords = csvReader.ReadAll().ToList();
 
-            this.RemoveIncorrectRecords(validator);
+            importedRecords = RemoveIncorrectRecords(importedRecords, validator);
+
+            this.RemoveDuplicatedRecords(importedRecords);
         }
 
         private static bool IsValidRecord(FileCabinetRecord record, IRecordValidator validator)
@@ -157,6 +159,22 @@ namespace FileCabinetApp
             return true;
         }
 
+        private static List<FileCabinetRecord> RemoveIncorrectRecords(List<FileCabinetRecord> importedRecords, IRecordValidator validator)
+        {
+            List<FileCabinetRecord> validRecords = importedRecords.ToList();
+
+            foreach (var record in importedRecords)
+            {
+                if (!IsValidRecord(record, validator))
+                {
+                    Console.WriteLine($"Record with Id {record.Id}, is incorrect.");
+                    validRecords.Remove(record);
+                }
+            }
+
+            return validRecords;
+        }
+
         private static string GetFileName(string filePath)
         {
             if (filePath.Contains("\\"))
@@ -167,20 +185,15 @@ namespace FileCabinetApp
             return filePath;
         }
 
-        private void RemoveIncorrectRecords(IRecordValidator validator)
+        private void RemoveDuplicatedRecords(List<FileCabinetRecord> importedRecords)
         {
-            List<FileCabinetRecord> validRecords = this.records.ToList();
+            var indexes = importedRecords.Select(rec => rec.Id).ToList();
 
-            foreach (var record in this.records)
-            {
-                if (!IsValidRecord(record, validator))
-                {
-                    Console.WriteLine($"Record with Id {record.Id}, is incorrect.");
-                    validRecords.Remove(record);
-                }
-            }
+            List<FileCabinetRecord> uniqueRecords = this.records.Where(rec => !indexes.Contains(rec.Id)).ToList();
 
-            this.records = validRecords.ToArray();
+            uniqueRecords.AddRange(importedRecords);
+
+            this.records = uniqueRecords.ToArray();
         }
     }
 }

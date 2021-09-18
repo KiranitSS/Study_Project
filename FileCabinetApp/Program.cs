@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace FileCabinetApp
 {
@@ -92,9 +94,9 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
-        private static IRecordValidator GetValidator(string[] mainParams)
+        private static IRecordValidator GetValidator(string[] parameters)
         {
-            if (mainParams is null || mainParams.Length == 0)
+            if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using default validation rules.");
                 return new DefaultValidator();
@@ -105,9 +107,9 @@ namespace FileCabinetApp
             string shortValidationModeMessage = "-v";
             string customValidationModeText = "custom";
 
-            if (mainParams.Length > 0 && mainParams[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 0 && parameters[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                validationMode = mainParams[0];
+                validationMode = parameters[0];
                 validationMode = validationMode.Trim();
 
                 validationMode = validationMode.Replace(validationModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
@@ -119,9 +121,9 @@ namespace FileCabinetApp
                 }
             }
 
-            if (mainParams.Length > 1 && mainParams[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 1 && parameters[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                validationMode = mainParams[1];
+                validationMode = parameters[1];
 
                 if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
@@ -134,12 +136,12 @@ namespace FileCabinetApp
             return new DefaultValidator();
         }
 
-        private static IFileCabinetService SetStorage(string[] mainParams, FileStream fileStream)
+        private static IFileCabinetService SetStorage(string[] parameters, FileStream fileStream)
         {
-            if (mainParams is null || mainParams.Length == 0)
+            if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using memory storage.");
-                validator = GetValidator(mainParams);
+                validator = GetValidator(parameters);
                 return new FileCabinetMemoryService(validator);
             }
 
@@ -148,9 +150,9 @@ namespace FileCabinetApp
             string shortStorageModeMessage = "-s";
             string customStorageModeText = "file";
 
-            if (mainParams.Length > 0 && mainParams[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 0 && parameters[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                storageMode = mainParams[0];
+                storageMode = parameters[0];
                 storageMode = storageMode.Trim();
 
                 storageMode = storageMode.Replace(storageModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
@@ -158,25 +160,25 @@ namespace FileCabinetApp
                 if (storageMode.Equals(customStorageModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using system storage.");
-                    validator = GetValidator(mainParams);
+                    validator = GetValidator(parameters);
                     return new FileCabinetFilesystemService(fileStream);
                 }
             }
 
-            if (mainParams.Length > 1 && mainParams[0].Equals(shortStorageModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 1 && parameters[0].Equals(shortStorageModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                storageMode = mainParams[1];
+                storageMode = parameters[1];
 
                 if (string.Equals(storageMode, customStorageModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using system storage.");
-                    validator = GetValidator(mainParams);
+                    validator = GetValidator(parameters);
                     return new FileCabinetFilesystemService(fileStream);
                 }
             }
 
             Console.WriteLine("Using memory storage.");
-            validator = GetValidator(mainParams);
+            validator = GetValidator(parameters);
             return new FileCabinetMemoryService(validator);
         }
 
@@ -336,9 +338,9 @@ namespace FileCabinetApp
             {
                 if (importParams[0].Equals("csv"))
                 {
-                    FileCabinetServiceSnapshot snapshot = ((FileCabinetMemoryService)fileCabinetService).MakeSnapshot();
+                    FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
                     snapshot.LoadFromCsv(reader, validator);
-                    ((FileCabinetMemoryService)fileCabinetService).Restore(snapshot);
+                    fileCabinetService.Restore(snapshot);
                 }
             }
         }

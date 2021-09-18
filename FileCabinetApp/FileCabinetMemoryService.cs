@@ -32,10 +32,7 @@ namespace FileCabinetApp
             this.validator = validator;
         }
 
-        /// <summary>
-        /// Restores records.
-        /// </summary>
-        /// <param name="serviceSnapshot">Service which contains last records state.</param>
+        /// <inheritdoc/>
         public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
         {
             if (serviceSnapshot is null)

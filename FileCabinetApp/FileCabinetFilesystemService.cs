@@ -17,7 +17,6 @@ namespace FileCabinetApp
     /// </summary>
     public class FileCabinetFilesystemService : IFileCabinetService, IDisposable
     {
-        private static int id;
         private readonly string path;
         private bool disposed;
         private FileStream fileStream;
@@ -41,6 +40,24 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
+        public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
+        {
+            if (serviceSnapshot is null)
+            {
+                throw new ArgumentNullException(nameof(serviceSnapshot));
+            }
+
+            List<FileCabinetRecord> records = serviceSnapshot.Records.ToList();
+
+            this.fileStream = new FileStream(this.path, FileMode.Create);
+
+            foreach (var record in records)
+            {
+                this.SaveRecord(new RecordDataConverter(record));
+            }
+        }
+
+        /// <inheritdoc/>
         public int CreateRecord(RecordParameters parameters)
         {
             if (parameters is null)
@@ -51,7 +68,7 @@ namespace FileCabinetApp
             var data = new RecordDataConverter()
             {
                 Status = 0,
-                Id = GetIncrementedId(),
+                Id = this.ReadLastId(this.path) + 1,
                 Year = parameters.DateOfBirth.Year,
                 Month = parameters.DateOfBirth.Month,
                 Day = parameters.DateOfBirth.Day,
@@ -63,15 +80,9 @@ namespace FileCabinetApp
             data.SetFirstName(StringFormatter.StringToChar(parameters.FirstName, 60));
             data.SetLastName(StringFormatter.StringToChar(parameters.LastName, 60));
 
-            if (this.fileStream.CanWrite)
-            {
-                this.SaveRecord(data);
-            }
-            else
-            {
-                this.fileStream = new FileStream(this.path, FileMode.Append);
-                this.SaveRecord(data);
-            }
+            this.fileStream.Close();
+            this.fileStream = new FileStream(this.path, FileMode.Append);
+            this.SaveRecord(data);
 
             return data.Id;
         }
@@ -142,7 +153,6 @@ namespace FileCabinetApp
         {
             int size = 277;
             int recordIndex = 0;
-            long offset;
 
             List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
@@ -152,29 +162,7 @@ namespace FileCabinetApp
                 {
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        RecordDataConverter record = new RecordDataConverter();
-                        offset = size * recordIndex;
-                        fs.Seek(offset, SeekOrigin.Begin);
-
-                        record.Status = reader.ReadInt16();
-                        record.Id = reader.ReadInt32();
-
-                        byte[] firstname = reader.ReadBytes(120);
-                        record.SetFirstName(Encoding.UTF8.GetString(firstname).ToList());
-
-                        byte[] lastname = reader.ReadBytes(120);
-                        record.SetLastName(Encoding.UTF8.GetString(lastname).ToList());
-
-                        record.Year = reader.ReadInt32();
-                        record.Month = reader.ReadInt32();
-                        record.Day = reader.ReadInt32();
-
-                        record.MoneyCount = reader.ReadDecimal();
-                        record.PIN = reader.ReadInt16();
-                        record.CharProp = reader.ReadChar();
-
-                        records.Add(ConvertToRecord(record));
-                        recordIndex++;
+                        records.Add(GetRecord(size, ref recordIndex, fs, reader));
                     }
                 }
             }
@@ -196,6 +184,12 @@ namespace FileCabinetApp
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc/>
+        public FileCabinetServiceSnapshot MakeSnapshot()
+        {
+            return new FileCabinetServiceSnapshot(this.GetRecords().ToArray());
         }
 
         /// <summary>
@@ -226,6 +220,36 @@ namespace FileCabinetApp
             return fixedByteArray;
         }
 
+        private static FileCabinetRecord GetRecord(int size, ref int recordIndex, FileStream fs, BinaryReader reader)
+        {
+            long offset = 0;
+            fs.Seek(offset, SeekOrigin.Begin);
+
+            RecordDataConverter record = new RecordDataConverter();
+            offset = size * recordIndex;
+            fs.Seek(offset, SeekOrigin.Begin);
+
+            record.Status = reader.ReadInt16();
+            record.Id = reader.ReadInt32();
+
+            byte[] firstname = reader.ReadBytes(120);
+            record.SetFirstName(Encoding.UTF8.GetString(firstname).ToList());
+
+            byte[] lastname = reader.ReadBytes(120);
+            record.SetLastName(Encoding.UTF8.GetString(lastname).ToList());
+
+            record.Year = reader.ReadInt32();
+            record.Month = reader.ReadInt32();
+            record.Day = reader.ReadInt32();
+
+            record.MoneyCount = reader.ReadDecimal();
+            record.PIN = reader.ReadInt16();
+            record.CharProp = reader.ReadChar();
+
+            recordIndex++;
+            return ConvertToRecord(record);
+        }
+
         private static FileCabinetRecord ConvertToRecord(RecordDataConverter data)
         {
             FileCabinetRecord record = new FileCabinetRecord
@@ -242,13 +266,34 @@ namespace FileCabinetApp
             return record;
         }
 
-        private static int GetIncrementedId()
+        private int ReadLastId(string path)
         {
-            return ++id;
+            this.fileStream.Close();
+            this.fileStream = File.OpenRead(path);
+            if (this.fileStream.Length == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                this.fileStream.Position = this.fileStream.Length;
+            }
+
+            int lastLineNum = (int)(this.fileStream.Length / 277) - 1;
+
+            using (BinaryReader reader = new BinaryReader(this.fileStream))
+            {
+                return GetRecord(277, ref lastLineNum, this.fileStream, reader).Id;
+            }
         }
 
         private void SaveRecord(RecordDataConverter data)
         {
+            if (!this.fileStream.CanWrite)
+            {
+                this.fileStream = new FileStream(this.path, FileMode.Append);
+            }
+
             using (BinaryWriter writer = new BinaryWriter(this.fileStream))
             {
                 try
