@@ -58,5 +58,17 @@ namespace FileCabinetApp
         /// <param name="dateOfBirth">Search key.</param>
         /// <returns>>Returns record.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth);
+
+        /// <summary>
+        /// Restores records.
+        /// </summary>
+        /// <param name="serviceSnapshot">Service which contains last records state.</param>
+        public void Restore(FileCabinetServiceSnapshot serviceSnapshot);
+
+        /// <summary>
+        /// Creates <see cref="FileCabinetServiceSnapshot"/> instance with avaible now records.
+        /// </summary>
+        /// <returns>Returns <see cref="FileCabinetServiceSnapshot"/> instance.</returns>
+        public FileCabinetServiceSnapshot MakeSnapshot();
     }
 }

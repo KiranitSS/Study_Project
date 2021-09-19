@@ -15,13 +15,13 @@ namespace FileCabinetApp
     public class FileCabinetMemoryService : IFileCabinetService
     {
         private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
-        private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
-
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
 
         private readonly IRecordValidator validator;
+
+        private List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetMemoryService"/> class.
@@ -30,6 +30,17 @@ namespace FileCabinetApp
         public FileCabinetMemoryService(IRecordValidator validator)
         {
             this.validator = validator;
+        }
+
+        /// <inheritdoc/>
+        public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
+        {
+            if (serviceSnapshot is null)
+            {
+                throw new ArgumentNullException(nameof(serviceSnapshot));
+            }
+
+            this.records = serviceSnapshot.Records.ToList();
         }
 
         /// <inheritdoc/>
