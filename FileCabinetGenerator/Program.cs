@@ -83,16 +83,14 @@ namespace FileCabinetGenerator
 
         private static void SaveToXml(List<FileCabinetRecord> records)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(FileCabinetRecord));
+            XmlSerializer serializer = new XmlSerializer(typeof(List<FileCabinetRecord>), new[] { typeof(FileCabinetRecord) });
             StreamWriter writer = new StreamWriter(path);
+
             XmlSerializerNamespaces xns = new XmlSerializerNamespaces();
             xns.Add(string.Empty, string.Empty);
 
-            foreach (var record in records)
-            {
-                serializer.Serialize(writer, record, xns);
-            }
-            
+            serializer.Serialize(writer, records, xns);
+
             writer.Close();
         }
 

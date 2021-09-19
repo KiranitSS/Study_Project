@@ -116,11 +116,36 @@ namespace FileCabinetApp
         /// <param name="validator">Checks records correctness.</param>
         public void LoadFromCsv(StreamReader reader, IRecordValidator validator)
         {
+            if (reader is null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             FileCabinetRecordCsvReader csvReader = new FileCabinetRecordCsvReader(reader);
             List<FileCabinetRecord> importedRecords = csvReader.ReadAll().ToList();
 
             importedRecords = RemoveIncorrectRecords(importedRecords, validator);
+            Console.WriteLine($"{importedRecords.Count} records were imported from {((FileStream)reader.BaseStream).Name}");
+            this.RemoveDuplicatedRecords(importedRecords);
+        }
 
+        /// <summary>
+        /// Loads records from xml file.
+        /// </summary>
+        /// <param name="reader">Reader with established path.</param>
+        /// <param name="validator">Checks records correctness.</param>
+        public void LoadFromXml(StreamReader reader, IRecordValidator validator)
+        {
+            if (reader is null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            FileCabinetRecordXmlReader xmlReader = new FileCabinetRecordXmlReader(reader);
+            List<FileCabinetRecord> importedRecords = xmlReader.ReadAll().ToList();
+
+            importedRecords = RemoveIncorrectRecords(importedRecords, validator);
+            Console.WriteLine($"{importedRecords.Count} records were imported from {((FileStream)reader.BaseStream).Name}");
             this.RemoveDuplicatedRecords(importedRecords);
         }
 

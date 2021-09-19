@@ -56,6 +56,8 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
+            args = new string[] { "-s", "file" };
+
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
@@ -303,7 +305,7 @@ namespace FileCabinetApp
 
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                FileCabinetServiceSnapshot snapshot = ((FileCabinetMemoryService)fileCabinetService).MakeSnapshot();
+                FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
 
                 if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
                 {
@@ -340,6 +342,13 @@ namespace FileCabinetApp
                 {
                     FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
                     snapshot.LoadFromCsv(reader, validator);
+                    fileCabinetService.Restore(snapshot);
+                }
+
+                if (importParams[0].Equals("xml"))
+                {
+                    FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
+                    snapshot.LoadFromXml(reader, validator);
                     fileCabinetService.Restore(snapshot);
                 }
             }
