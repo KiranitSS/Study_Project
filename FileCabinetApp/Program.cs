@@ -61,7 +61,6 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            args = new string[] { "-s", "file" };
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
