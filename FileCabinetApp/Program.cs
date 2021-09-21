@@ -522,8 +522,19 @@ namespace FileCabinetApp
 
         private static void Stat(string parameters)
         {
-            var recordsCount = fileCabinetService.GetStat();
-            Console.WriteLine($"Here {recordsCount} record(s).");
+            int recordsCount = fileCabinetService.GetStat();
+
+            if (fileCabinetService.GetType() == typeof(FileCabinetFilesystemService))
+            {
+                int removedRecordsCount = recordsCount - (fileCabinetService as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int existingRecordsCount = (fileCabinetService as FileCabinetFilesystemService).GetExistingRecords().Count;
+
+                Console.WriteLine($"Here {existingRecordsCount} record(s).");
+                Console.WriteLine($"And here {removedRecordsCount} removed records.");
+                return;
+            }
+
+            Console.WriteLine($"Here {recordsCount} record(s).\nAnd here 0 removed records.");
         }
 
         private static void PrintHelp(string parameters)

@@ -159,7 +159,7 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public int GetStat()
         {
-            return this.GetExistingRecords().Count;
+            return this.GetRecords().Count;
         }
 
         /// <inheritdoc/>
