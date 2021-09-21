@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents class to save records data in xml file.
+    /// Represents class to save records data in csv file.
     /// </summary>
     public class FileCabinetRecordCsvWriter
     {
@@ -41,7 +42,7 @@ namespace FileCabinetApp
                 record.FirstName,
                 record.LastName,
                 record.DateOfBirth,
-                record.MoneyCount,
+                record.MoneyCount.ToString(CultureInfo.InvariantCulture),
                 record.PIN,
                 record.CharProp);
 

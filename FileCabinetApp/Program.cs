@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace FileCabinetApp
 {
@@ -29,6 +33,9 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
+            new Tuple<string, Action<string>>("import", Import),
+            new Tuple<string, Action<string>>("remove", Remove),
+            new Tuple<string, Action<string>>("purge", Purge),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -41,6 +48,9 @@ namespace FileCabinetApp
             new string[] { "list", "prints the records", "The 'list' command prints records list." },
             new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
+            new string[] { "import", "imports the records", "The 'import' command imports records from external file." },
+            new string[] { "remove", "removes the record", "The 'remove' command removes record by id." },
+            new string[] { "purge", "purges the record", "The 'purge' command clear db from removed records." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -51,6 +61,7 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
+            args = new string[] { "-s", "file" };
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
@@ -89,9 +100,9 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
-        private static IRecordValidator GetValidator(string[] mainParams)
+        private static IRecordValidator GetValidator(string[] parameters)
         {
-            if (mainParams is null || mainParams.Length == 0)
+            if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using default validation rules.");
                 return new DefaultValidator();
@@ -102,9 +113,9 @@ namespace FileCabinetApp
             string shortValidationModeMessage = "-v";
             string customValidationModeText = "custom";
 
-            if (mainParams.Length > 0 && mainParams[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 0 && parameters[0].Contains(validationModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                validationMode = mainParams[0];
+                validationMode = parameters[0];
                 validationMode = validationMode.Trim();
 
                 validationMode = validationMode.Replace(validationModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
@@ -116,9 +127,9 @@ namespace FileCabinetApp
                 }
             }
 
-            if (mainParams.Length > 1 && mainParams[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 1 && parameters[0].Equals(shortValidationModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                validationMode = mainParams[1];
+                validationMode = parameters[1];
 
                 if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
@@ -131,12 +142,12 @@ namespace FileCabinetApp
             return new DefaultValidator();
         }
 
-        private static IFileCabinetService SetStorage(string[] mainParams, FileStream fileStream)
+        private static IFileCabinetService SetStorage(string[] parameters, FileStream fileStream)
         {
-            if (mainParams is null || mainParams.Length == 0)
+            if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using memory storage.");
-                validator = GetValidator(mainParams);
+                validator = GetValidator(parameters);
                 return new FileCabinetMemoryService(validator);
             }
 
@@ -145,9 +156,9 @@ namespace FileCabinetApp
             string shortStorageModeMessage = "-s";
             string customStorageModeText = "file";
 
-            if (mainParams.Length > 0 && mainParams[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 0 && parameters[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                storageMode = mainParams[0];
+                storageMode = parameters[0];
                 storageMode = storageMode.Trim();
 
                 storageMode = storageMode.Replace(storageModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
@@ -155,25 +166,25 @@ namespace FileCabinetApp
                 if (storageMode.Equals(customStorageModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using system storage.");
-                    validator = GetValidator(mainParams);
+                    validator = GetValidator(parameters);
                     return new FileCabinetFilesystemService(fileStream);
                 }
             }
 
-            if (mainParams.Length > 1 && mainParams[0].Equals(shortStorageModeMessage, StringComparison.OrdinalIgnoreCase))
+            if (parameters.Length > 1 && parameters[0].Equals(shortStorageModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                storageMode = mainParams[1];
+                storageMode = parameters[1];
 
                 if (string.Equals(storageMode, customStorageModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using system storage.");
-                    validator = GetValidator(mainParams);
+                    validator = GetValidator(parameters);
                     return new FileCabinetFilesystemService(fileStream);
                 }
             }
 
             Console.WriteLine("Using memory storage.");
-            validator = GetValidator(mainParams);
+            validator = GetValidator(parameters);
             return new FileCabinetMemoryService(validator);
         }
 
@@ -227,7 +238,16 @@ namespace FileCabinetApp
 
         private static void List(string command)
         {
-            var records = fileCabinetService.GetRecords();
+            List<FileCabinetRecord> records;
+
+            if (fileCabinetService.GetType().Equals(typeof(FileCabinetFilesystemService)))
+            {
+                 records = (fileCabinetService as FileCabinetFilesystemService).GetExistingRecords();
+            }
+            else
+            {
+                records = (fileCabinetService as FileCabinetMemoryService).GetRecords().ToList();
+            }
 
             if (records.Count == 0)
             {
@@ -262,7 +282,7 @@ namespace FileCabinetApp
         {
             if (fileCabinetService.GetStat() == 0)
             {
-                Console.WriteLine("There is no any records.");
+                Console.WriteLine("There is no any records");
                 return;
             }
 
@@ -298,7 +318,7 @@ namespace FileCabinetApp
 
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                FileCabinetServiceSnapshot snapshot = ((FileCabinetMemoryService)fileCabinetService).MakeSnapshot();
+                FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
 
                 if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
                 {
@@ -310,6 +330,74 @@ namespace FileCabinetApp
                     snapshot.SaveToXml(writer);
                 }
             }
+        }
+
+        private static void Import(string parameters)
+        {
+            parameters = parameters.Trim();
+
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Not enougth parameters");
+                return;
+            }
+
+            string[] importParams = parameters.Split(" ");
+
+            if (!IsAbleToImport(importParams))
+            {
+                return;
+            }
+
+            using (StreamReader reader = new StreamReader(importParams[1]))
+            {
+                if (importParams[0].Equals("csv"))
+                {
+                    FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
+                    snapshot.LoadFromCsv(reader, validator);
+                    fileCabinetService.Restore(snapshot);
+                }
+
+                if (importParams[0].Equals("xml"))
+                {
+                    FileCabinetServiceSnapshot snapshot = fileCabinetService.MakeSnapshot();
+                    snapshot.LoadFromXml(reader, validator);
+                    fileCabinetService.Restore(snapshot);
+                }
+            }
+        }
+
+        private static void Remove(string parameters)
+        {
+            if (string.IsNullOrWhiteSpace(parameters) || !int.TryParse(parameters, out int id))
+            {
+                Console.WriteLine("Incorrect parameters");
+                return;
+            }
+
+            fileCabinetService.RemoveRecord(id);
+        }
+
+        private static void Purge(string parameters)
+        {
+            fileCabinetService.PurgeRecords();
+        }
+
+        private static bool IsAbleToImport(string[] importParams)
+        {
+            if (importParams.Length != 2)
+            {
+                Console.WriteLine("Incorrect input parameters");
+                return false;
+            }
+
+            if (!File.Exists(importParams[1]))
+            {
+                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
+                return false;
+            }
+
+            return true;
         }
 
         private static bool IsAbleToSave(string filePath, string fileName)
