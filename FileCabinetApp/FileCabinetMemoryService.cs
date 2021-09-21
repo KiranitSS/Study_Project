@@ -15,13 +15,13 @@ namespace FileCabinetApp
     public class FileCabinetMemoryService : IFileCabinetService
     {
         private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
-        private readonly List<FileCabinetRecord> records = new List<FileCabinetRecord>();
-
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
 
         private readonly IRecordValidator validator;
+
+        private List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetMemoryService"/> class.
@@ -30,6 +30,17 @@ namespace FileCabinetApp
         public FileCabinetMemoryService(IRecordValidator validator)
         {
             this.validator = validator;
+        }
+
+        /// <inheritdoc/>
+        public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
+        {
+            if (serviceSnapshot is null)
+            {
+                throw new ArgumentNullException(nameof(serviceSnapshot));
+            }
+
+            this.records = serviceSnapshot.Records.ToList();
         }
 
         /// <inheritdoc/>
@@ -140,6 +151,40 @@ namespace FileCabinetApp
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
             return new FileCabinetServiceSnapshot(this.records.ToArray());
+        }
+
+        /// <inheritdoc/>
+        public void RemoveRecord(int id)
+        {
+            try
+            {
+                List<FileCabinetRecord> recordsForDeleting;
+                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
+
+                this.records.Remove(record);
+
+                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+            }
+
+            Console.WriteLine($"Record #{id} has been removed.");
+        }
+
+        /// <inheritdoc/>
+        public void PurgeRecords()
+        {
+            Console.WriteLine("Nothing to purge.");
         }
 
         /// <summary>
