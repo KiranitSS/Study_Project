@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -70,5 +70,16 @@ namespace FileCabinetApp
         /// </summary>
         /// <returns>Returns <see cref="FileCabinetServiceSnapshot"/> instance.</returns>
         public FileCabinetServiceSnapshot MakeSnapshot();
+
+        /// <summary>
+        /// Removes record from records list.
+        /// </summary>
+        /// <param name="id">ID of the record to delete.</param>
+        public void RemoveRecord(int id);
+
+        /// <summary>
+        /// Purges removed records from storage.
+        /// </summary>
+        public void PurgeRecords();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -49,12 +49,10 @@ namespace FileCabinetApp
 
             List<FileCabinetRecord> records = serviceSnapshot.Records.ToList();
 
+            this.fileStream.Close();
             this.fileStream = new FileStream(this.path, FileMode.Create);
 
-            foreach (var record in records)
-            {
-                this.SaveRecord(new RecordDataConverter(record));
-            }
+            records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
         }
 
         /// <inheritdoc/>
@@ -95,7 +93,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            List<FileCabinetRecord> records = this.GetRecords().ToList();
+            List<FileCabinetRecord> records = this.GetExistingRecords();
 
             if (id > records.Count || id < 1)
             {
@@ -132,40 +130,28 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
-            return new (this.GetRecords().Where(rec => rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture).Equals(dateOfBirth)).ToList());
+            return new (this.GetExistingRecords().Where(rec => rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture).Equals(dateOfBirth)).ToList());
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            var records = this.GetRecords();
+            var records = this.GetExistingRecords();
             return new (records.Where(rec => rec.FirstName.Replace("\0", string.Empty).Equals(firstName, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
         {
-            return new (this.GetRecords().Where(rec => rec.LastName.Replace("\0", string.Empty).Equals(lastname, StringComparison.OrdinalIgnoreCase)).ToList());
+            return new (this.GetExistingRecords().Where(rec => rec.LastName.Replace("\0", string.Empty).Equals(lastname, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
         /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            int size = 277;
-            int recordIndex = 0;
+            List<RecordDataConverter> recordsData = this.GetRecordsData();
 
-            List<FileCabinetRecord> records = new List<FileCabinetRecord>();
-
-            using (FileStream fs = new FileStream(this.path, FileMode.OpenOrCreate))
-            {
-                using (BinaryReader reader = new BinaryReader(fs))
-                {
-                    while (reader.BaseStream.Position != reader.BaseStream.Length)
-                    {
-                        records.Add(GetRecord(size, ref recordIndex, fs, reader));
-                    }
-                }
-            }
+            List<FileCabinetRecord> records = recordsData.Select(rec => ConvertToRecord(rec)).ToList();
 
             return new ReadOnlyCollection<FileCabinetRecord>(records);
         }
@@ -173,10 +159,7 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public int GetStat()
         {
-            long offset = 277;
-            using FileStream fs = new FileStream(this.path, FileMode.OpenOrCreate);
-            using BinaryReader reader = new BinaryReader(fs);
-            return (int)(reader.BaseStream.Length / offset);
+            return this.GetRecords().Count;
         }
 
         /// <inheritdoc/>
@@ -189,7 +172,65 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
-            return new FileCabinetServiceSnapshot(this.GetRecords().ToArray());
+            return new FileCabinetServiceSnapshot(this.GetExistingRecords().ToArray());
+        }
+
+        /// <inheritdoc/>
+        public void RemoveRecord(int id)
+        {
+            var records = this.GetExistingRecords();
+            var removedRecords = this.GetRemovedRecords();
+
+            if (records is null)
+            {
+                Console.WriteLine($"Record #{id} doesn't exists.");
+                return;
+            }
+
+            try
+            {
+                var recordForRemoving = records.Find(rec => rec.Id == id);
+                var recordData = new RecordDataConverter(recordForRemoving);
+
+                records.Remove(recordForRemoving);
+                recordData.Status = 1;
+
+                removedRecords.Add(recordData);
+
+                this.fileStream.Close();
+                this.fileStream = new FileStream(this.path, FileMode.Create);
+
+                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+                removedRecords.ForEach(rec => this.SaveRecord(rec));
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+                return;
+            }
+
+            Console.WriteLine($"Record #{id} has been removed.");
+        }
+
+        /// <inheritdoc/>
+        public void PurgeRecords()
+        {
+            var records = this.GetExistingRecords();
+            this.fileStream.Close();
+            this.fileStream = new FileStream(this.path, FileMode.Create);
+
+            records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+        }
+
+        /// <summary>
+        /// Gets existing records.
+        /// </summary>
+        /// <returns>Records list.</returns>
+        public List<FileCabinetRecord> GetExistingRecords()
+        {
+            var records = this.GetRecordsData().Where(rec => rec.Status == 0).ToList();
+            return records.Select(rec => ConvertToRecord(rec)).ToList();
         }
 
         /// <summary>
@@ -220,7 +261,7 @@ namespace FileCabinetApp
             return fixedByteArray;
         }
 
-        private static FileCabinetRecord GetRecord(int size, ref int recordIndex, FileStream fs, BinaryReader reader)
+        private static RecordDataConverter GetRecord(int size, ref int recordIndex, FileStream fs, BinaryReader reader)
         {
             long offset = 0;
             fs.Seek(offset, SeekOrigin.Begin);
@@ -230,6 +271,7 @@ namespace FileCabinetApp
             fs.Seek(offset, SeekOrigin.Begin);
 
             record.Status = reader.ReadInt16();
+
             record.Id = reader.ReadInt32();
 
             byte[] firstname = reader.ReadBytes(120);
@@ -247,7 +289,7 @@ namespace FileCabinetApp
             record.CharProp = reader.ReadChar();
 
             recordIndex++;
-            return ConvertToRecord(record);
+            return record;
         }
 
         private static FileCabinetRecord ConvertToRecord(RecordDataConverter data)
@@ -276,14 +318,7 @@ namespace FileCabinetApp
             }
             else
             {
-                this.fileStream.Position = this.fileStream.Length;
-            }
-
-            int lastLineNum = (int)(this.fileStream.Length / 277) - 1;
-
-            using (BinaryReader reader = new BinaryReader(this.fileStream))
-            {
-                return GetRecord(277, ref lastLineNum, this.fileStream, reader).Id;
+                return this.GetExistingRecords().Max(rec => rec.Id);
             }
         }
 
@@ -291,6 +326,7 @@ namespace FileCabinetApp
         {
             if (!this.fileStream.CanWrite)
             {
+                this.fileStream.Close();
                 this.fileStream = new FileStream(this.path, FileMode.Append);
             }
 
@@ -322,6 +358,32 @@ namespace FileCabinetApp
                     throw;
                 }
             }
+        }
+
+        private List<RecordDataConverter> GetRemovedRecords()
+        {
+            return this.GetRecordsData().Where(rec => rec.Status == 1).ToList();
+        }
+
+        private List<RecordDataConverter> GetRecordsData()
+        {
+            int size = 277;
+            int recordIndex = 0;
+
+            List<RecordDataConverter> records = new List<RecordDataConverter>();
+            this.fileStream.Close();
+            using (FileStream fs = new FileStream(this.path, FileMode.OpenOrCreate))
+            {
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        records.Add(GetRecord(size, ref recordIndex, fs, reader));
+                    }
+                }
+            }
+
+            return records;
         }
     }
 }

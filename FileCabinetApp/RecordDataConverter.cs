@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +33,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
+            this.Status = 0;
             this.Id = parameters.Id;
             this.firstName = parameters.FirstName.ToList();
             this.lastName = parameters.LastName.ToList();

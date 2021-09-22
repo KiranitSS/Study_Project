@@ -153,6 +153,40 @@ namespace FileCabinetApp
             return new FileCabinetServiceSnapshot(this.records.ToArray());
         }
 
+        /// <inheritdoc/>
+        public void RemoveRecord(int id)
+        {
+            try
+            {
+                List<FileCabinetRecord> recordsForDeleting;
+                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
+
+                this.records.Remove(record);
+
+                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+            }
+
+            Console.WriteLine($"Record #{id} has been removed.");
+        }
+
+        /// <inheritdoc/>
+        public void PurgeRecords()
+        {
+            Console.WriteLine("Nothing to purge.");
+        }
+
         /// <summary>
         /// Creates new record parameters validator.
         /// </summary>
