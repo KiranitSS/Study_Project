@@ -1,4 +1,4 @@
-﻿namespace FileCabinetApp.CommandHandler
+﻿namespace FileCabinetApp.CommandHandlers
 {
     public interface ICommandHandler
     {

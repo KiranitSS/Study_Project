@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
+using FileCabinetApp.CommandHandlers;
 
 namespace FileCabinetApp
 {
@@ -48,6 +49,8 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
+            var commandHandler = CreateCommandHandler();
+
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
                 FileCabinetService = SetStorage(args, fileStream);
@@ -75,6 +78,8 @@ namespace FileCabinetApp
                     const int parametersIndex = 1;
                     var parameters = inputs.Length > 1 ? inputs[parametersIndex] : string.Empty;
                     commands[index].Item2(parameters);
+
+                    commandHandler.Handle(new AppCommandRequest { Command = command, Parameters = parameters });
                 }
                 else
                 {
@@ -82,6 +87,11 @@ namespace FileCabinetApp
                 }
             }
             while (IsRunning);
+        }
+
+        private static CommandHandler CreateCommandHandler()
+        {
+            return new CommandHandler();
         }
 
         private static IRecordValidator GetValidator(string[] parameters)
