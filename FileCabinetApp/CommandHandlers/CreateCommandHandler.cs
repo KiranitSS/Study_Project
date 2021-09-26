@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class AppCommandRequest
+    public class CreateCommandHandler : CommandHandlerBase
     {
-        public string Command { get; set; }
-
-        public string Parameters { get; set; }
+        private static void Create(string command)
+        {
+            AddRecord(Program.FileCabinetService);
+        }
     }
 }

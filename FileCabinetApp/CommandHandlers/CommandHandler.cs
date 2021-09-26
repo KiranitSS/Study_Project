@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FileCabinetApp.CommandHandler
+namespace FileCabinetApp.CommandHandlers
 {
     public class CommandHandler : CommandHandlerBase
     {
@@ -40,67 +40,6 @@ namespace FileCabinetApp.CommandHandler
         public void SetNext(AppCommandRequest request)
         {
             throw new NotImplementedException();
-        }
-
-        private static void Create(string command)
-        {
-            AddRecord(Program.FileCabinetService);
-        }
-
-        private static void Edit(string command)
-        {
-            Console.Write("Write ID:");
-            int id = ReadInput(IDConverter, IDValidator);
-
-            if (id > Program.FileCabinetService.GetStat())
-            {
-                Console.WriteLine("Incorrect ID");
-            }
-
-            var parameters = GetRecordData();
-            Program.FileCabinetService.EditRecord(id, parameters);
-        }
-
-        private static void List(string command)
-        {
-            List<FileCabinetRecord> records;
-
-            if (Program.FileCabinetService.GetType().Equals(typeof(FileCabinetFilesystemService)))
-            {
-                records = (Program.FileCabinetService as FileCabinetFilesystemService).GetExistingRecords();
-            }
-            else
-            {
-                records = (Program.FileCabinetService as FileCabinetMemoryService).GetRecords().ToList();
-            }
-
-            if (records.Count == 0)
-            {
-                Console.WriteLine("There are no any records");
-                return;
-            }
-
-            foreach (var record in records)
-            {
-                PrintRecord(record);
-            }
-        }
-
-        private static void Find(string parameters)
-        {
-            string targetProp = GetTargetProp(parameters);
-
-            if (parameters.Length == targetProp.Length)
-            {
-                Console.WriteLine("Property value missed");
-                return;
-            }
-
-            string targetName = GetTargetName(parameters, targetProp.Length);
-
-            var targetRecords = FindTargetRecords(targetName, targetProp);
-
-            PrintTargetRecords(targetRecords);
         }
 
         private static void PrintTargetRecords(System.Collections.ObjectModel.ReadOnlyCollection<FileCabinetRecord> targetRecords)
@@ -278,26 +217,6 @@ namespace FileCabinetApp.CommandHandler
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                 $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
                 $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
-        }
-
-        private static void AddRecord(IFileCabinetService fileCabinetService)
-        {
-            if (fileCabinetService is null)
-            {
-                throw new ArgumentNullException(nameof(fileCabinetService));
-            }
-
-            var parameters = GetRecordData();
-            int recId = fileCabinetService.CreateRecord(parameters);
-
-            if (recId == -1)
-            {
-                Console.WriteLine($"Record is not created.");
-            }
-            else
-            {
-                Console.WriteLine($"Record #{recId} is created.");
-            }
         }
 
         private static string GetTargetProp(string parameters)

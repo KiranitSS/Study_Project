@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class AppCommandRequest
+    public class ExportCommandHandler : CommandHandlerBase
     {
-        public string Command { get; set; }
 
-        public string Parameters { get; set; }
     }
 }

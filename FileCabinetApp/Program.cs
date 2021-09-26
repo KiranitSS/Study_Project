@@ -33,6 +33,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("purge", Purge),
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
+
         };
 
         public static bool IsRunning { get; set; } = true;
@@ -49,7 +50,7 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
-            var commandHandler = CreateCommandHandler();
+            var commandHandler = CreateCommandHandlers();
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
@@ -89,9 +90,25 @@ namespace FileCabinetApp
             while (IsRunning);
         }
 
-        private static CommandHandler CreateCommandHandler()
+        private static ICommandHandler CreateCommandHandlers()
         {
-            return new CommandHandler();
+            var helpHandler = new HelpCommandHandler();
+            var createHandler = new CreateCommandHandler();
+            var statHandler = new StatCommandHandler();
+            var editHandler = new EditCommandHandler();
+            var findHandler = new FindCommandHandler();
+            var listHandler = new ListCommandHandler();
+            var exportHandler = new ExportCommandHandler();
+            var importHandler = new ImportCommandHandler();
+            var removeHandler = new RemoveCommandHandler();
+            var purgehandler = new PurgeCommandHandler();
+            var exitHandler = new ExitCommandHandler();
+
+            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
+                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(removeHandler)
+                .SetNext(purgehandler).SetNext(exitHandler);
+
+            return helpHandler;
         }
 
         private static IRecordValidator GetValidator(string[] parameters)

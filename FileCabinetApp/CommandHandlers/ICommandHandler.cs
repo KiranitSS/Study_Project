@@ -2,7 +2,7 @@
 {
     public interface ICommandHandler
     {
-        public void SetNext(ICommandHandler commandHandler);
+        public ICommandHandler SetNext(ICommandHandler commandHandler);
 
         public AppCommandRequest Handle(AppCommandRequest request);
     }
