@@ -1,25 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Represents handler class for record edition method.
+    /// </summary>
     public class EditCommandHandler : CommandHandlerBase
     {
-        private static void Edit(string command)
+        /// <inheritdoc/>
+        public override AppCommandRequest Handle(AppCommandRequest request)
         {
-            Console.Write("Write ID:");
-            int id = ReadInput(IDConverter, IDValidator);
-
-            if (id > Program.FileCabinetService.GetStat())
+            if (request != null && request.Command.Equals("edit", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine("Incorrect ID");
+                Edit(request.Parameters);
             }
 
-            var parameters = GetRecordData();
-            Program.FileCabinetService.EditRecord(id, parameters);
+            return base.Handle(request);
+        }
+
+        private static void Edit(string parameters)
+        {
+            Console.Write("Write ID:");
+
+            if (!TryGetId(parameters, out int id) || id > Program.FileCabinetService.GetStat())
+            {
+                Console.WriteLine("Incorrect ID");
+                return;
+            }
+
+            var recordParameters = Program.GetRecordData();
+            Program.FileCabinetService.EditRecord(id, recordParameters);
+        }
+
+        private static bool TryGetId(string input, out int id)
+        {
+            bool result = int.TryParse(input, out id);
+
+            if (result && id < Program.FileCabinetService.GetStat() + 1 && id > 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

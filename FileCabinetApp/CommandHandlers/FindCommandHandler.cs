@@ -1,12 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Represents handler class for searching records.
+    /// </summary>
     public class FindCommandHandler : CommandHandlerBase
     {
+        /// <inheritdoc/>
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request != null && request.Command.Equals("find", StringComparison.OrdinalIgnoreCase))
+            {
+                Find(request.Parameters);
+            }
+
+            return base.Handle(request);
+        }
+
+        private static void Find(string parameters)
+        {
+            string targetProp = GetTargetProp(parameters);
+
+            if (parameters.Length == targetProp.Length)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            string targetName = GetTargetName(parameters, targetProp.Length);
+
+            var targetRecords = FindTargetRecords(targetName, targetProp);
+
+            PrintTargetRecords(targetRecords);
+        }
+
+        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
+        {
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByFirstName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByBirthDate(targetValue);
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
+        }
+
+        private static string GetTargetProp(string parameters)
+        {
+            string targetProp = parameters.Trim();
+
+            if (string.IsNullOrEmpty(targetProp))
+            {
+                Console.WriteLine("Property name missed");
+                return targetProp;
+            }
+
+            int endIndex = targetProp.IndexOf(" ", StringComparison.InvariantCulture);
+
+            if (endIndex == -1)
+            {
+                Console.WriteLine("Property value missed");
+                return targetProp;
+            }
+
+            return targetProp[..endIndex];
+        }
+
+        private static string GetTargetName(string parameters, int targetPropLength)
+        {
+            int startIndex = targetPropLength;
+            return parameters[(startIndex + 1) ..];
+        }
+
+        private static void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
+        {
+            if (targetRecords.Count == 0)
+            {
+                Console.WriteLine("There are no suitable entries");
+            }
+            else
+            {
+                foreach (var record in targetRecords)
+                {
+                    PrintRecord(record);
+                }
+            }
+        }
+
+        private static void PrintRecord(FileCabinetRecord record)
+        {
+            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
+        }
     }
 }

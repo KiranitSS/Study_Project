@@ -20,26 +20,26 @@ namespace FileCabinetApp
         private const string DeveloperName = "Alexandr Alexeevich";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
 
-        private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
-        {
-            new Tuple<string, Action<string>>("create", Create),
-            new Tuple<string, Action<string>>("edit", Edit),
-            new Tuple<string, Action<string>>("stat", Stat),
-            new Tuple<string, Action<string>>("list", List),
-            new Tuple<string, Action<string>>("find", Find),
-            new Tuple<string, Action<string>>("export", Export),
-            new Tuple<string, Action<string>>("import", Import),
-            new Tuple<string, Action<string>>("remove", Remove),
-            new Tuple<string, Action<string>>("purge", Purge),
-            new Tuple<string, Action<string>>("help", PrintHelp),
-            new Tuple<string, Action<string>>("exit", Exit),
-
-        };
-
+        /// <summary>
+        /// Gets or sets a value indicating whether stop app.
+        /// </summary>
+        /// <value>Is app running or stopped.</value>
         public static bool IsRunning { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets validation setting.
+        /// </summary>
+        /// <value>
+        /// Validation setting.
+        /// </value>
         public static IRecordValidator Validator { get; set; }
 
+        /// <summary>
+        /// Gets or sets the location where the files should be saved.
+        /// </summary>
+        /// <value>
+        /// The location where the files should be saved.
+        /// </value>
         public static IFileCabinetService FileCabinetService { get; set; }
 
         /// <summary>
@@ -73,21 +73,39 @@ namespace FileCabinetApp
                     continue;
                 }
 
-                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.InvariantCultureIgnoreCase));
-                if (index >= 0)
-                {
-                    const int parametersIndex = 1;
-                    var parameters = inputs.Length > 1 ? inputs[parametersIndex] : string.Empty;
-                    commands[index].Item2(parameters);
+                const int parametersIndex = 1;
+                var parameters = inputs.Length > 1 ? inputs[parametersIndex] : string.Empty;
 
-                    commandHandler.Handle(new AppCommandRequest { Command = command, Parameters = parameters });
-                }
-                else
-                {
-                    PrintMissedCommandInfo(command);
-                }
+                commandHandler.Handle(new AppCommandRequest { Command = command, Parameters = parameters });
             }
             while (IsRunning);
+        }
+
+        /// <summary>
+        /// Gets records parameters from console input.
+        /// </summary>
+        /// <returns>Values for creation record.</returns>
+        public static RecordParameters GetRecordData()
+        {
+            Console.Write("First name: ");
+            string firstname = ReadInput(StringConverter, FirstnameValidator);
+
+            Console.Write("Last name: ");
+            string lastname = ReadInput(StringConverter, LastnameValidator);
+
+            Console.Write("Date of bitrth: ");
+            DateTime dateOfbirth = ReadInput(DateTimeConverter, DateOfBirthValidator);
+
+            Console.Write("Count of money: ");
+            decimal moneyCount = ReadInput(DecimalConverter, MoneyCountValidator);
+
+            Console.Write("PIN code: ");
+            short pin = ReadInput(ShortConverter, PINValidator);
+
+            Console.Write("Char prop: ");
+            char charProp = ReadInput(CharConverter, CharPropValidator);
+
+            return new RecordParameters(firstname, lastname, dateOfbirth, moneyCount, pin, charProp);
         }
 
         private static ICommandHandler CreateCommandHandlers()
@@ -203,6 +221,216 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"There is no '{command}' command.");
             Console.WriteLine();
+        }
+
+        private static bool IsAbleToImport(string[] importParams)
+        {
+            if (importParams.Length != 2)
+            {
+                Console.WriteLine("Incorrect input parameters");
+                return false;
+            }
+
+            if (!File.Exists(importParams[1]))
+            {
+                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsAbleToSave(string filePath, string fileName)
+        {
+            if (!IsDirectoryValid(filePath, fileName))
+            {
+                return false;
+            }
+
+            if (File.Exists(filePath))
+            {
+                Console.Write($"File is exist - rewrite {filePath}? [Y/n]");
+                string answer;
+
+                do
+                {
+                    answer = Console.ReadLine();
+
+                    if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    if (answer.Equals("n", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("Operation canceled");
+                        return false;
+                    }
+
+                    Console.Write("Incorrect input, retry:");
+                }
+                while (true);
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private static bool IsDirectoryValid(string filePath, string fileName)
+        {
+            if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (!Directory.Exists(filePath) && filePath.Contains("\\"))
+            {
+                Console.WriteLine($"Export failed: can't open file {fileName}.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsFileNameMissed(string parameters, string fileType)
+        {
+            if (parameters.Length != fileType.Length)
+            {
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Operation failed.");
+                return true;
+            }
+        }
+
+        private static string GetFileName(string filePath)
+        {
+            if (filePath.Contains("\\"))
+            {
+                return filePath[(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1) ..];
+            }
+
+            return filePath;
+        }
+
+        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
+        {
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByFirstName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return Program.FileCabinetService.FindByBirthDate(targetValue);
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
+        }
+
+        private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = Console.ReadLine();
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                value = conversionResult.Item3;
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                return value;
+            }
+            while (true);
+        }
+
+        private static Tuple<bool, string, string> StringConverter(string value)
+        {
+            return new (true, value, value);
+        }
+
+        private static Tuple<bool, string, DateTime> DateTimeConverter(string value)
+        {
+            bool result = DateTime.TryParse(value, out DateTime conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, decimal> DecimalConverter(string value)
+        {
+            bool result = decimal.TryParse(value, out decimal conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, short> ShortConverter(string value)
+        {
+            bool result = short.TryParse(value, out short conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string, char> CharConverter(string value)
+        {
+            bool result = char.TryParse(value, out char conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static Tuple<bool, string> FirstnameValidator(string value)
+        {
+            bool result = Program.Validator.IsCorrectFirstName(value);
+            return new (result, value);
+        }
+
+        private static Tuple<bool, string> LastnameValidator(string value)
+        {
+            bool result = Program.Validator.IsCorrectLastName(value);
+            return new (result, value);
+        }
+
+        private static Tuple<bool, string> DateOfBirthValidator(DateTime value)
+        {
+            bool result = Program.Validator.IsCorrectDateOfBirth(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> MoneyCountValidator(decimal value)
+        {
+            bool result = Program.Validator.IsCorrectMoneyCount(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> PINValidator(short value)
+        {
+            bool result = Program.Validator.IsCorrectPIN(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static Tuple<bool, string> CharPropValidator(char value)
+        {
+            bool result = Program.Validator.IsCorrectCharProp(value);
+            return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
     }
 }
