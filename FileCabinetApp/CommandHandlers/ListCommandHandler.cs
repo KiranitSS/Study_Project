@@ -12,16 +12,17 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class ListCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
+        private readonly IRecordPrinter printer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ListCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
-        public ListCommandHandler(IFileCabinetService service)
+        /// <param name="printer">Records printer.</param>
+        public ListCommandHandler(IFileCabinetService service, IRecordPrinter printer)
             : base(service)
         {
-            this.service = service;
+            this.printer = printer;
         }
 
         /// <inheritdoc/>
@@ -46,13 +47,13 @@ namespace FileCabinetApp.CommandHandlers
         {
             List<FileCabinetRecord> records;
 
-            if (this.service.GetType().Equals(typeof(FileCabinetFilesystemService)))
+            if (this.Service.GetType().Equals(typeof(FileCabinetFilesystemService)))
             {
-                records = (this.service as FileCabinetFilesystemService).GetExistingRecords();
+                records = (this.Service as FileCabinetFilesystemService).GetExistingRecords();
             }
             else
             {
-                records = (this.service as FileCabinetMemoryService).GetRecords().ToList();
+                records = (this.Service as FileCabinetMemoryService).GetRecords().ToList();
             }
 
             if (records.Count == 0)
@@ -61,10 +62,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            foreach (var record in records)
-            {
-                PrintRecord(record);
-            }
+            this.printer.Print(records);
         }
     }
 }

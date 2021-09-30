@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Represents abstract class that join same handlers which use <see cref="IFileCabinetService"/>>.
+    /// </summary>
     public abstract class ServiceCommandHandlerBase : CommandHandlerBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCommandHandlerBase"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
         protected ServiceCommandHandlerBase(IFileCabinetService service)
         {
             this.Service = service;

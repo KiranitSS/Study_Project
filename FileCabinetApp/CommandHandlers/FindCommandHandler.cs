@@ -13,13 +13,17 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
+        private readonly IRecordPrinter printer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="FindCommandHandler"/> class.
         /// </summary>
         /// <param name = "service" > Service for working with records.</param>
-        public FindCommandHandler(IFileCabinetService service)
+        /// /// <param name="printer">Records printer.</param>
+        public FindCommandHandler(IFileCabinetService service, IRecordPrinter printer)
             : base(service)
         {
+            this.printer = printer;
         }
 
         /// <inheritdoc/>
@@ -60,7 +64,7 @@ namespace FileCabinetApp.CommandHandlers
             return parameters[(startIndex + 1) ..];
         }
 
-        private static void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
+        private void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
         {
             if (targetRecords.Count == 0)
             {
@@ -68,18 +72,8 @@ namespace FileCabinetApp.CommandHandlers
             }
             else
             {
-                foreach (var record in targetRecords)
-                {
-                    PrintRecord(record);
-                }
+                this.printer.Print(targetRecords);
             }
-        }
-
-        private static void PrintRecord(FileCabinetRecord record)
-        {
-            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
         }
 
         private void Find(string parameters)
@@ -96,7 +90,7 @@ namespace FileCabinetApp.CommandHandlers
 
             var targetRecords = this.FindTargetRecords(targetName, targetProp);
 
-            PrintTargetRecords(targetRecords);
+            this.PrintTargetRecords(targetRecords);
         }
 
         private ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
