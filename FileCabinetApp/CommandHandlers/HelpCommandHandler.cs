@@ -30,6 +30,11 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
+        public HelpCommandHandler(IFileCabinetService fileCabinetService)
+        {
+
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {

@@ -20,6 +20,8 @@ namespace FileCabinetApp
         private const string DeveloperName = "Alexandr Alexeevich";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
 
+        private static IFileCabinetService fileCabinetService;
+
         /// <summary>
         /// Gets or sets a value indicating whether stop app.
         /// </summary>
@@ -35,14 +37,6 @@ namespace FileCabinetApp
         public static IRecordValidator Validator { get; set; }
 
         /// <summary>
-        /// Gets or sets the location where the files should be saved.
-        /// </summary>
-        /// <value>
-        /// The location where the files should be saved.
-        /// </value>
-        public static IFileCabinetService FileCabinetService { get; set; }
-
-        /// <summary>
         /// Program entry point.
         /// </summary>
         /// <param name="args">Program start parameters.</param>
@@ -54,7 +48,7 @@ namespace FileCabinetApp
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
-                FileCabinetService = SetStorage(args, fileStream);
+                fileCabinetService = SetStorage(args, fileStream);
             }
 
             Console.WriteLine(Program.HintMessage);
@@ -111,15 +105,15 @@ namespace FileCabinetApp
         private static ICommandHandler CreateCommandHandlers()
         {
             var helpHandler = new HelpCommandHandler();
-            var createHandler = new CreateCommandHandler();
-            var statHandler = new StatCommandHandler();
-            var editHandler = new EditCommandHandler();
-            var findHandler = new FindCommandHandler();
-            var listHandler = new ListCommandHandler();
-            var exportHandler = new ExportCommandHandler();
-            var importHandler = new ImportCommandHandler();
-            var removeHandler = new RemoveCommandHandler();
-            var purgehandler = new PurgeCommandHandler();
+            var createHandler = new CreateCommandHandler(fileCabinetService);
+            var statHandler = new StatCommandHandler(fileCabinetService);
+            var editHandler = new EditCommandHandler(fileCabinetService);
+            var findHandler = new FindCommandHandler(fileCabinetService);
+            var listHandler = new ListCommandHandler(fileCabinetService);
+            var exportHandler = new ExportCommandHandler(fileCabinetService);
+            var importHandler = new ImportCommandHandler(fileCabinetService);
+            var removeHandler = new RemoveCommandHandler(fileCabinetService);
+            var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
 
             helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
@@ -215,128 +209,6 @@ namespace FileCabinetApp
             Console.WriteLine("Using memory storage.");
             Validator = GetValidator(parameters);
             return new FileCabinetMemoryService(Validator);
-        }
-
-        private static void PrintMissedCommandInfo(string command)
-        {
-            Console.WriteLine($"There is no '{command}' command.");
-            Console.WriteLine();
-        }
-
-        private static bool IsAbleToImport(string[] importParams)
-        {
-            if (importParams.Length != 2)
-            {
-                Console.WriteLine("Incorrect input parameters");
-                return false;
-            }
-
-            if (!File.Exists(importParams[1]))
-            {
-                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsAbleToSave(string filePath, string fileName)
-        {
-            if (!IsDirectoryValid(filePath, fileName))
-            {
-                return false;
-            }
-
-            if (File.Exists(filePath))
-            {
-                Console.Write($"File is exist - rewrite {filePath}? [Y/n]");
-                string answer;
-
-                do
-                {
-                    answer = Console.ReadLine();
-
-                    if (answer.Equals("y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-
-                    if (answer.Equals("n", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Console.WriteLine("Operation canceled");
-                        return false;
-                    }
-
-                    Console.Write("Incorrect input, retry:");
-                }
-                while (true);
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        private static bool IsDirectoryValid(string filePath, string fileName)
-        {
-            if (filePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
-            {
-                Console.WriteLine($"Export failed: can't open file {fileName}.");
-                return false;
-            }
-
-            filePath = filePath.Remove(filePath.Length - fileName.Length);
-
-            if (!Directory.Exists(filePath) && filePath.Contains("\\"))
-            {
-                Console.WriteLine($"Export failed: can't open file {fileName}.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsFileNameMissed(string parameters, string fileType)
-        {
-            if (parameters.Length != fileType.Length)
-            {
-                return false;
-            }
-            else
-            {
-                Console.WriteLine("Operation failed.");
-                return true;
-            }
-        }
-
-        private static string GetFileName(string filePath)
-        {
-            if (filePath.Contains("\\"))
-            {
-                return filePath[(filePath.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1) ..];
-            }
-
-            return filePath;
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
-        {
-            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByFirstName(targetValue);
-            }
-
-            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByLastName(targetValue);
-            }
-
-            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByBirthDate(targetValue);
-            }
-
-            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
         }
 
         private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)

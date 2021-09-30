@@ -11,20 +11,26 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class CreateCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public CreateCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("create", StringComparison.OrdinalIgnoreCase))
             {
-                Create();
+                this.Create();
             }
 
             return base.Handle(request);
-        }
-
-        private static void Create()
-        {
-            AddRecord(Program.FileCabinetService);
         }
 
         private static void AddRecord(IFileCabinetService fileCabinetService)
@@ -45,6 +51,11 @@ namespace FileCabinetApp.CommandHandlers
             {
                 Console.WriteLine($"Record #{recId} is created.");
             }
+        }
+
+        private void Create()
+        {
+            AddRecord(this.service);
         }
     }
 }

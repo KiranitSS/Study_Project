@@ -12,6 +12,17 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class EditCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public EditCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
@@ -27,7 +38,7 @@ namespace FileCabinetApp.CommandHandlers
         {
             Console.Write("Write ID:");
 
-            if (!TryGetId(parameters, out int id) || id > Program.FileCabinetService.GetStat())
+            if (!TryGetId(parameters, out int id) || id > this.service.GetStat())
             {
                 Console.WriteLine("Incorrect ID");
                 return;

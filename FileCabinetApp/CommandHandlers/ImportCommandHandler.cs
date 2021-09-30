@@ -12,18 +12,46 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class ImportCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public ImportCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("import", StringComparison.OrdinalIgnoreCase))
             {
-                Import(request.Parameters);
+                this.Import(request.Parameters);
             }
 
             return base.Handle(request);
         }
 
-        private static void Import(string parameters)
+        private static bool IsAbleToImport(string[] importParams)
+        {
+            if (importParams.Length != 2)
+            {
+                Console.WriteLine("Incorrect input parameters");
+                return false;
+            }
+
+            if (!File.Exists(importParams[1]))
+            {
+                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void Import(string parameters)
         {
             parameters = parameters.Trim();
 
@@ -44,35 +72,18 @@ namespace FileCabinetApp.CommandHandlers
             {
                 if (importParams[0].Equals("csv"))
                 {
-                    FileCabinetServiceSnapshot snapshot = Program.FileCabinetService.MakeSnapshot();
+                    FileCabinetServiceSnapshot snapshot = this.service.MakeSnapshot();
                     snapshot.LoadFromCsv(reader, Program.Validator);
-                    Program.FileCabinetService.Restore(snapshot);
+                    this.service.Restore(snapshot);
                 }
 
                 if (importParams[0].Equals("xml"))
                 {
-                    FileCabinetServiceSnapshot snapshot = Program.FileCabinetService.MakeSnapshot();
+                    FileCabinetServiceSnapshot snapshot = this.service.MakeSnapshot();
                     snapshot.LoadFromXml(reader, Program.Validator);
-                    Program.FileCabinetService.Restore(snapshot);
+                    this.service.Restore(snapshot);
                 }
             }
-        }
-
-        private static bool IsAbleToImport(string[] importParams)
-        {
-            if (importParams.Length != 2)
-            {
-                Console.WriteLine("Incorrect input parameters");
-                return false;
-            }
-
-            if (!File.Exists(importParams[1]))
-            {
-                Console.WriteLine($"Import error: file {importParams[1]} is not exist.");
-                return false;
-            }
-
-            return true;
         }
     }
 }

@@ -13,52 +13,26 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class FindCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FindCommandHandler"/> class.
+        /// </summary>
+        /// <param name = "service" > Service for working with records.</param>
+        public FindCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("find", StringComparison.OrdinalIgnoreCase))
             {
-                Find(request.Parameters);
+                this.Find(request.Parameters);
             }
 
             return base.Handle(request);
-        }
-
-        private static void Find(string parameters)
-        {
-            string targetProp = GetTargetProp(parameters);
-
-            if (parameters.Length == targetProp.Length)
-            {
-                Console.WriteLine("Property value missed");
-                return;
-            }
-
-            string targetName = GetTargetName(parameters, targetProp.Length);
-
-            var targetRecords = FindTargetRecords(targetName, targetProp);
-
-            PrintTargetRecords(targetRecords);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
-        {
-            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByFirstName(targetValue);
-            }
-
-            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByLastName(targetValue);
-            }
-
-            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
-            {
-                return Program.FileCabinetService.FindByBirthDate(targetValue);
-            }
-
-            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
         }
 
         private static string GetTargetProp(string parameters)
@@ -108,6 +82,43 @@ namespace FileCabinetApp.CommandHandlers
             Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
                 $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
                 $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
+        }
+
+        private void Find(string parameters)
+        {
+            string targetProp = GetTargetProp(parameters);
+
+            if (parameters.Length == targetProp.Length)
+            {
+                Console.WriteLine("Property value missed");
+                return;
+            }
+
+            string targetName = GetTargetName(parameters, targetProp.Length);
+
+            var targetRecords = this.FindTargetRecords(targetName, targetProp);
+
+            PrintTargetRecords(targetRecords);
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindTargetRecords(string targetValue, string targetProp)
+        {
+            if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                return this.service.FindByFirstName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                return this.service.FindByLastName(targetValue);
+            }
+
+            if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                return this.service.FindByBirthDate(targetValue);
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
         }
     }
 }

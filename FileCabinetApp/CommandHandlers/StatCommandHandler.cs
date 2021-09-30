@@ -11,25 +11,36 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class StatCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StatCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public StatCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("stat", StringComparison.OrdinalIgnoreCase))
             {
-                Stat();
+                this.Stat();
             }
 
             return base.Handle(request);
         }
 
-        private static void Stat()
+        private void Stat()
         {
-            int recordsCount = Program.FileCabinetService.GetStat();
+            int recordsCount = this.service.GetStat();
 
-            if (Program.FileCabinetService.GetType() == typeof(FileCabinetFilesystemService))
+            if (this.service.GetType() == typeof(FileCabinetFilesystemService))
             {
-                int removedRecordsCount = recordsCount - (Program.FileCabinetService as FileCabinetFilesystemService).GetExistingRecords().Count;
-                int existingRecordsCount = (Program.FileCabinetService as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int removedRecordsCount = recordsCount - (this.service as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int existingRecordsCount = (this.service as FileCabinetFilesystemService).GetExistingRecords().Count;
 
                 Console.WriteLine($"Here {existingRecordsCount} record(s).");
                 Console.WriteLine($"And here {removedRecordsCount} removed records.");

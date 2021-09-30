@@ -12,28 +12,46 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class ListCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ListCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public ListCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("list", StringComparison.OrdinalIgnoreCase))
             {
-                List();
+                this.List();
             }
 
             return base.Handle(request);
         }
 
-        private static void List()
+        private static void PrintRecord(FileCabinetRecord record)
+        {
+            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
+                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
+        }
+
+        private void List()
         {
             List<FileCabinetRecord> records;
 
-            if (Program.FileCabinetService.GetType().Equals(typeof(FileCabinetFilesystemService)))
+            if (this.service.GetType().Equals(typeof(FileCabinetFilesystemService)))
             {
-                records = (Program.FileCabinetService as FileCabinetFilesystemService).GetExistingRecords();
+                records = (this.service as FileCabinetFilesystemService).GetExistingRecords();
             }
             else
             {
-                records = (Program.FileCabinetService as FileCabinetMemoryService).GetRecords().ToList();
+                records = (this.service as FileCabinetMemoryService).GetRecords().ToList();
             }
 
             if (records.Count == 0)
@@ -46,13 +64,6 @@ namespace FileCabinetApp.CommandHandlers
             {
                 PrintRecord(record);
             }
-        }
-
-        private static void PrintRecord(FileCabinetRecord record)
-        {
-            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
         }
     }
 }

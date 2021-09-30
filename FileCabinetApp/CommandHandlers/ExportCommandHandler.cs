@@ -12,69 +12,26 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class ExportCommandHandler : CommandHandlerBase
     {
+        private readonly IFileCabinetService service;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExportCommandHandler"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
+        public ExportCommandHandler(IFileCabinetService service)
+        {
+            this.service = service;
+        }
+
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request != null && request.Command.Equals("export", StringComparison.OrdinalIgnoreCase))
             {
-                Export(request.Parameters);
+                this.Export(request.Parameters);
             }
 
             return base.Handle(request);
-        }
-
-        private static void Export(string parameters)
-        {
-            if (Program.FileCabinetService.GetStat() == 0)
-            {
-                Console.WriteLine("There is no any records");
-                return;
-            }
-
-            string fileType = GetTargetProp(parameters);
-
-            if (IsFileNameMissed(parameters, fileType))
-            {
-                return;
-            }
-
-            string filePath = parameters[fileType.Length..].Trim();
-            string fileName = GetFileName(filePath);
-
-            if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(fileName))
-            {
-                Console.WriteLine("Operation failed, empty path.");
-                return;
-            }
-
-            filePath = filePath.Remove(filePath.Length - fileName.Length);
-
-            if (!fileName.Contains($".{fileType}"))
-            {
-                fileName += $".{fileType}";
-            }
-
-            filePath += fileName;
-
-            if (!IsAbleToSave(filePath, fileName))
-            {
-                return;
-            }
-
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                FileCabinetServiceSnapshot snapshot = Program.FileCabinetService.MakeSnapshot();
-
-                if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
-                {
-                    snapshot.SaveToCsv(writer);
-                }
-
-                if (fileType.Equals("xml", StringComparison.OrdinalIgnoreCase))
-                {
-                    snapshot.SaveToXml(writer);
-                }
-            }
         }
 
         private static string GetTargetProp(string parameters)
@@ -175,6 +132,60 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             return true;
+        }
+
+        private void Export(string parameters)
+        {
+            if (this.service.GetStat() == 0)
+            {
+                Console.WriteLine("There is no any records");
+                return;
+            }
+
+            string fileType = GetTargetProp(parameters);
+
+            if (IsFileNameMissed(parameters, fileType))
+            {
+                return;
+            }
+
+            string filePath = parameters[fileType.Length..].Trim();
+            string fileName = GetFileName(filePath);
+
+            if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(fileName))
+            {
+                Console.WriteLine("Operation failed, empty path.");
+                return;
+            }
+
+            filePath = filePath.Remove(filePath.Length - fileName.Length);
+
+            if (!fileName.Contains($".{fileType}"))
+            {
+                fileName += $".{fileType}";
+            }
+
+            filePath += fileName;
+
+            if (!IsAbleToSave(filePath, fileName))
+            {
+                return;
+            }
+
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                FileCabinetServiceSnapshot snapshot = this.service.MakeSnapshot();
+
+                if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToCsv(writer);
+                }
+
+                if (fileType.Equals("xml", StringComparison.OrdinalIgnoreCase))
+                {
+                    snapshot.SaveToXml(writer);
+                }
+            }
         }
     }
 }
