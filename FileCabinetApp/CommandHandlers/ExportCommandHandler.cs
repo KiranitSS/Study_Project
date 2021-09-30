@@ -10,17 +10,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler for exporting records.
     /// </summary>
-    public class ExportCommandHandler : CommandHandlerBase
+    public class ExportCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public ExportCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -136,7 +134,7 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Export(string parameters)
         {
-            if (this.service.GetStat() == 0)
+            if (this.Service.GetStat() == 0)
             {
                 Console.WriteLine("There is no any records");
                 return;
@@ -174,7 +172,7 @@ namespace FileCabinetApp.CommandHandlers
 
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                FileCabinetServiceSnapshot snapshot = this.service.MakeSnapshot();
+                FileCabinetServiceSnapshot snapshot = this.Service.MakeSnapshot();
 
                 if (fileType.Equals("csv", StringComparison.OrdinalIgnoreCase))
                 {

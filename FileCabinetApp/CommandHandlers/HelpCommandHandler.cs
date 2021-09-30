@@ -15,7 +15,7 @@ namespace FileCabinetApp.CommandHandlers
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
 
-        private static string[][] helpMessages = new string[][]
+        private static readonly string[][] HelpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
             new string[] { "edit", "edit record", "The 'edit' command edit record by id." },
@@ -29,11 +29,6 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
-
-        public HelpCommandHandler(IFileCabinetService fileCabinetService)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
@@ -50,10 +45,10 @@ namespace FileCabinetApp.CommandHandlers
         {
             if (!string.IsNullOrEmpty(parameters))
             {
-                var index = Array.FindIndex(helpMessages, 0, helpMessages.Length, i => string.Equals(i[CommandHelpIndex], parameters, StringComparison.InvariantCultureIgnoreCase));
+                var index = Array.FindIndex(HelpMessages, 0, HelpMessages.Length, i => string.Equals(i[CommandHelpIndex], parameters, StringComparison.InvariantCultureIgnoreCase));
                 if (index >= 0)
                 {
-                    Console.WriteLine(helpMessages[index][ExplanationHelpIndex]);
+                    Console.WriteLine(HelpMessages[index][ExplanationHelpIndex]);
                 }
                 else
                 {
@@ -64,7 +59,7 @@ namespace FileCabinetApp.CommandHandlers
             {
                 Console.WriteLine("Available commands:");
 
-                foreach (var helpMessage in helpMessages)
+                foreach (var helpMessage in HelpMessages)
                 {
                     Console.WriteLine("\t{0}\t- {1}", helpMessage[CommandHelpIndex], helpMessage[DescriptionHelpIndex]);
                 }

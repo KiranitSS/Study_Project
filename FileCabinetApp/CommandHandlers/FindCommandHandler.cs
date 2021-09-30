@@ -11,17 +11,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class for searching records.
     /// </summary>
-    public class FindCommandHandler : CommandHandlerBase
+    public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="FindCommandHandler"/> class.
         /// </summary>
         /// <param name = "service" > Service for working with records.</param>
         public FindCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -105,17 +103,17 @@ namespace FileCabinetApp.CommandHandlers
         {
             if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
             {
-                return this.service.FindByFirstName(targetValue);
+                return this.Service.FindByFirstName(targetValue);
             }
 
             if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
             {
-                return this.service.FindByLastName(targetValue);
+                return this.Service.FindByLastName(targetValue);
             }
 
             if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
             {
-                return this.service.FindByBirthDate(targetValue);
+                return this.Service.FindByBirthDate(targetValue);
             }
 
             return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());

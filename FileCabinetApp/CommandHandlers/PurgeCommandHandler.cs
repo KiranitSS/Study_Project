@@ -9,17 +9,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class for clearing deleted records.
     /// </summary>
-    public class PurgeCommandHandler : CommandHandlerBase
+    public class PurgeCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PurgeCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public PurgeCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -35,7 +33,7 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Purge()
         {
-            this.service.PurgeRecords();
+            this.Service.PurgeRecords();
         }
     }
 }

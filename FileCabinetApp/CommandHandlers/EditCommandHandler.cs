@@ -10,17 +10,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class for record edition method.
     /// </summary>
-    public class EditCommandHandler : CommandHandlerBase
+    public class EditCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="EditCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public EditCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -28,31 +26,31 @@ namespace FileCabinetApp.CommandHandlers
         {
             if (request != null && request.Command.Equals("edit", StringComparison.OrdinalIgnoreCase))
             {
-                Edit(request.Parameters);
+                this.Edit(request.Parameters);
             }
 
             return base.Handle(request);
         }
 
-        private static void Edit(string parameters)
+        private void Edit(string parameters)
         {
             Console.Write("Write ID:");
 
-            if (!TryGetId(parameters, out int id) || id > this.service.GetStat())
+            if (!this.TryGetId(parameters, out int id) || id > this.Service.GetStat())
             {
                 Console.WriteLine("Incorrect ID");
                 return;
             }
 
             var recordParameters = Program.GetRecordData();
-            Program.FileCabinetService.EditRecord(id, recordParameters);
+            this.Service.EditRecord(id, recordParameters);
         }
 
-        private static bool TryGetId(string input, out int id)
+        private bool TryGetId(string input, out int id)
         {
             bool result = int.TryParse(input, out id);
 
-            if (result && id < Program.FileCabinetService.GetStat() + 1 && id > 0)
+            if (result && id < this.Service.GetStat() + 1 && id > 0)
             {
                 return true;
             }

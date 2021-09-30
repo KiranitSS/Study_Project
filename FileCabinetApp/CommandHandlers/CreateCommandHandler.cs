@@ -9,17 +9,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class for record creation method.
     /// </summary>
-    public class CreateCommandHandler : CommandHandlerBase
+    public class CreateCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public CreateCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -55,7 +53,7 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Create()
         {
-            AddRecord(this.service);
+            AddRecord(this.Service);
         }
     }
 }

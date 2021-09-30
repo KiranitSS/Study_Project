@@ -9,17 +9,15 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class for clearing deleted records.
     /// </summary>
-    public class StatCommandHandler : CommandHandlerBase
+    public class StatCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IFileCabinetService service;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="StatCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public StatCommandHandler(IFileCabinetService service)
+            : base(service)
         {
-            this.service = service;
         }
 
         /// <inheritdoc/>
@@ -35,12 +33,12 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Stat()
         {
-            int recordsCount = this.service.GetStat();
+            int recordsCount = this.Service.GetStat();
 
-            if (this.service.GetType() == typeof(FileCabinetFilesystemService))
+            if (this.Service.GetType() == typeof(FileCabinetFilesystemService))
             {
-                int removedRecordsCount = recordsCount - (this.service as FileCabinetFilesystemService).GetExistingRecords().Count;
-                int existingRecordsCount = (this.service as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int removedRecordsCount = recordsCount - (this.Service as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int existingRecordsCount = (this.Service as FileCabinetFilesystemService).GetExistingRecords().Count;
 
                 Console.WriteLine($"Here {existingRecordsCount} record(s).");
                 Console.WriteLine($"And here {removedRecordsCount} removed records.");

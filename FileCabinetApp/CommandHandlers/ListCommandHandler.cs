@@ -10,7 +10,7 @@ namespace FileCabinetApp.CommandHandlers
     /// <summary>
     /// Represents handler class to list app.
     /// </summary>
-    public class ListCommandHandler : CommandHandlerBase
+    public class ListCommandHandler : ServiceCommandHandlerBase
     {
         private readonly IFileCabinetService service;
 
@@ -19,6 +19,7 @@ namespace FileCabinetApp.CommandHandlers
         /// </summary>
         /// <param name="service">Service for working with records.</param>
         public ListCommandHandler(IFileCabinetService service)
+            : base(service)
         {
             this.service = service;
         }
