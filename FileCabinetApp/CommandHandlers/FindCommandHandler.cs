@@ -13,18 +13,20 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IRecordPrinter printer;
+        private readonly Print print;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FindCommandHandler"/> class.
         /// </summary>
         /// <param name = "service" > Service for working with records.</param>
-        /// /// <param name="printer">Records printer.</param>
-        public FindCommandHandler(IFileCabinetService service, IRecordPrinter printer)
+        /// /// <param name="print">Records print method.</param>
+        public FindCommandHandler(IFileCabinetService service, Print print)
             : base(service)
         {
-            this.printer = printer;
+            this.print = print;
         }
+
+        public delegate void Print(IEnumerable<FileCabinetRecord> records);
 
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
@@ -72,7 +74,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             else
             {
-                this.printer.Print(targetRecords);
+                this.print(targetRecords);
             }
         }
 

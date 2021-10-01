@@ -44,12 +44,12 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
-            var commandHandler = CreateCommandHandlers();
-
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
                 fileCabinetService = SetStorage(args, fileStream);
             }
+
+            var commandHandler = CreateCommandHandlers();
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -104,14 +104,12 @@ namespace FileCabinetApp
 
         private static ICommandHandler CreateCommandHandlers()
         {
-            var recordsPrinter = new DefaultRecordPrinter();
-
             var helpHandler = new HelpCommandHandler();
             var createHandler = new CreateCommandHandler(fileCabinetService);
             var statHandler = new StatCommandHandler(fileCabinetService);
             var editHandler = new EditCommandHandler(fileCabinetService);
-            var findHandler = new FindCommandHandler(fileCabinetService, recordsPrinter);
-            var listHandler = new ListCommandHandler(fileCabinetService, recordsPrinter);
+            var findHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
+            var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
             var importHandler = new ImportCommandHandler(fileCabinetService);
             var removeHandler = new RemoveCommandHandler(fileCabinetService);
@@ -123,6 +121,13 @@ namespace FileCabinetApp
                 .SetNext(purgehandler).SetNext(exitHandler);
 
             return helpHandler;
+        }
+
+        private static void DefaultRecordPrint(IEnumerable<FileCabinetRecord> records)
+        {
+            records.ToList().ForEach(rec => Console.WriteLine($"#{rec.Id}, {rec.FirstName}, " +
+                $"{rec.LastName}, {rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
+                $"{rec.PIN}, {rec.MoneyCount}$, {rec.CharProp}"));
         }
 
         private static IRecordValidator GetValidator(string[] parameters)

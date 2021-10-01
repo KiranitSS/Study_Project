@@ -12,18 +12,20 @@ namespace FileCabinetApp.CommandHandlers
     /// </summary>
     public class ListCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IRecordPrinter printer;
+        private readonly Print print;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ListCommandHandler"/> class.
         /// </summary>
         /// <param name="service">Service for working with records.</param>
-        /// <param name="printer">Records printer.</param>
-        public ListCommandHandler(IFileCabinetService service, IRecordPrinter printer)
+        /// <param name="print">Records print method.</param>
+        public ListCommandHandler(IFileCabinetService service, Print print)
             : base(service)
         {
-            this.printer = printer;
+            this.print = print;
         }
+
+        public delegate void Print(IEnumerable<FileCabinetRecord> records);
 
         /// <inheritdoc/>
         public override AppCommandRequest Handle(AppCommandRequest request)
@@ -34,13 +36,6 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             return base.Handle(request);
-        }
-
-        private static void PrintRecord(FileCabinetRecord record)
-        {
-            Console.WriteLine($"#{record.Id}, {record.FirstName}, " +
-                $"{record.LastName}, {record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{record.PIN}, {record.MoneyCount}$, {record.CharProp}");
         }
 
         private void List()
@@ -62,7 +57,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            this.printer.Print(records);
+            this.print(records);
         }
     }
 }
