@@ -278,37 +278,37 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> FirstnameValidator(string value)
         {
-            bool result = Program.Validator.IsCorrectFirstName(value);
+            bool result = Program.Validator.ValidateFirstName(value);
             return new (result, value);
         }
 
         private static Tuple<bool, string> LastnameValidator(string value)
         {
-            bool result = Program.Validator.IsCorrectLastName(value);
+            bool result = Program.Validator.ValidateLastName(value);
             return new (result, value);
         }
 
         private static Tuple<bool, string> DateOfBirthValidator(DateTime value)
         {
-            bool result = Program.Validator.IsCorrectDateOfBirth(value);
+            bool result = Program.Validator.ValidateDateOfBirth(value);
             return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
 
         private static Tuple<bool, string> MoneyCountValidator(decimal value)
         {
-            bool result = Program.Validator.IsCorrectMoneyCount(value);
+            bool result = Program.Validator.ValidateMoneyCount(value);
             return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
 
         private static Tuple<bool, string> PINValidator(short value)
         {
-            bool result = Program.Validator.IsCorrectPIN(value);
+            bool result = Program.Validator.ValidatePIN(value);
             return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
 
         private static Tuple<bool, string> CharPropValidator(char value)
         {
-            bool result = Program.Validator.IsCorrectCharProp(value);
+            bool result = Program.Validator.ValidateProp(value);
             return new (result, value.ToString(CultureInfo.InvariantCulture));
         }
     }
