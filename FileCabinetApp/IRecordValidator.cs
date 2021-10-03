@@ -15,7 +15,6 @@ namespace FileCabinetApp
         /// Validate records creation parameters.
         /// </summary>
         /// <param name="parameters">Record creation parameters.</param>
-        /// <returns>Is record creation parameters valid or not.</returns>
-        public bool ValidateParameters(RecordParameters parameters);
+        public void ValidateParameters(RecordParameters parameters);
     }
 }

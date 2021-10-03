@@ -10,47 +10,19 @@ namespace FileCabinetApp
     /// <summary>
     /// Represents records validator with default settings.
     /// </summary>
-    public class DefaultValidator : IRecordValidator
+    public class DefaultValidator : CompositeValidator
     {
-        /// <inheritdoc/>
-        public bool ValidateParameters(RecordParameters parameters)
+        public DefaultValidator(IEnumerable<IRecordValidator> validators)
+            : base(new IRecordValidator[]
+            {
+                new FirstNameValidator(2, 60),
+                new LastNameValidator(2, 60),
+                new DateOfBirthValidator(new DateTime(1950, 1, 1), DateTime.UtcNow),
+                new MoneyCountValidator(0),
+                new PinValidator(1),
+                new CharPropValidator(true),
+            })
         {
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            if (!new FirstNameValidator(2, 60).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            if (!new LastNameValidator(2, 60).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            if (!new DateOfBirthValidator(new DateTime(1950, 1, 1), DateTime.UtcNow).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            if (!new MoneyCountValidator(0).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            if (!new PinValidator(0).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            if (!new CharPropValidator(true).ValidateParameters(parameters))
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }
