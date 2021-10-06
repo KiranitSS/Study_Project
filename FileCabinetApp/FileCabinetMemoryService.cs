@@ -176,6 +176,7 @@ namespace FileCabinetApp
             {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine($"Record #{id} doesn't exists.");
+                return;
             }
 
             Console.WriteLine($"Record #{id} has been removed.");
