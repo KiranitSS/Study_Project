@@ -16,32 +16,34 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void ValidateParameters(RecordParameters parameters)
+        public bool ValidateParameters(RecordParameters parameters)
         {
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            this.ValidateCharProp(parameters.CharProp);
+            return this.ValidateCharProp(parameters.CharProp);
         }
 
         /// <summary>
         /// Checks ability to add simple char property.
         /// </summary>
         /// <param name="charProp">Simple char property.</param>
-        /// <returns>Returns ability to add simple char property to record.</returns>
-        private void ValidateCharProp(char charProp)
+        private bool ValidateCharProp(char charProp)
         {
             if (char.IsWhiteSpace(charProp))
             {
-                return;
+                return false;
             }
 
             if (this.mustBeLetter && !char.IsLetter(charProp))
             {
                 Console.WriteLine("Must be letter!");
+                return false;
             }
+
+            return true;
         }
     }
 }

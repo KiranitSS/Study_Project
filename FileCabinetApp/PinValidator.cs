@@ -11,32 +11,35 @@ namespace FileCabinetApp
     {
         private readonly int minLength;
 
-        public PinValidator(int min)
+        public PinValidator(int minLength)
         {
-            this.minLength = min;
+            this.minLength = minLength;
         }
 
         /// <inheritdoc/>
-        public void ValidateParameters(RecordParameters parameters)
+        public bool ValidateParameters(RecordParameters parameters)
         {
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            this.ValidatePIN(parameters.PIN);
+            return this.ValidatePIN(parameters.PIN);
         }
 
         /// <summary>
         /// Checks ability to add PIN.
         /// </summary>
         /// <param name="pin">Persons PIN code.</param>
-        private void ValidatePIN(short pin)
+        private bool ValidatePIN(short pin)
         {
             if (pin.ToString(CultureInfo.InvariantCulture).Length < this.minLength)
             {
                 Console.WriteLine($"PIN length must be {this.minLength} or longer.");
+                return false;
             }
+
+            return true;
         }
     }
 }

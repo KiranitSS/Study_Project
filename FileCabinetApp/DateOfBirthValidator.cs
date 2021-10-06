@@ -18,27 +18,29 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void ValidateParameters(RecordParameters parameters)
+        public bool ValidateParameters(RecordParameters parameters)
         {
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            this.ValidateDateOfBirth(parameters.DateOfBirth);
+            return this.ValidateDateOfBirth(parameters.DateOfBirth);
         }
 
         /// <summary>
         /// Checks ability to add date of birth.
         /// </summary>
         /// <param name="dateOfBirth">Persons date of birth.</param>
-        /// <returns>Returns ability to add date of birth to record.</returns>
-        private void ValidateDateOfBirth(DateTime dateOfBirth)
+        private bool ValidateDateOfBirth(DateTime dateOfBirth)
         {
             if (dateOfBirth < this.from || dateOfBirth > this.to)
             {
                 Console.WriteLine("Incorrect date of birth");
+                return false;
             }
+
+            return true;
         }
     }
 }

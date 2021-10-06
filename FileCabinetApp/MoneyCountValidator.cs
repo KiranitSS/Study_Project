@@ -16,26 +16,29 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void ValidateParameters(RecordParameters parameters)
+        public bool ValidateParameters(RecordParameters parameters)
         {
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            this.ValidateMoneyCount(parameters.MoneyCount);
+            return this.ValidateMoneyCount(parameters.MoneyCount);
         }
 
         /// <summary>
         /// Checks ability to add count of money.
         /// </summary>
         /// <param name="moneyCount">Persons count of money.</param>
-        private void ValidateMoneyCount(decimal moneyCount)
+        private bool ValidateMoneyCount(decimal moneyCount)
         {
             if (moneyCount < this.min)
             {
                 Console.WriteLine($"Count of money must be bigger than {this.min}$");
+                return false;
             }
+
+            return true;
         }
     }
 }

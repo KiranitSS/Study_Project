@@ -151,32 +151,7 @@ namespace FileCabinetApp
 
         private static bool IsValidRecord(FileCabinetRecord record, IRecordValidator validator)
         {
-            if (!validator.ValidateFirstName(record.FirstName))
-            {
-                return false;
-            }
-
-            if (!validator.ValidateLastName(record.LastName))
-            {
-                return false;
-            }
-
-            if (!validator.ValidateDateOfBirth(record.DateOfBirth))
-            {
-                return false;
-            }
-
-            if (!validator.ValidateMoneyCount(record.MoneyCount))
-            {
-                return false;
-            }
-
-            if (!validator.ValidatePIN(record.PIN))
-            {
-                return false;
-            }
-
-            if (!validator.ValidateProp(record.CharProp))
+            if (!validator.ValidateParameters(new RecordParameters(record)))
             {
                 return false;
             }

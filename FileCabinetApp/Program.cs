@@ -81,25 +81,78 @@ namespace FileCabinetApp
         /// <returns>Values for creation record.</returns>
         public static RecordParameters GetRecordData()
         {
-            Console.Write("First name: ");
-            string firstname = ReadInput(StringConverter, FirstnameValidator);
+            string firstname;
+            string lastname;
+            DateTime dateOfbirth;
+            decimal moneyCount;
+            short pin;
+            char charProp;
+            RecordParameters parameters;
 
-            Console.Write("Last name: ");
-            string lastname = ReadInput(StringConverter, LastnameValidator);
+            do
+            {
+                Console.Write("First name: ");
+                firstname = ReadInput(StringConverter);
 
-            Console.Write("Date of bitrth: ");
-            DateTime dateOfbirth = ReadInput(DateTimeConverter, DateOfBirthValidator);
+                Console.Write("Last name: ");
+                lastname = ReadInput(StringConverter);
 
-            Console.Write("Count of money: ");
-            decimal moneyCount = ReadInput(DecimalConverter, MoneyCountValidator);
+                Console.Write("Date of bitrth: ");
+                dateOfbirth = ReadInput(DateTimeConverter);
 
-            Console.Write("PIN code: ");
-            short pin = ReadInput(ShortConverter, PINValidator);
+                Console.Write("Count of money: ");
+                moneyCount = ReadInput(DecimalConverter);
 
-            Console.Write("Char prop: ");
-            char charProp = ReadInput(CharConverter, CharPropValidator);
+                Console.Write("PIN code: ");
+                pin = ReadInput(ShortConverter);
 
-            return new RecordParameters(firstname, lastname, dateOfbirth, moneyCount, pin, charProp);
+                Console.Write("Char prop: ");
+                charProp = ReadInput(CharConverter);
+
+                parameters = new RecordParameters(firstname, lastname, dateOfbirth, moneyCount, pin, charProp);
+
+                if (Validator.ValidateParameters(parameters))
+                {
+                    break;
+                }
+
+                Console.WriteLine("Record creation failed!\n");
+            }
+            while (true);
+
+            return parameters;
+        }
+
+        public static IRecordValidator CreateDefault(this ValidatorBuilder validator)
+        {
+            if (validator is null)
+            {
+                throw new ArgumentNullException(nameof(validator));
+            }
+
+            return validator.ValidateFirstName(2, 60)
+                .ValidateLastName(2, 60)
+                .ValidateDateOfBirth(new DateTime(1950, 1, 1), DateTime.UtcNow)
+                .ValidateMoneyCount(0)
+                .ValidatePin(1)
+                .ValidateCharProp(true)
+                .Create();
+        }
+
+        public static IRecordValidator CreateCustom(this ValidatorBuilder validator)
+        {
+            if (validator is null)
+            {
+                throw new ArgumentNullException(nameof(validator));
+            }
+
+            return validator.ValidateFirstName(2, 30)
+                .ValidateLastName(2, 40)
+                .ValidateDateOfBirth(new DateTime(1930, 1, 1), DateTime.UtcNow)
+                .ValidateMoneyCount(200)
+                .ValidatePin(3)
+                .ValidateCharProp(false)
+                .Create();
         }
 
         private static ICommandHandler CreateCommandHandlers()
@@ -135,7 +188,7 @@ namespace FileCabinetApp
             if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using default validation rules.");
-                return new DefaultValidator();
+                return new ValidatorBuilder().CreateDefault(); ;
             }
 
             string validationMode;
@@ -153,7 +206,7 @@ namespace FileCabinetApp
                 if (validationMode.Equals(customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using custom validation rules.");
-                    return new CustomValidator();
+                    return new ValidatorBuilder().CreateCustom(); ;
                 }
             }
 
@@ -164,12 +217,12 @@ namespace FileCabinetApp
                 if (string.Equals(validationMode, customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using custom validation rules.");
-                    return new CustomValidator();
+                    return new ValidatorBuilder().CreateCustom();
                 }
             }
 
             Console.WriteLine("Using default validation rules.");
-            return new DefaultValidator();
+            return new ValidatorBuilder().CreateDefault(); ;
         }
 
         private static IFileCabinetService SetStorage(string[] parameters, FileStream fileStream)
@@ -218,12 +271,10 @@ namespace FileCabinetApp
             return new FileCabinetMemoryService(Validator);
         }
 
-        private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
+        private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter)
         {
             do
             {
-                T value;
-
                 var input = Console.ReadLine();
                 var conversionResult = converter(input);
 
@@ -233,83 +284,38 @@ namespace FileCabinetApp
                     continue;
                 }
 
-                value = conversionResult.Item3;
-
-                var validationResult = validator(value);
-                if (!validationResult.Item1)
-                {
-                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
-                    continue;
-                }
-
-                return value;
+                return conversionResult.Item3;
             }
             while (true);
         }
 
         private static Tuple<bool, string, string> StringConverter(string value)
         {
-            return new (true, value, value);
+            return new(true, value, value);
         }
 
         private static Tuple<bool, string, DateTime> DateTimeConverter(string value)
         {
             bool result = DateTime.TryParse(value, out DateTime conversionResult);
-            return new (result, value, conversionResult);
+            return new(result, value, conversionResult);
         }
 
         private static Tuple<bool, string, decimal> DecimalConverter(string value)
         {
             bool result = decimal.TryParse(value, out decimal conversionResult);
-            return new (result, value, conversionResult);
+            return new(result, value, conversionResult);
         }
 
         private static Tuple<bool, string, short> ShortConverter(string value)
         {
             bool result = short.TryParse(value, out short conversionResult);
-            return new (result, value, conversionResult);
+            return new(result, value, conversionResult);
         }
 
         private static Tuple<bool, string, char> CharConverter(string value)
         {
             bool result = char.TryParse(value, out char conversionResult);
-            return new (result, value, conversionResult);
-        }
-
-        private static Tuple<bool, string> FirstnameValidator(string value)
-        {
-            bool result = Program.Validator.ValidateFirstName(value);
-            return new (result, value);
-        }
-
-        private static Tuple<bool, string> LastnameValidator(string value)
-        {
-            bool result = Program.Validator.ValidateLastName(value);
-            return new (result, value);
-        }
-
-        private static Tuple<bool, string> DateOfBirthValidator(DateTime value)
-        {
-            bool result = Program.Validator.ValidateDateOfBirth(value);
-            return new (result, value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static Tuple<bool, string> MoneyCountValidator(decimal value)
-        {
-            bool result = Program.Validator.ValidateMoneyCount(value);
-            return new (result, value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static Tuple<bool, string> PINValidator(short value)
-        {
-            bool result = Program.Validator.ValidatePIN(value);
-            return new (result, value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static Tuple<bool, string> CharPropValidator(char value)
-        {
-            bool result = Program.Validator.ValidateProp(value);
-            return new (result, value.ToString(CultureInfo.InvariantCulture));
+            return new(result, value, conversionResult);
         }
     }
 }

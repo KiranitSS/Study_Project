@@ -18,33 +18,35 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void ValidateParameters(RecordParameters parameters)
+        public bool ValidateParameters(RecordParameters parameters)
         {
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            this.ValidateLastName(parameters.LastName);
+            return this.ValidateLastName(parameters.LastName);
         }
 
         /// <summary>
         /// Checks ability to add lastname.
         /// </summary>
         /// <param name="lastname">Persons lastname.</param>
-        /// <returns>Returns ability to add lastname to record.</returns>
-        private void ValidateLastName(string lastname)
+        private bool ValidateLastName(string lastname)
         {
             if (string.IsNullOrWhiteSpace(lastname))
             {
                 Console.WriteLine("Last name can't be empty");
-                return;
+                return false;
             }
 
             if (lastname.Length < this.minLength || lastname.Length > this.maxLength)
             {
                 Console.WriteLine($"First name length can't be lower than {this.minLength} or bigger than {this.maxLength}");
+                return false;
             }
+
+            return true;
         }
     }
 }
