@@ -38,6 +38,25 @@ namespace FileCabinetApp
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RecordParameters"/> class.
+        /// </summary>
+        /// <param name="record">Records which parameters will be taken.</param>
+        public RecordParameters(FileCabinetRecord record)
+        {
+            if (record is null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            this.FirstName = record.FirstName;
+            this.LastName = record.LastName;
+            this.DateOfBirth = record.DateOfBirth;
+            this.MoneyCount = record.MoneyCount;
+            this.PIN = record.PIN;
+            this.CharProp = record.CharProp;
+        }
+
+        /// <summary>
         /// Gets or sets persons ID.
         /// </summary>
         /// <value>
