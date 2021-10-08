@@ -1,0 +1,49 @@
+{
+	"default": {
+		"firstName": {
+			"min": 2,
+			"max": 60
+		},
+		"lastName": {
+			"min": 2,
+			"max": 60
+		},
+		"dateOfBirth": {
+			"from": "1/1/1950",
+			"to": "8/10/2021"
+		},
+		"moneyCount": {
+			"min": 0
+		},
+		"pin":{
+			"minLength": 1
+		},
+		"charProp":{
+			"mustBeLetter" : true
+		}
+		
+	},
+	"custom": {
+		"firstName": {
+			"min": 2,
+			"max": 30
+		},
+		"lastName": {
+			"min": 2,
+			"max": 40
+		},
+		"dateOfBirth": {
+			"from": "1/1/1930",
+			"to": "8/10/2021"
+		},
+		"moneyCount": {
+			"min": 200
+		},
+		"pin":{
+			"minLength": 3
+		},
+		"charProp":{
+			"mustBeLetter" : false
+		}
+	}
+}

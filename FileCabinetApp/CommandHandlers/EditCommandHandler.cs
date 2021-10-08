@@ -34,8 +34,6 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Edit(string parameters)
         {
-            Console.Write("Write ID:");
-
             if (!this.TryGetId(parameters, out int id) || id > this.Service.GetStat())
             {
                 Console.WriteLine("Incorrect ID");
