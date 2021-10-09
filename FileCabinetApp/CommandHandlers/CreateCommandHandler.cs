@@ -31,29 +31,10 @@ namespace FileCabinetApp.CommandHandlers
             return base.Handle(request);
         }
 
-        private static void AddRecord(IFileCabinetService fileCabinetService)
-        {
-            if (fileCabinetService is null)
-            {
-                throw new ArgumentNullException(nameof(fileCabinetService));
-            }
-
-            var parameters = Program.GetRecordData();
-            int recId = fileCabinetService.CreateRecord(parameters);
-
-            if (recId == -1)
-            {
-                Console.WriteLine($"Record is not created.");
-            }
-            else
-            {
-                Console.WriteLine($"Record #{recId} is created.");
-            }
-        }
-
         private void Create()
         {
-            AddRecord(this.Service);
+            var parameters = Program.GetRecordData();
+            new ServiceMeter(this.Service).CreateRecord(parameters);
         }
     }
 }

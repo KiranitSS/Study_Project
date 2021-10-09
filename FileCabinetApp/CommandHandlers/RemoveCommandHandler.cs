@@ -39,7 +39,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            this.Service.RemoveRecord(id);
+            new ServiceMeter(this.Service).RemoveRecord(id);
         }
     }
 }

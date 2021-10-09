@@ -82,6 +82,15 @@ namespace FileCabinetApp
             this.fileStream = new FileStream(this.path, FileMode.Append);
             this.SaveRecord(data);
 
+            if (data.Id == -1)
+            {
+                Console.WriteLine($"Record is not created.");
+            }
+            else
+            {
+                Console.WriteLine($"Record #{data.Id} is created.");
+            }
+
             return data.Id;
         }
 

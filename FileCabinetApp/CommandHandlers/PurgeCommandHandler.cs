@@ -33,7 +33,7 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Purge()
         {
-            this.Service.PurgeRecords();
+            new ServiceMeter(this.Service).PurgeRecords();
         }
     }
 }

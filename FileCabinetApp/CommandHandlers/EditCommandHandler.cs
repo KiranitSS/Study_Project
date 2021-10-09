@@ -41,7 +41,7 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             var recordParameters = Program.GetRecordData();
-            this.Service.EditRecord(id, recordParameters);
+            new ServiceMeter(this.Service).EditRecord(id, recordParameters);
         }
 
         private bool TryGetId(string input, out int id)
