@@ -41,7 +41,15 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             var recordParameters = Program.GetRecordData();
-            new ServiceMeter(this.Service).EditRecord(id, recordParameters);
+
+            if (Program.IsLogging)
+            {
+                new ServiceLogger(new ServiceMeter(this.Service)).EditRecord(id, recordParameters);
+            }
+            else
+            {
+                new ServiceMeter(this.Service).EditRecord(id, recordParameters);
+            }
         }
 
         private bool TryGetId(string input, out int id)

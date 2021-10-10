@@ -34,7 +34,15 @@ namespace FileCabinetApp.CommandHandlers
         private void Create()
         {
             var parameters = Program.GetRecordData();
-            new ServiceMeter(this.Service).CreateRecord(parameters);
+
+            if (Program.IsLogging)
+            {
+                new ServiceLogger(new ServiceMeter(this.Service)).CreateRecord(parameters);
+            }
+            else
+            {
+                new ServiceMeter(this.Service).CreateRecord(parameters);
+            }
         }
     }
 }

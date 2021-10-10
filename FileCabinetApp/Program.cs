@@ -30,6 +30,8 @@ namespace FileCabinetApp
         /// <value>Is app running or stopped.</value>
         public static bool IsRunning { get; set; } = true;
 
+        public static bool IsLogging { get; set; }
+
         /// <summary>
         /// Gets or sets validation setting.
         /// </summary>
@@ -45,6 +47,8 @@ namespace FileCabinetApp
         public static void Main(string[] args)
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+
+            IsLoggingStarted(args);
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
@@ -344,6 +348,11 @@ namespace FileCabinetApp
         {
             bool result = char.TryParse(value, out char conversionResult);
             return new (result, value, conversionResult);
+        }
+
+        private static void IsLoggingStarted(string[] parameters)
+        {
+            IsLogging = parameters.Any(p => p.Equals("use-logger", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -99,16 +99,31 @@ namespace FileCabinetApp.CommandHandlers
         {
             if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
             {
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByFirstName(targetValue);
+                }
+
                 return new ServiceMeter(this.Service).FindByFirstName(targetValue);
             }
 
             if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
             {
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByLastName(targetValue);
+                }
+
                 return new ServiceMeter(this.Service).FindByLastName(targetValue);
             }
 
             if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
             {
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByBirthDate(targetValue);
+                }
+
                 return new ServiceMeter(this.Service).FindByBirthDate(targetValue);
             }
 
