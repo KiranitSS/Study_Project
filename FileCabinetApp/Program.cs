@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
 using FileCabinetApp.CommandHandlers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FileCabinetApp
 {
@@ -19,7 +21,7 @@ namespace FileCabinetApp
     {
         private const string DeveloperName = "Alexandr Alexeevich";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
-
+        private const string ValidatorSettingsFile = "validation-rules.json";
         private static IFileCabinetService fileCabinetService;
 
         /// <summary>
@@ -27,6 +29,8 @@ namespace FileCabinetApp
         /// </summary>
         /// <value>Is app running or stopped.</value>
         public static bool IsRunning { get; set; } = true;
+
+        public static bool IsLogging { get; set; }
 
         /// <summary>
         /// Gets or sets validation setting.
@@ -43,6 +47,8 @@ namespace FileCabinetApp
         public static void Main(string[] args)
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+
+            IsLoggingStarted(args);
 
             using (FileStream fileStream = new FileStream("cabinet-records.db", FileMode.Create))
             {
@@ -123,36 +129,62 @@ namespace FileCabinetApp
             return parameters;
         }
 
-        public static IRecordValidator CreateDefault(this ValidatorBuilder validator)
+        public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
-            if (validator is null)
+            if (builder is null)
             {
-                throw new ArgumentNullException(nameof(validator));
+                throw new ArgumentNullException(nameof(builder));
             }
 
-            return validator.ValidateFirstName(2, 60)
-                .ValidateLastName(2, 60)
-                .ValidateDateOfBirth(new DateTime(1950, 1, 1), DateTime.UtcNow)
-                .ValidateMoneyCount(0)
-                .ValidatePin(1)
-                .ValidateCharProp(true)
-                .Create();
+            return ImportValidator(builder, "default");
         }
 
-        public static IRecordValidator CreateCustom(this ValidatorBuilder validator)
+        public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
-            if (validator is null)
+            if (builder is null)
             {
-                throw new ArgumentNullException(nameof(validator));
+                throw new ArgumentNullException(nameof(builder));
             }
 
-            return validator.ValidateFirstName(2, 30)
-                .ValidateLastName(2, 40)
-                .ValidateDateOfBirth(new DateTime(1930, 1, 1), DateTime.UtcNow)
-                .ValidateMoneyCount(200)
-                .ValidatePin(3)
-                .ValidateCharProp(false)
-                .Create();
+            return ImportValidator(builder, "custom");
+        }
+
+        private static IRecordValidator ImportValidator(ValidatorBuilder builder, string validatorType)
+        {
+            string json = File.ReadAllText(ValidatorSettingsFile);
+            JObject settingsObj = JObject.Parse(json);
+
+            JToken settingsToken = settingsObj[validatorType];
+
+            JToken firstnameToken = settingsToken["firstName"];
+            int minFirtnameLength = Convert.ToInt32(firstnameToken["min"].ToString(), CultureInfo.InvariantCulture);
+            int maxFirstnameLength = Convert.ToInt32(firstnameToken["max"].ToString(), CultureInfo.InvariantCulture);
+
+            JToken lastnameToken = settingsToken["lastName"];
+            int minLastnameLength = Convert.ToInt32(lastnameToken["min"].ToString(), CultureInfo.InvariantCulture);
+            int maxLastnameLength = Convert.ToInt32(lastnameToken["max"].ToString(), CultureInfo.InvariantCulture);
+
+            JToken dateOfBirthToken = settingsToken["dateOfBirth"];
+            DateTime minDateOfBirthBorder = DateTime.Parse(dateOfBirthToken["from"].ToString(), CultureInfo.InvariantCulture);
+            DateTime maxDateOfBirthBorder = DateTime.Parse(dateOfBirthToken["to"].ToString(), CultureInfo.InvariantCulture);
+
+            JToken moneyCountToken = settingsToken["moneyCount"];
+            int minMoneyCount = Convert.ToInt32(moneyCountToken["min"].ToString(), CultureInfo.InvariantCulture);
+
+            JToken pinToken = settingsToken["pin"];
+            int minPinLength = Convert.ToInt32(pinToken["minLength"].ToString(), CultureInfo.InvariantCulture);
+
+            JToken charPropToken = settingsToken["charProp"];
+            bool mustBeLetter = Convert.ToBoolean(charPropToken["mustBeLetter"].ToString(), CultureInfo.InvariantCulture);
+
+            return builder
+                   .ValidateFirstName(minFirtnameLength, maxFirstnameLength)
+                   .ValidateLastName(minLastnameLength, maxLastnameLength)
+                   .ValidateDateOfBirth(minDateOfBirthBorder, maxDateOfBirthBorder)
+                   .ValidateMoneyCount(minMoneyCount)
+                   .ValidatePin(minPinLength)
+                   .ValidateCharProp(mustBeLetter)
+                   .Create();
         }
 
         private static ICommandHandler CreateCommandHandlers()
@@ -188,7 +220,7 @@ namespace FileCabinetApp
             if (parameters is null || parameters.Length == 0)
             {
                 Console.WriteLine("Using default validation rules.");
-                return new ValidatorBuilder().CreateDefault(); ;
+                return new ValidatorBuilder().CreateDefault();
             }
 
             string validationMode;
@@ -206,7 +238,7 @@ namespace FileCabinetApp
                 if (validationMode.Equals(customValidationModeText, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("Using custom validation rules.");
-                    return new ValidatorBuilder().CreateCustom(); ;
+                    return new ValidatorBuilder().CreateCustom();
                 }
             }
 
@@ -222,7 +254,7 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine("Using default validation rules.");
-            return new ValidatorBuilder().CreateDefault(); ;
+            return new ValidatorBuilder().CreateDefault();
         }
 
         private static IFileCabinetService SetStorage(string[] parameters, FileStream fileStream)
@@ -291,31 +323,36 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string, string> StringConverter(string value)
         {
-            return new(true, value, value);
+            return new (true, value, value);
         }
 
         private static Tuple<bool, string, DateTime> DateTimeConverter(string value)
         {
             bool result = DateTime.TryParse(value, out DateTime conversionResult);
-            return new(result, value, conversionResult);
+            return new (result, value, conversionResult);
         }
 
         private static Tuple<bool, string, decimal> DecimalConverter(string value)
         {
             bool result = decimal.TryParse(value, out decimal conversionResult);
-            return new(result, value, conversionResult);
+            return new (result, value, conversionResult);
         }
 
         private static Tuple<bool, string, short> ShortConverter(string value)
         {
             bool result = short.TryParse(value, out short conversionResult);
-            return new(result, value, conversionResult);
+            return new (result, value, conversionResult);
         }
 
         private static Tuple<bool, string, char> CharConverter(string value)
         {
             bool result = char.TryParse(value, out char conversionResult);
-            return new(result, value, conversionResult);
+            return new (result, value, conversionResult);
+        }
+
+        private static void IsLoggingStarted(string[] parameters)
+        {
+            IsLogging = parameters.Any(p => p.Equals("use-logger", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

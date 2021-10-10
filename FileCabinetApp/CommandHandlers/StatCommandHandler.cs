@@ -33,7 +33,9 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Stat()
         {
-            int recordsCount = this.Service.GetStat();
+            int recordsCount = Program.IsLogging
+                ? new ServiceLogger(new ServiceMeter(this.Service)).GetStat()
+                : new ServiceMeter(this.Service).GetStat();
 
             if (this.Service.GetType() == typeof(FileCabinetFilesystemService))
             {

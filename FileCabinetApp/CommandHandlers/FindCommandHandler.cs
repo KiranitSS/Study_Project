@@ -99,17 +99,32 @@ namespace FileCabinetApp.CommandHandlers
         {
             if (string.Equals(targetProp, "firstname", StringComparison.OrdinalIgnoreCase))
             {
-                return this.Service.FindByFirstName(targetValue);
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByFirstName(targetValue);
+                }
+
+                return new ServiceMeter(this.Service).FindByFirstName(targetValue);
             }
 
             if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
             {
-                return this.Service.FindByLastName(targetValue);
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByLastName(targetValue);
+                }
+
+                return new ServiceMeter(this.Service).FindByLastName(targetValue);
             }
 
             if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
             {
-                return this.Service.FindByBirthDate(targetValue);
+                if (Program.IsLogging)
+                {
+                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByBirthDate(targetValue);
+                }
+
+                return new ServiceMeter(this.Service).FindByBirthDate(targetValue);
             }
 
             return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
