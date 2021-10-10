@@ -15,7 +15,7 @@ namespace FileCabinetApp
         /// <summary>
         /// Add new <see cref="FileCabinetRecord"/> to records list and dictionaries.
         /// </summary>
-        /// <param name="parameters">Contains creating parameters.</param>
+        /// /// <param name="parameters">Contains creating parameters.</param>
         /// <returns> Returns ID of new record.</returns>
         public int CreateRecord(RecordParameters parameters);
 

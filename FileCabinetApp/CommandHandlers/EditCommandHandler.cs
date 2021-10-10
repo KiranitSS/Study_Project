@@ -34,8 +34,6 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Edit(string parameters)
         {
-            Console.Write("Write ID:");
-
             if (!this.TryGetId(parameters, out int id) || id > this.Service.GetStat())
             {
                 Console.WriteLine("Incorrect ID");
@@ -43,7 +41,15 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             var recordParameters = Program.GetRecordData();
-            this.Service.EditRecord(id, recordParameters);
+
+            if (Program.IsLogging)
+            {
+                new ServiceLogger(new ServiceMeter(this.Service)).EditRecord(id, recordParameters);
+            }
+            else
+            {
+                new ServiceMeter(this.Service).EditRecord(id, recordParameters);
+            }
         }
 
         private bool TryGetId(string input, out int id)

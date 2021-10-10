@@ -66,6 +66,15 @@ namespace FileCabinetApp
 
             this.records.Add(record);
 
+            if (record.Id == -1)
+            {
+                Console.WriteLine($"Record is not created.");
+            }
+            else
+            {
+                Console.WriteLine($"Record #{record.Id} is created.");
+            }
+
             return record.Id;
         }
 
