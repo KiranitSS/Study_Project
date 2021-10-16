@@ -44,6 +44,7 @@ namespace FileCabinetApp.CommandHandlers
 
                 Console.WriteLine($"Here {existingRecordsCount} record(s).");
                 Console.WriteLine($"And here {removedRecordsCount} removed records.");
+
                 return;
             }
 

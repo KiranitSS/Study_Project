@@ -110,7 +110,7 @@ namespace FileCabinetApp
         public void RemoveRecord(int id)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.RemoveRecord(id);  
+            this.service.RemoveRecord(id);
             stopwatch.Stop();
             Console.WriteLine($"Remove method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }

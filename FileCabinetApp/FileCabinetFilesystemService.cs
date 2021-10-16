@@ -17,6 +17,21 @@ namespace FileCabinetApp
     /// </summary>
     public class FileCabinetFilesystemService : IFileCabinetService, IDisposable
     {
+        private readonly Dictionary<string, int> baseOffSets = new Dictionary<string, int>
+        {
+            { "status", 0 },
+            { "id", 2 },
+            { "firstname", 6 },
+            { "lastname", 126 },
+            { "year", 246 },
+            { "month", 250 },
+            { "day", 254 },
+            { "moneycount", 258 },
+            { "pin", 274 },
+            { "charprop", 276 },
+        };
+
+        private readonly SortedList<string, List<int>> fieldOffsets = new SortedList<string, List<int>>();
         private readonly string path;
         private bool disposed;
         private FileStream fileStream;
@@ -36,6 +51,23 @@ namespace FileCabinetApp
             else
             {
                 this.path = string.Empty;
+            }
+        }
+
+        public SortedList<string, List<int>> this[string fieldName]
+        {
+            get
+            {
+                if (!this.fieldOffsets.ContainsKey(fieldName))
+                {
+                    this.fieldOffsets.Add(fieldName, this.GetOffsets(fieldName));
+                }
+                else
+                {
+                    this.fieldOffsets[fieldName] = this.GetOffsets(fieldName);
+                }
+
+                return this.fieldOffsets;
             }
         }
 
@@ -315,6 +347,20 @@ namespace FileCabinetApp
             };
 
             return record;
+        }
+
+        private List<int> GetOffsets(string fieldName)
+        {
+            int fieldOffset = this.baseOffSets[fieldName];
+            int recordsCount = this.GetStat();
+            List<int> offsets = new List<int>();
+
+            for (int i = 1; i < recordsCount + 1; i++)
+            {
+                offsets.Add(fieldOffset * i);
+            }
+
+            return offsets;
         }
 
         private int ReadLastId(string path)

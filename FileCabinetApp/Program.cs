@@ -30,6 +30,10 @@ namespace FileCabinetApp
         /// <value>Is app running or stopped.</value>
         public static bool IsRunning { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether actions written in log.
+        /// </summary>
+        /// <value>Is app writting its actions is log.</value>
         public static bool IsLogging { get; set; }
 
         /// <summary>
@@ -46,6 +50,9 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
+            // TODO: Remove this string after testing.
+            args = new string[] { "--storage", "file" };
+            Console.WriteLine();
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             IsLoggingStarted(args);
@@ -273,10 +280,8 @@ namespace FileCabinetApp
 
             if (parameters.Length > 0 && parameters[0].Contains(storageModeMessage, StringComparison.OrdinalIgnoreCase))
             {
-                storageMode = parameters[0];
+                storageMode = parameters[1];
                 storageMode = storageMode.Trim();
-
-                storageMode = storageMode.Replace(storageModeMessage, string.Empty, StringComparison.OrdinalIgnoreCase);
 
                 if (storageMode.Equals(customStorageModeText, StringComparison.OrdinalIgnoreCase))
                 {
