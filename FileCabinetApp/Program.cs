@@ -50,8 +50,6 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            // TODO: Remove this string after testing.
-            args = new string[] { "--storage", "file" };
             Console.WriteLine();
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 

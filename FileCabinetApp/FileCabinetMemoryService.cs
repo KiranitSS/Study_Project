@@ -136,21 +136,21 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        public IRecordIterator FindByFirstName(string firstName)
         {
-            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(firstName, this.firstNameDictionary));
+            return new MemoryIterator(FindByKey(firstName, this.firstNameDictionary));
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
+        public IRecordIterator FindByLastName(string lastname)
         {
-            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(lastname, this.lastNameDictionary));
+            return new MemoryIterator(FindByKey(lastname, this.lastNameDictionary));
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
+        public IRecordIterator FindByBirthDate(string dateOfBirth)
         {
-            return new ReadOnlyCollection<FileCabinetRecord>(FindByKey(dateOfBirth, this.birthdateDictionary));
+            return new MemoryIterator(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
         /// <summary>
@@ -202,16 +202,16 @@ namespace FileCabinetApp
         /// </summary>
         /// <returns>Returns <see cref="IRecordValidator"/> object
         /// which contains record validation settings.</returns>
-        private static ReadOnlyCollection<FileCabinetRecord> FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
+        private static List<FileCabinetRecord> FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
             bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
 
             if (!contains)
             {
-                return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());
+                return new List<FileCabinetRecord>();
             }
 
-            return new ReadOnlyCollection<FileCabinetRecord>(currentRecords);
+            return currentRecords;
         }
 
         private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)

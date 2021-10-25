@@ -21,6 +21,26 @@ namespace FileCabinetApp
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
+        /// </summary>
+        /// <param name="data">Data for record creating.</param>
+        public FileCabinetRecord(RecordDataConverter data)
+        {
+            if (data is null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            this.Id = data.Id;
+            this.FirstName = string.Concat(data.GetFirstName().ToArray());
+            this.LastName = string.Concat(data.GetLastName().ToArray());
+            this.DateOfBirth = new DateTime(data.Year, data.Month, data.Day);
+            this.MoneyCount = data.MoneyCount;
+            this.PIN = data.PIN;
+            this.CharProp = data.CharProp;
+        }
+
+        /// <summary>
         /// Gets or sets persons ID.
         /// </summary>
         /// <value>

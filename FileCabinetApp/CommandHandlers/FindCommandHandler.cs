@@ -66,6 +66,18 @@ namespace FileCabinetApp.CommandHandlers
             return parameters[(startIndex + 1) ..];
         }
 
+        private static ReadOnlyCollection<FileCabinetRecord> GetRecordsByIterator(IRecordIterator iterator)
+        {
+            List<FileCabinetRecord> records = new List<FileCabinetRecord>();
+
+            while (iterator.HasMore())
+            {
+                records.Add(iterator.GetNext());
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(records);
+        }
+
         private void PrintTargetRecords(ReadOnlyCollection<FileCabinetRecord> targetRecords)
         {
             if (targetRecords.Count == 0)
@@ -101,30 +113,30 @@ namespace FileCabinetApp.CommandHandlers
             {
                 if (Program.IsLogging)
                 {
-                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByFirstName(targetValue);
+                    return GetRecordsByIterator(new ServiceLogger(new ServiceMeter(this.Service)).FindByFirstName(targetValue));
                 }
 
-                return new ServiceMeter(this.Service).FindByFirstName(targetValue);
+                return GetRecordsByIterator(new ServiceMeter(this.Service).FindByFirstName(targetValue));
             }
 
             if (string.Equals(targetProp, "lastname", StringComparison.OrdinalIgnoreCase))
             {
                 if (Program.IsLogging)
                 {
-                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByLastName(targetValue);
+                    return GetRecordsByIterator(new ServiceLogger(new ServiceMeter(this.Service)).FindByLastName(targetValue));
                 }
 
-                return new ServiceMeter(this.Service).FindByLastName(targetValue);
+                return GetRecordsByIterator(new ServiceMeter(this.Service).FindByLastName(targetValue));
             }
 
             if (string.Equals(targetProp, "dateofbirth", StringComparison.OrdinalIgnoreCase))
             {
                 if (Program.IsLogging)
                 {
-                    return new ServiceLogger(new ServiceMeter(this.Service)).FindByBirthDate(targetValue);
+                    return GetRecordsByIterator(new ServiceLogger(new ServiceMeter(this.Service)).FindByBirthDate(targetValue));
                 }
 
-                return new ServiceMeter(this.Service).FindByBirthDate(targetValue);
+                return GetRecordsByIterator(new ServiceMeter(this.Service).FindByBirthDate(targetValue));
             }
 
             return new ReadOnlyCollection<FileCabinetRecord>(Array.Empty<FileCabinetRecord>());

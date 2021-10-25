@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Represents validation modes.
+    /// Represents records validation modes.
     /// </summary>
     public interface IRecordValidator
     {

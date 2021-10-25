@@ -169,22 +169,42 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
+        public IRecordIterator FindByBirthDate(string dateOfBirth)
         {
-            return new (this.GetExistingRecords().Where(rec => rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture).Equals(dateOfBirth)).ToList());
+            bool IsSearchable(FileCabinetRecord rec)
+            {
+                return rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)
+                .Replace("\0", string.Empty)
+                .Equals(dateOfBirth, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return new FilesystemIterator(this.path, 277, IsSearchable);
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        public IRecordIterator FindByFirstName(string firstName)
         {
-            var records = this.GetExistingRecords();
-            return new (records.Where(rec => rec.FirstName.Replace("\0", string.Empty).Equals(firstName, StringComparison.OrdinalIgnoreCase)).ToList());
+            bool IsSearchable(FileCabinetRecord rec)
+            {
+                return rec.FirstName
+                .Replace("\0", string.Empty)
+                .Equals(firstName, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return new FilesystemIterator(this.path, 277, IsSearchable);
         }
 
         /// <inheritdoc/>
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastname)
+        public IRecordIterator FindByLastName(string lastname)
         {
-            return new (this.GetExistingRecords().Where(rec => rec.LastName.Replace("\0", string.Empty).Equals(lastname, StringComparison.OrdinalIgnoreCase)).ToList());
+            bool IsSearchable(FileCabinetRecord rec)
+            {
+                return rec.LastName
+                .Replace("\0", string.Empty)
+                .Equals(lastname, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return new FilesystemIterator(this.path, 277, IsSearchable);
         }
 
         /// <inheritdoc/>
@@ -192,7 +212,7 @@ namespace FileCabinetApp
         {
             List<RecordDataConverter> recordsData = this.GetRecordsData();
 
-            List<FileCabinetRecord> records = recordsData.Select(rec => ConvertToRecord(rec)).ToList();
+            List<FileCabinetRecord> records = recordsData.Select(rec => new FileCabinetRecord(rec)).ToList();
 
             return new ReadOnlyCollection<FileCabinetRecord>(records);
         }
@@ -271,7 +291,7 @@ namespace FileCabinetApp
         public List<FileCabinetRecord> GetExistingRecords()
         {
             var records = this.GetRecordsData().Where(rec => rec.Status == 0).ToList();
-            return records.Select(rec => ConvertToRecord(rec)).ToList();
+            return records.Select(rec => new FileCabinetRecord(rec)).ToList();
         }
 
         /// <summary>
@@ -300,53 +320,6 @@ namespace FileCabinetApp
 
             Array.Copy(nameAsBytes, fixedByteArray, nameLength);
             return fixedByteArray;
-        }
-
-        private static RecordDataConverter GetRecord(int size, ref int recordIndex, FileStream fs, BinaryReader reader)
-        {
-            long offset = 0;
-            fs.Seek(offset, SeekOrigin.Begin);
-
-            RecordDataConverter record = new RecordDataConverter();
-            offset = size * recordIndex;
-            fs.Seek(offset, SeekOrigin.Begin);
-
-            record.Status = reader.ReadInt16();
-
-            record.Id = reader.ReadInt32();
-
-            byte[] firstname = reader.ReadBytes(120);
-            record.SetFirstName(Encoding.UTF8.GetString(firstname).ToList());
-
-            byte[] lastname = reader.ReadBytes(120);
-            record.SetLastName(Encoding.UTF8.GetString(lastname).ToList());
-
-            record.Year = reader.ReadInt32();
-            record.Month = reader.ReadInt32();
-            record.Day = reader.ReadInt32();
-
-            record.MoneyCount = reader.ReadDecimal();
-            record.PIN = reader.ReadInt16();
-            record.CharProp = reader.ReadChar();
-
-            recordIndex++;
-            return record;
-        }
-
-        private static FileCabinetRecord ConvertToRecord(RecordDataConverter data)
-        {
-            FileCabinetRecord record = new FileCabinetRecord
-            {
-                Id = data.Id,
-                FirstName = string.Concat(data.GetFirstName().ToArray()),
-                LastName = string.Concat(data.GetLastName().ToArray()),
-                DateOfBirth = new DateTime(data.Year, data.Month, data.Day),
-                MoneyCount = data.MoneyCount,
-                PIN = data.PIN,
-                CharProp = data.CharProp,
-            };
-
-            return record;
         }
 
         private List<int> GetOffsets(string fieldName)
@@ -433,7 +406,8 @@ namespace FileCabinetApp
                 {
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        records.Add(GetRecord(size, ref recordIndex, fs, reader));
+                        records.Add(RecordsReader.GetRecord(size, recordIndex, fs, reader));
+                        recordIndex++;
                     }
                 }
             }
