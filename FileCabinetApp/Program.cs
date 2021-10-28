@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -29,6 +29,8 @@ namespace FileCabinetApp
         /// </summary>
         /// <value>Is app running or stopped.</value>
         public static bool IsRunning { get; set; } = true;
+
+        public static bool IsLogging { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether actions written in log.
