@@ -55,7 +55,10 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public IEnumerator<FileCabinetRecord> GetEnumerator()
         {
-            return ((IEnumerable<FileCabinetRecord>)this.records).GetEnumerator();
+            for (int i = 0; i < this.records.Count; i++)
+            {
+                yield return this.records[i];
+            }
         }
 
         /// <inheritdoc/>

@@ -50,7 +50,6 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            Console.WriteLine();
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
 
             IsLoggingStarted(args);
