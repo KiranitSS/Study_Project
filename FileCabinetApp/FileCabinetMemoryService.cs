@@ -136,19 +136,19 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             return new MemoryIterator(FindByKey(firstName, this.firstNameDictionary));
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByLastName(string lastname)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
         {
             return new MemoryIterator(FindByKey(lastname, this.lastNameDictionary));
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByBirthDate(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
             return new MemoryIterator(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
@@ -216,8 +216,7 @@ namespace FileCabinetApp
 
         private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
         {
-            List<FileCabinetRecord> currentRecords;
-            filterDictionary.TryGetValue(key, out currentRecords);
+            filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
 
             if (currentRecords == null)
             {

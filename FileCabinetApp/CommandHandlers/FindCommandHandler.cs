@@ -66,13 +66,13 @@ namespace FileCabinetApp.CommandHandlers
             return parameters[(startIndex + 1) ..];
         }
 
-        private static ReadOnlyCollection<FileCabinetRecord> GetRecordsByIterator(IRecordIterator iterator)
+        private static ReadOnlyCollection<FileCabinetRecord> GetRecordsByIterator(IEnumerable<FileCabinetRecord> iterator)
         {
             List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
-            while (iterator.HasMore())
+            foreach (var item in iterator)
             {
-                records.Add(iterator.GetNext());
+                records.Add(item);
             }
 
             return new ReadOnlyCollection<FileCabinetRecord>(records);

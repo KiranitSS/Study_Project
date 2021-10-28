@@ -43,21 +43,21 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="firstName">Search key.</param>
         /// <returns>Returns record.</returns>
-        public IRecordIterator FindByFirstName(string firstName);
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName);
 
         /// <summary>
         /// Searches for an entry by lastname.
         /// </summary>
         /// <param name="lastname">Search key.</param>
         /// <returns>>Returns record.</returns>
-        public IRecordIterator FindByLastName(string lastname);
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname);
 
         /// <summary>
         /// Searches for an entry by date of birth.
         /// </summary>
         /// <param name="dateOfBirth">Search key.</param>
         /// <returns>>Returns record.</returns>
-        public IRecordIterator FindByBirthDate(string dateOfBirth);
+        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth);
 
         /// <summary>
         /// Restores records.

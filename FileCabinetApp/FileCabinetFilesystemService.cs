@@ -169,7 +169,7 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByBirthDate(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
             bool IsSearchable(FileCabinetRecord rec)
             {
@@ -182,7 +182,7 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             bool IsSearchable(FileCabinetRecord rec)
             {
@@ -195,7 +195,7 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IRecordIterator FindByLastName(string lastname)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
         {
             bool IsSearchable(FileCabinetRecord rec)
             {
