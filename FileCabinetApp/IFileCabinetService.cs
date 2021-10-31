@@ -81,5 +81,11 @@ namespace FileCabinetApp
         /// Purges removed records from storage.
         /// </summary>
         public void PurgeRecords();
+
+        /// <summary>
+        /// Insert record in records list.
+        /// </summary>
+        /// <param name="parameters">Record for insert.</param>
+        public void InsertRecord(RecordParameters parameters);
     }
 }

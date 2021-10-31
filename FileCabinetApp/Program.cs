@@ -50,7 +50,7 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+            Console.WriteLine($"File Cabinet Application, developed by {DeveloperName}");
 
             IsLoggingStarted(args);
 
@@ -61,19 +61,19 @@ namespace FileCabinetApp
 
             var commandHandler = CreateCommandHandlers();
 
-            Console.WriteLine(Program.HintMessage);
+            Console.WriteLine(HintMessage);
             Console.WriteLine();
 
             do
             {
                 Console.Write("> ");
-                var inputs = Console.ReadLine().Split(' ', 2);
+                var inputs = Console.ReadLine().Trim().Split(' ', 2);
                 const int commandIndex = 0;
                 var command = inputs[commandIndex];
 
                 if (string.IsNullOrEmpty(command))
                 {
-                    Console.WriteLine(Program.HintMessage);
+                    Console.WriteLine(HintMessage);
                     continue;
                 }
 
@@ -201,12 +201,13 @@ namespace FileCabinetApp
             var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
             var importHandler = new ImportCommandHandler(fileCabinetService);
+            var insertHandler = new InsertCommandHandler(fileCabinetService);
             var removeHandler = new RemoveCommandHandler(fileCabinetService);
             var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
 
             helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
-                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(removeHandler)
+                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler).SetNext(removeHandler)
                 .SetNext(purgehandler).SetNext(exitHandler);
 
             return helpHandler;

@@ -125,12 +125,7 @@ namespace FileCabinetApp
 
             currentRecords.Remove(currentRecord);
 
-            currentRecord.FirstName = parameters.FirstName;
-            currentRecord.LastName = parameters.LastName;
-            currentRecord.DateOfBirth = parameters.DateOfBirth;
-            currentRecord.PIN = parameters.PIN;
-            currentRecord.MoneyCount = parameters.MoneyCount;
-            currentRecord.CharProp = parameters.CharProp;
+            ReplaceRecordParameters(parameters, currentRecord);
 
             this.AddRecordToFilterDictionaries(currentRecord);
         }
@@ -195,6 +190,61 @@ namespace FileCabinetApp
         public void PurgeRecords()
         {
             Console.WriteLine("Nothing to purge.");
+        }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (parameters.Id < 0)
+            {
+                Console.WriteLine("Incorrect ID");
+            }
+
+            int index = this.records.FindIndex(rec => rec.Id == parameters.Id);
+
+            if (index < 0)
+            {
+                var record = new FileCabinetRecord
+                {
+                    Id = parameters.Id,
+                    FirstName = parameters.FirstName,
+                    LastName = parameters.LastName,
+                    DateOfBirth = parameters.DateOfBirth,
+                    PIN = parameters.PIN,
+                    MoneyCount = parameters.MoneyCount,
+                    CharProp = parameters.CharProp,
+                };
+
+                this.AddRecordToFilterDictionaries(record);
+
+                this.records.Add(record);
+            }
+            else
+            {
+                var currentRecord = this.records[index];
+                this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
+
+                currentRecords.Remove(currentRecord);
+
+                ReplaceRecordParameters(parameters, currentRecord);
+
+                this.AddRecordToFilterDictionaries(currentRecord);
+            }
+        }
+
+        private static void ReplaceRecordParameters(RecordParameters parameters, FileCabinetRecord currentRecord)
+        {
+            currentRecord.FirstName = parameters.FirstName;
+            currentRecord.LastName = parameters.LastName;
+            currentRecord.DateOfBirth = parameters.DateOfBirth;
+            currentRecord.PIN = parameters.PIN;
+            currentRecord.MoneyCount = parameters.MoneyCount;
+            currentRecord.CharProp = parameters.CharProp;
         }
 
         /// <summary>

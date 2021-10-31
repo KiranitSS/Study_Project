@@ -91,6 +91,14 @@ namespace FileCabinetApp
             return records;
         }
 
+        public void InsertRecord(RecordParameters parameters)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.service.InsertRecord(parameters);
+            stopwatch.Stop();
+            Console.WriteLine($"Insert method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+        }
+
         /// <inheritdoc/>
         public FileCabinetServiceSnapshot MakeSnapshot()
         {

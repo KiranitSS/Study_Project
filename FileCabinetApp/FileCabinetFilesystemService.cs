@@ -135,16 +135,17 @@ namespace FileCabinetApp
             }
 
             List<FileCabinetRecord> records = this.GetExistingRecords();
+            int index = records.FindIndex(rec => rec.Id == id);
 
-            if (id > records.Count || id < 1)
+            if (index < 0)
             {
-                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
+                Console.WriteLine("Record doesn't exists.");
                 return;
             }
 
             var data = new RecordDataConverter(parameters);
 
-            records[id - 1] = new FileCabinetRecord
+            records[index] = new FileCabinetRecord
             {
                 Id = id,
                 FirstName = string.Concat(data.GetFirstName()),
@@ -156,7 +157,7 @@ namespace FileCabinetApp
             };
 
             this.fileStream.Dispose();
-            this.fileStream = new FileStream(this.path, FileMode.Create);
+            this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
 
             foreach (var record in records)
             {
@@ -282,6 +283,45 @@ namespace FileCabinetApp
             this.fileStream = new FileStream(this.path, FileMode.Create);
 
             records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+        }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            var records = this.GetExistingRecords();
+            int index = records.FindIndex(rec => rec.Id == parameters.Id);
+
+            if (index < 0)
+            {
+                this.fileStream.Dispose();
+                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+
+                this.SaveRecord(new RecordDataConverter(parameters));
+            }
+            else
+            {
+                var record = new FileCabinetRecord
+                {
+                    Id = parameters.Id,
+                    FirstName = parameters.FirstName,
+                    LastName = parameters.LastName,
+                    DateOfBirth = parameters.DateOfBirth,
+                    PIN = parameters.PIN,
+                    MoneyCount = parameters.MoneyCount,
+                    CharProp = parameters.CharProp,
+                };
+
+                records[index] = record;
+
+                this.fileStream.Dispose();
+                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+            }
         }
 
         /// <summary>

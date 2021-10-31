@@ -175,5 +175,20 @@ namespace FileCabinetApp
         {
             throw new NotSupportedException();
         }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            using (StreamWriter writer = new StreamWriter(this.logPath, true))
+            {
+                string msg = $"{DateTime.Now} - Calling Insert() with Parameters '{parameters}'.";
+
+                Console.WriteLine(msg);
+                writer.WriteLine(msg);
+                writer.Flush();
+            }
+
+            this.service.InsertRecord(parameters);
+        }
     }
 }
