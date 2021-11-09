@@ -78,6 +78,12 @@ namespace FileCabinetApp
         public void RemoveRecord(int id);
 
         /// <summary>
+        /// Deletes record from records list.
+        /// </summary>
+        /// <param name="parameters">Parameters of the record to delete.</param>
+        public void DeleteRecords(string parameters);
+
+        /// <summary>
         /// Purges removed records from storage.
         /// </summary>
         public void PurgeRecords();

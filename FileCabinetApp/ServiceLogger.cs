@@ -190,5 +190,20 @@ namespace FileCabinetApp
 
             this.service.InsertRecord(parameters);
         }
+
+        /// <inheritdoc/>
+        public void DeleteRecords(string parameters)
+        {
+            using (StreamWriter writer = new StreamWriter(this.logPath, true))
+            {
+                string msg = $"{DateTime.Now} - Calling Delete() with Parameters '{parameters}'.";
+
+                Console.WriteLine(msg);
+                writer.WriteLine(msg);
+                writer.Flush();
+            }
+
+            this.service.DeleteRecords(parameters);
+        }
     }
 }

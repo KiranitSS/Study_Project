@@ -135,7 +135,6 @@ namespace FileCabinetApp.CommandHandlers
 
             this.Service.InsertRecord(data);
             Console.WriteLine("Record inserted");
-
         }
     }
 }

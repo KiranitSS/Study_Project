@@ -39,8 +39,8 @@ namespace FileCabinetApp.CommandHandlers
 
             if (this.Service.GetType() == typeof(FileCabinetFilesystemService))
             {
-                int removedRecordsCount = recordsCount - (this.Service as FileCabinetFilesystemService).GetExistingRecords().Count;
                 int existingRecordsCount = (this.Service as FileCabinetFilesystemService).GetExistingRecords().Count;
+                int removedRecordsCount = recordsCount - existingRecordsCount;
 
                 Console.WriteLine($"Here {existingRecordsCount} record(s).");
                 Console.WriteLine($"And here {removedRecordsCount} removed records.");

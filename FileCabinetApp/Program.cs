@@ -50,6 +50,7 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
+            args = new string[] { "--storage", "file" };
             Console.WriteLine($"File Cabinet Application, developed by {DeveloperName}");
 
             IsLoggingStarted(args);
@@ -203,12 +204,13 @@ namespace FileCabinetApp
             var importHandler = new ImportCommandHandler(fileCabinetService);
             var insertHandler = new InsertCommandHandler(fileCabinetService);
             var removeHandler = new RemoveCommandHandler(fileCabinetService);
+            var deleteHandler = new DeleteCommandHandler(fileCabinetService);
             var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
 
             helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
                 .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler).SetNext(removeHandler)
-                .SetNext(purgehandler).SetNext(exitHandler);
+                .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler);
 
             return helpHandler;
         }

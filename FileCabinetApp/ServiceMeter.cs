@@ -91,6 +91,7 @@ namespace FileCabinetApp
             return records;
         }
 
+        /// <inheritdoc/>
         public void InsertRecord(RecordParameters parameters)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -112,6 +113,15 @@ namespace FileCabinetApp
             this.service.PurgeRecords();
             stopwatch.Stop();
             Console.WriteLine($"Purge method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+        }
+
+        /// <inheritdoc/>
+        public void DeleteRecords(string parameters)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.service.DeleteRecords(parameters);
+            stopwatch.Stop();
+            Console.WriteLine($"Delete method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
 
         /// <inheritdoc/>
