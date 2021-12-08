@@ -205,10 +205,11 @@ namespace FileCabinetApp
             var deleteHandler = new DeleteCommandHandler(fileCabinetService);
             var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
+            var correctionHandler = new CorrectionCommandHandler();
 
             helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(updateHandler).SetNext(findHandler)
                 .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
-                .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler);
+                .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler).SetNext(correctionHandler);
 
             return helpHandler;
         }
