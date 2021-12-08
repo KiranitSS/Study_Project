@@ -33,19 +33,10 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.EditRecord(id, parameters);
-            stopwatch.Stop();
-            Console.WriteLine($"Edit method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
-        }
-
-        /// <inheritdoc/>
-        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> paramsByWhichChange)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.UpdateRecords(paramsToChange, paramsByWhichChange);
+            this.service.UpdateRecords(paramsToChange, searchCriteria);
             stopwatch.Stop();
             Console.WriteLine($"Update method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
@@ -131,15 +122,6 @@ namespace FileCabinetApp
             this.service.DeleteRecords(parameters);
             stopwatch.Stop();
             Console.WriteLine($"Delete method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
-        }
-
-        /// <inheritdoc/>
-        public void RemoveRecord(int id)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.RemoveRecord(id);
-            stopwatch.Stop();
-            Console.WriteLine($"Remove method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
 
         /// <inheritdoc/>

@@ -20,13 +20,6 @@ namespace FileCabinetApp
         public int CreateRecord(RecordParameters parameters);
 
         /// <summary>
-        /// Edits records properties.
-        /// </summary>
-        /// <param name="id">Persons ID.</param>
-        /// <param name="parameters">Contains edit records parameters.</param>
-        public void EditRecord(int id, RecordParameters parameters);
-
-        /// <summary>
         /// Updates records properties.
         /// </summary>
         /// <param name="paramsToChange">Records params which would be changed.</param>
@@ -77,12 +70,6 @@ namespace FileCabinetApp
         /// </summary>
         /// <returns>Returns <see cref="FileCabinetServiceSnapshot"/> instance.</returns>
         public FileCabinetServiceSnapshot MakeSnapshot();
-
-        /// <summary>
-        /// Removes record from records list.
-        /// </summary>
-        /// <param name="id">ID of the record to delete.</param>
-        public void RemoveRecord(int id);
 
         /// <summary>
         /// Deletes record from records list.

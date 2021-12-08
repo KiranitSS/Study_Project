@@ -107,30 +107,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
-        {
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            if (id > this.records.Count + 1 || id < 0)
-            {
-                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
-                return;
-            }
-
-            var currentRecord = this.records[id - 1];
-            this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
-
-            currentRecords.Remove(currentRecord);
-
-            ReplaceRecordParameters(parameters, currentRecord);
-
-            this.AddRecordToFilterDictionaries(currentRecord);
-        }
-
-        /// <inheritdoc/>
         public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
             if (paramsToChange is null)
@@ -202,32 +178,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void RemoveRecord(int id)
-        {
-            try
-            {
-                List<FileCabinetRecord> recordsForDeleting;
-                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
-
-                this.records.Remove(record);
-
-                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine($"Record #{id} doesn't exists.");
-            }
-        }
-
-        /// <inheritdoc/>
         public void DeleteRecords(string parameters)
         {
             if (parameters is null)
@@ -239,7 +189,7 @@ namespace FileCabinetApp
             int separatorIndex = parameters.IndexOf('=');
 
             string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
-            string propValue = parameters[(separatorIndex + 1)..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1) ..].Trim().Replace("'", string.Empty).ToUpperInvariant();
 
             if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
             {
@@ -418,6 +368,31 @@ namespace FileCabinetApp
             AddRecordToDictionary(record, record.FirstName, this.firstNameDictionary);
             AddRecordToDictionary(record, record.LastName, this.lastNameDictionary);
             AddRecordToDictionary(record, dateOfBirthKey, this.birthdateDictionary);
+        }
+
+        private void RemoveRecord(int id)
+        {
+            try
+            {
+                List<FileCabinetRecord> recordsForDeleting;
+                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
+
+                this.records.Remove(record);
+
+                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+            }
         }
     }
 }

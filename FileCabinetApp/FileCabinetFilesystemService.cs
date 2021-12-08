@@ -127,49 +127,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
-        {
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            List<FileCabinetRecord> records = this.GetExistingRecords();
-            int index = records.FindIndex(rec => rec.Id == id);
-
-            if (index < 0)
-            {
-                Console.WriteLine("Record doesn't exists.");
-                return;
-            }
-
-            var data = new RecordDataConverter(parameters);
-
-            records[index] = new FileCabinetRecord
-            {
-                Id = id,
-                FirstName = string.Concat(data.GetFirstName()),
-                LastName = string.Concat(data.GetLastName()),
-                DateOfBirth = new DateTime(data.Year, data.Month, data.Day),
-                MoneyCount = data.MoneyCount,
-                PIN = data.PIN,
-                CharProp = data.CharProp,
-            };
-
-            this.fileStream.Dispose();
-            this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
-
-            foreach (var record in records)
-            {
-                this.fileStream.Dispose();
-                this.fileStream = new FileStream(this.path, FileMode.Append);
-                this.SaveRecord(new RecordDataConverter(record));
-            }
-
-            this.fileStream.Dispose();
-        }
-
-        /// <inheritdoc/>
         public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
             if (paramsToChange is null)
@@ -287,48 +244,6 @@ namespace FileCabinetApp
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
             return new FileCabinetServiceSnapshot(this.GetExistingRecords().ToArray());
-        }
-
-        /// <inheritdoc/>
-        public void RemoveRecord(int id)
-        {
-            var records = this.GetExistingRecords();
-            var removedRecords = this.GetRemovedRecords();
-
-            if (records is null)
-            {
-                Console.WriteLine($"Record #{id} doesn't exists.");
-                return;
-            }
-
-            try
-            {
-                var recordForRemoving = records.Find(rec => rec.Id == id);
-
-                if (recordForRemoving is null)
-                {
-                    Console.WriteLine($"Record #{id} doesn't exists.");
-                    return;
-                }
-
-                var recordData = new RecordDataConverter(recordForRemoving);
-
-                records.Remove(recordForRemoving);
-                recordData.Status = 1;
-
-                removedRecords.Add(recordData);
-
-                this.fileStream.Close();
-                this.fileStream = new FileStream(this.path, FileMode.Create);
-
-                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
-                removedRecords.ForEach(rec => this.SaveRecord(rec));
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine($"Record #{id} doesn't exists.");
-            }
         }
 
         /// <inheritdoc/>
@@ -599,6 +514,47 @@ namespace FileCabinetApp
             }
 
             return records;
+        }
+
+        private void RemoveRecord(int id)
+        {
+            var records = this.GetExistingRecords();
+            var removedRecords = this.GetRemovedRecords();
+
+            if (records is null)
+            {
+                Console.WriteLine($"Record #{id} doesn't exists.");
+                return;
+            }
+
+            try
+            {
+                var recordForRemoving = records.Find(rec => rec.Id == id);
+
+                if (recordForRemoving is null)
+                {
+                    Console.WriteLine($"Record #{id} doesn't exists.");
+                    return;
+                }
+
+                var recordData = new RecordDataConverter(recordForRemoving);
+
+                records.Remove(recordForRemoving);
+                recordData.Status = 1;
+
+                removedRecords.Add(recordData);
+
+                this.fileStream.Close();
+                this.fileStream = new FileStream(this.path, FileMode.Create);
+
+                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+                removedRecords.ForEach(rec => this.SaveRecord(rec));
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+            }
         }
     }
 }

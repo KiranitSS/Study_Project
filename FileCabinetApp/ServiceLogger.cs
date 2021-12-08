@@ -51,40 +51,18 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
             using (StreamWriter writer = new StreamWriter(this.logPath, true))
             {
-                string msg = $"{DateTime.Now} - Calling Edit() with Id = '{id}, 'FirstName = '{parameters.FirstName}', LastName = '{parameters.LastName}'," +
-                                $" DateOfBirth = '{parameters.DateOfBirth}', MoneyCount = '{parameters.MoneyCount}'," +
-                                $" Pin = '{parameters.PIN}', CharProp = '{parameters.CharProp}'";
+                string msg = $"{DateTime.Now} - Calling Update() with paramsToChange '{paramsToChange}', paramsByWhichChange '{searchCriteria}'";
 
                 Console.WriteLine(msg);
                 writer.WriteLine(msg);
                 writer.Flush();
             }
 
-            this.service.EditRecord(id, parameters);
-        }
-
-        /// <inheritdoc/>
-        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> paramsByWhichChange)
-        {
-            using (StreamWriter writer = new StreamWriter(this.logPath, true))
-            {
-                string msg = $"{DateTime.Now} - Calling Update() with paramsToChange '{paramsToChange}', paramsByWhichChange '{paramsByWhichChange}'";
-
-                Console.WriteLine(msg);
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-
-            this.service.UpdateRecords(paramsToChange, paramsByWhichChange);
+            this.service.UpdateRecords(paramsToChange, searchCriteria);
         }
 
         /// <inheritdoc/>
@@ -172,21 +150,6 @@ namespace FileCabinetApp
             }
 
             this.service.PurgeRecords();
-        }
-
-        /// <inheritdoc/>
-        public void RemoveRecord(int id)
-        {
-            using (StreamWriter writer = new StreamWriter(this.logPath, true))
-            {
-                string msg = $"{DateTime.Now} - Calling Remove() with Id '{id}'";
-
-                Console.WriteLine(msg);
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-
-            this.service.RemoveRecord(id);
         }
 
         /// <inheritdoc/>
