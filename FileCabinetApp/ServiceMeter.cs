@@ -42,6 +42,15 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> paramsByWhichChange)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.service.UpdateRecords(paramsToChange, paramsByWhichChange);
+            stopwatch.Stop();
+            Console.WriteLine($"Update method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+        }
+
+        /// <inheritdoc/>
         public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();

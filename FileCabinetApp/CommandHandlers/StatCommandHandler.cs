@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace FileCabinetApp.CommandHandlers
 {
     /// <summary>
-    /// Represents handler class for clearing deleted records.
+    /// Represents handler class for getting count of records in storage.
     /// </summary>
     public class StatCommandHandler : ServiceCommandHandlerBase
     {

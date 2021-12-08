@@ -13,6 +13,10 @@ namespace FileCabinetApp
         private readonly IFileCabinetService service;
         private readonly string logPath;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceLogger"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
         public ServiceLogger(IFileCabinetService service)
         {
             if (service is null)
@@ -66,6 +70,21 @@ namespace FileCabinetApp
             }
 
             this.service.EditRecord(id, parameters);
+        }
+
+        /// <inheritdoc/>
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> paramsByWhichChange)
+        {
+            using (StreamWriter writer = new StreamWriter(this.logPath, true))
+            {
+                string msg = $"{DateTime.Now} - Calling Update() with paramsToChange '{paramsToChange}', paramsByWhichChange '{paramsByWhichChange}'";
+
+                Console.WriteLine(msg);
+                writer.WriteLine(msg);
+                writer.Flush();
+            }
+
+            this.service.UpdateRecords(paramsToChange, paramsByWhichChange);
         }
 
         /// <inheritdoc/>

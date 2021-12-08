@@ -31,11 +31,34 @@ namespace FileCabinetApp.CommandHandlers
             return base.Handle(request);
         }
 
+        private static bool AreCorrectDeletionParameters(string parameters)
+        {
+            if (parameters.IndexOf("where", StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                return false;
+            }
+
+            parameters = parameters.Replace("where", string.Empty).TrimStart();
+
+            if (string.IsNullOrEmpty(parameters) || !parameters.Contains('=') || parameters.Length < 3)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private void Delete(string parameters)
         {
             if (string.IsNullOrWhiteSpace(parameters))
             {
                 Console.WriteLine("Parameters can't be empty.");
+                return;
+            }
+
+            if (!AreCorrectDeletionParameters(parameters))
+            {
+                Console.WriteLine("Incorrect parameters");
                 return;
             }
 

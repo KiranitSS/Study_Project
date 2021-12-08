@@ -131,6 +131,50 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
+        {
+            if (paramsToChange is null)
+            {
+                throw new ArgumentNullException(nameof(paramsToChange));
+            }
+
+            if (searchCriteria is null)
+            {
+                throw new ArgumentNullException(nameof(searchCriteria));
+            }
+
+            if (paramsToChange.Count == 0 || searchCriteria.Count == 0)
+            {
+                Console.WriteLine("Not enough parameters.");
+                return;
+            }
+
+            List<int> matchingIndexes = ServiceUtils.FindByProp(this.records, searchCriteria.First().Key, searchCriteria.First().Value);
+
+            List<int> searchingIndexes;
+
+            foreach (var critria in searchCriteria)
+            {
+                searchingIndexes = ServiceUtils.FindByProp(this.records, critria.Key, critria.Value);
+                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+            }
+
+            if (matchingIndexes.Count == 0)
+            {
+                Console.WriteLine("No any records changed.");
+                return;
+            }
+
+            int recordIndex;
+
+            foreach (var id in matchingIndexes)
+            {
+                recordIndex = this.records.FindIndex(x => x.Id == id);
+                this.records[recordIndex] = GetUpdatedRecord(this.records[recordIndex], paramsToChange);
+            }
+        }
+
+        /// <inheritdoc/>
         public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             return new MemoryIterator(FindByKey(firstName, this.firstNameDictionary));
@@ -186,7 +230,7 @@ namespace FileCabinetApp
         /// <inheritdoc/>
         public void DeleteRecords(string parameters)
         {
-            if (parameters is null || !AreCorrectDeletionParameters(parameters))
+            if (parameters is null)
             {
                 return;
             }
@@ -195,7 +239,7 @@ namespace FileCabinetApp
             int separatorIndex = parameters.IndexOf('=');
 
             string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
-            string propValue = parameters[(separatorIndex + 1) ..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1)..].Trim().Replace("'", string.Empty).ToUpperInvariant();
 
             if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
             {
@@ -203,7 +247,7 @@ namespace FileCabinetApp
                 return;
             }
 
-            var targetIndexes = this.FindByProp(propName, propValue);
+            var targetIndexes = ServiceUtils.FindByProp(this.records, propName, propValue);
 
             if (targetIndexes.Count == 0)
             {
@@ -332,90 +376,40 @@ namespace FileCabinetApp
             }
         }
 
-        private static bool AreCorrectDeletionParameters(string parameters)
+        private static FileCabinetRecord GetUpdatedRecord(FileCabinetRecord record, Dictionary<string, string> paramsToChange)
         {
-            if (!parameters.Contains("where", StringComparison.OrdinalIgnoreCase))
+            foreach (var parameter in paramsToChange)
             {
-                Console.WriteLine("Parameters are missed.");
-                return false;
+                switch (parameter.Key.ToUpperInvariant())
+                {
+                    case "ID":
+                        record.Id = int.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "FIRSTNAME":
+                        record.FirstName = parameter.Value;
+                        break;
+                    case "LASTNAME":
+                        record.LastName = parameter.Value;
+                        break;
+                    case "DATEOFBIRTH":
+                        record.DateOfBirth = DateTime.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "MONEYCOUNT":
+                        record.MoneyCount = decimal.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "PIN":
+                        record.PIN = short.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "CHARPROP":
+                        record.CharProp = parameter.Value[0];
+                        break;
+                    default:
+                        Console.WriteLine("Incorrect property name.");
+                        break;
+                }
             }
 
-            parameters = parameters.Replace("where", string.Empty).TrimStart();
-
-            if (string.IsNullOrEmpty(parameters) || !parameters.Contains('=') || parameters.Length < 3)
-            {
-                Console.WriteLine("Not enougth parameters.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private List<int> FindByProp(string propName, string propValue)
-        {
-            var indexes = new List<int>();
-
-            switch (propName)
-            {
-                case "ID":
-                    indexes = this.records
-                        .Where(rec => rec.Id
-                        .ToString(CultureInfo.InvariantCulture)
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "FIRSTNAME":
-                    indexes = this.records
-                        .Where(rec => rec.FirstName
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "LASTNAME":
-                    indexes = this.records
-                        .Where(rec => rec.LastName
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "DATEOFBIRTH":
-                    indexes = this.records
-                        .Where(rec => rec.DateOfBirth
-                        .ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "MONEYCOUNT":
-                    indexes = this.records
-                        .Where(rec => rec.MoneyCount
-                        .ToString(CultureInfo.InvariantCulture)
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "PIN":
-                    indexes = this.records
-                        .Where(rec => rec.PIN
-                        .ToString(CultureInfo.InvariantCulture)
-                        .Equals(propValue, StringComparison.OrdinalIgnoreCase))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                case "CHARPROP":
-                    indexes = this.records
-                        .Where(rec => rec.CharProp
-                        .Equals(propValue))
-                        .Select(rec => rec.Id)
-                        .ToList();
-                    break;
-                default:
-                    Console.WriteLine("Incorrect property name.");
-                    break;
-            }
-
-            return indexes;
+            return record;
         }
 
         private void AddRecordToFilterDictionaries(FileCabinetRecord record)

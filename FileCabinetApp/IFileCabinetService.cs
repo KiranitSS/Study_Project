@@ -27,6 +27,13 @@ namespace FileCabinetApp
         public void EditRecord(int id, RecordParameters parameters);
 
         /// <summary>
+        /// Updates records properties.
+        /// </summary>
+        /// <param name="paramsToChange">Records params which would be changed.</param>
+        /// <param name="searchCriteria">Params by which record would be founded.</param>
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria);
+
+        /// <summary>
         /// Create copy of all records.
         /// </summary>
         /// <returns>Return copy of records list.</returns>

@@ -50,7 +50,6 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            args = new string[] { "--storage", "file" };
             Console.WriteLine($"File Cabinet Application, developed by {DeveloperName}");
 
             IsLoggingStarted(args);
@@ -134,7 +133,7 @@ namespace FileCabinetApp
             return parameters;
         }
 
-        public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
+        private static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
             if (builder is null)
             {
@@ -144,7 +143,7 @@ namespace FileCabinetApp
             return ImportValidator(builder, "default");
         }
 
-        public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
+        private static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
             if (builder is null)
             {
@@ -198,6 +197,7 @@ namespace FileCabinetApp
             var createHandler = new CreateCommandHandler(fileCabinetService);
             var statHandler = new StatCommandHandler(fileCabinetService);
             var editHandler = new EditCommandHandler(fileCabinetService);
+            var updateHandler = new UpdateCommandHandler(fileCabinetService);
             var findHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
@@ -208,7 +208,7 @@ namespace FileCabinetApp
             var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
 
-            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
+            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(updateHandler).SetNext(findHandler)
                 .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler).SetNext(removeHandler)
                 .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler);
 
