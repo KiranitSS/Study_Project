@@ -25,7 +25,9 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
             new string[] { "import", "imports the records", "The 'import' command imports records from external file." },
             new string[] { "remove", "removes the record", "The 'remove' command removes record by id." },
+            new string[] { "delete", "deletes the records", "The 'delete' command deletes records by condition." },
             new string[] { "purge", "purges the record", "The 'purge' command clear db from removed records." },
+            new string[] { "insert", "insert the record", "The 'insert' command add record with parameters." },
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };

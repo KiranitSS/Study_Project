@@ -127,45 +127,55 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
-            if (parameters is null)
+            if (paramsToChange is null)
             {
-                throw new ArgumentNullException(nameof(parameters));
+                throw new ArgumentNullException(nameof(paramsToChange));
             }
 
-            List<FileCabinetRecord> records = this.GetExistingRecords();
-
-            if (id > records.Count || id < 1)
+            if (searchCriteria is null)
             {
-                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
+                throw new ArgumentNullException(nameof(searchCriteria));
+            }
+
+            if (paramsToChange.Count == 0 || searchCriteria.Count == 0)
+            {
+                Console.WriteLine("Not enough parameters.");
                 return;
             }
 
-            var data = new RecordDataConverter(parameters);
+            var records = this.GetExistingRecords();
 
-            records[id - 1] = new FileCabinetRecord
+            List<int> matchingIndexes = ServiceUtils.FindByProp(records, searchCriteria.First().Key, searchCriteria.First().Value);
+
+            List<int> searchingIndexes;
+
+            foreach (var critria in searchCriteria)
             {
-                Id = id,
-                FirstName = string.Concat(data.GetFirstName()),
-                LastName = string.Concat(data.GetLastName()),
-                DateOfBirth = new DateTime(data.Year, data.Month, data.Day),
-                MoneyCount = data.MoneyCount,
-                PIN = data.PIN,
-                CharProp = data.CharProp,
-            };
-
-            this.fileStream.Dispose();
-            this.fileStream = new FileStream(this.path, FileMode.Create);
-
-            foreach (var record in records)
-            {
-                this.fileStream.Dispose();
-                this.fileStream = new FileStream(this.path, FileMode.Append);
-                this.SaveRecord(new RecordDataConverter(record));
+                searchingIndexes = ServiceUtils.FindByProp(records, critria.Key, critria.Value);
+                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
             }
 
-            this.fileStream.Dispose();
+            if (matchingIndexes.Count == 0)
+            {
+                Console.WriteLine("No any records changed.");
+                return;
+            }
+
+            int recordIndex;
+
+            foreach (var id in matchingIndexes)
+            {
+                recordIndex = records.FindIndex(x => x.Id == id);
+                records[recordIndex] = GetUpdatedRecord(records[recordIndex], paramsToChange);
+            }
+
+            this.fileStream.Close();
+            this.fileStream = new FileStream(this.path, FileMode.Create);
+
+            records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+            this.GetRemovedRecords().ForEach(rec => this.SaveRecord(rec));
         }
 
         /// <inheritdoc/>
@@ -237,44 +247,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void RemoveRecord(int id)
-        {
-            var records = this.GetExistingRecords();
-            var removedRecords = this.GetRemovedRecords();
-
-            if (records is null)
-            {
-                Console.WriteLine($"Record #{id} doesn't exists.");
-                return;
-            }
-
-            try
-            {
-                var recordForRemoving = records.Find(rec => rec.Id == id);
-                var recordData = new RecordDataConverter(recordForRemoving);
-
-                records.Remove(recordForRemoving);
-                recordData.Status = 1;
-
-                removedRecords.Add(recordData);
-
-                this.fileStream.Close();
-                this.fileStream = new FileStream(this.path, FileMode.Create);
-
-                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
-                removedRecords.ForEach(rec => this.SaveRecord(rec));
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine($"Record #{id} doesn't exists.");
-                return;
-            }
-
-            Console.WriteLine($"Record #{id} has been removed.");
-        }
-
-        /// <inheritdoc/>
         public void PurgeRecords()
         {
             var records = this.GetExistingRecords();
@@ -282,6 +254,99 @@ namespace FileCabinetApp
             this.fileStream = new FileStream(this.path, FileMode.Create);
 
             records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+        }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            var records = this.GetExistingRecords();
+            int index = records.FindIndex(rec => rec.Id == parameters.Id);
+
+            if (index < 0)
+            {
+                this.fileStream.Dispose();
+                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+
+                this.SaveRecord(new RecordDataConverter(parameters));
+            }
+            else
+            {
+                var record = new FileCabinetRecord
+                {
+                    Id = parameters.Id,
+                    FirstName = parameters.FirstName,
+                    LastName = parameters.LastName,
+                    DateOfBirth = parameters.DateOfBirth,
+                    PIN = parameters.PIN,
+                    MoneyCount = parameters.MoneyCount,
+                    CharProp = parameters.CharProp,
+                };
+
+                records[index] = record;
+
+                this.fileStream.Dispose();
+                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+            }
+        }
+
+        /// <inheritdoc/>
+        public void DeleteRecords(string parameters)
+        {
+            if (parameters is null)
+            {
+                return;
+            }
+
+            parameters = parameters.Replace("where", string.Empty);
+            int separatorIndex = parameters.IndexOf('=');
+
+            string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1) ..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+
+            if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
+            {
+                Console.WriteLine("Not enougth parameters");
+                return;
+            }
+
+            var targetIndexes = ServiceUtils.FindByProp(this.GetExistingRecords(), propName, propValue);
+
+            if (targetIndexes.Count == 0)
+            {
+                Console.WriteLine("No matching entries found");
+                return;
+            }
+
+            if (targetIndexes.Count == 1)
+            {
+                this.RemoveRecord(targetIndexes[0]);
+                Console.Write($"Record #{targetIndexes[0]} is deleted.\n");
+            }
+            else
+            {
+                Console.Write("Records ");
+
+                foreach (var index in targetIndexes)
+                {
+                    this.RemoveRecord(index);
+                }
+
+                string[] ids = new string[targetIndexes.Count];
+
+                for (int i = 0; i < targetIndexes.Count; i++)
+                {
+                    ids[i] = "#" + targetIndexes[i];
+                }
+
+                Console.Write(string.Join(", ", ids));
+                Console.WriteLine(" are deleted.");
+            }
         }
 
         /// <summary>
@@ -320,6 +385,42 @@ namespace FileCabinetApp
 
             Array.Copy(nameAsBytes, fixedByteArray, nameLength);
             return fixedByteArray;
+        }
+
+        private static FileCabinetRecord GetUpdatedRecord(FileCabinetRecord record, Dictionary<string, string> paramsToChange)
+        {
+            foreach (var parameter in paramsToChange)
+            {
+                switch (parameter.Key.ToUpperInvariant())
+                {
+                    case "ID":
+                        record.Id = int.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "FIRSTNAME":
+                        record.FirstName = parameter.Value;
+                        break;
+                    case "LASTNAME":
+                        record.LastName = parameter.Value;
+                        break;
+                    case "DATEOFBIRTH":
+                        record.DateOfBirth = DateTime.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "MONEYCOUNT":
+                        record.MoneyCount = decimal.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "PIN":
+                        record.PIN = short.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "CHARPROP":
+                        record.CharProp = parameter.Value[0];
+                        break;
+                    default:
+                        Console.WriteLine("Incorrect property name.");
+                        break;
+                }
+            }
+
+            return record;
         }
 
         private List<int> GetOffsets(string fieldName)
@@ -385,6 +486,47 @@ namespace FileCabinetApp
                     Console.WriteLine("Failed to write. Reason: " + ex.Message);
                     throw;
                 }
+            }
+        }
+
+        private void RemoveRecord(int id)
+        {
+            var records = this.GetExistingRecords();
+            var removedRecords = this.GetRemovedRecords();
+
+            if (records is null)
+            {
+                Console.WriteLine($"Record #{id} doesn't exists.");
+                return;
+            }
+
+            try
+            {
+                var recordForRemoving = records.Find(rec => rec.Id == id);
+
+                if (recordForRemoving is null)
+                {
+                    Console.WriteLine($"Record #{id} doesn't exists.");
+                    return;
+                }
+
+                var recordData = new RecordDataConverter(recordForRemoving);
+
+                records.Remove(recordForRemoving);
+                recordData.Status = 1;
+
+                removedRecords.Add(recordData);
+
+                this.fileStream.Close();
+                this.fileStream = new FileStream(this.path, FileMode.Create);
+
+                records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
+                removedRecords.ForEach(rec => this.SaveRecord(rec));
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
             }
         }
 

@@ -32,8 +32,8 @@ namespace FileCabinetApp
             }
 
             this.Id = data.Id;
-            this.FirstName = string.Concat(data.GetFirstName().ToArray());
-            this.LastName = string.Concat(data.GetLastName().ToArray());
+            this.FirstName = string.Concat(data.GetFirstName().Where(x => x != '\0'));
+            this.LastName = string.Concat(data.GetLastName().Where(x => x != '\0').ToArray());
             this.DateOfBirth = new DateTime(data.Year, data.Month, data.Day);
             this.MoneyCount = data.MoneyCount;
             this.PIN = data.PIN;

@@ -13,6 +13,10 @@ namespace FileCabinetApp
         private readonly IFileCabinetService service;
         private readonly string logPath;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceLogger"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
         public ServiceLogger(IFileCabinetService service)
         {
             if (service is null)
@@ -47,25 +51,18 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
             using (StreamWriter writer = new StreamWriter(this.logPath, true))
             {
-                string msg = $"{DateTime.Now} - Calling Edit() with Id = '{id}, 'FirstName = '{parameters.FirstName}', LastName = '{parameters.LastName}'," +
-                                $" DateOfBirth = '{parameters.DateOfBirth}', MoneyCount = '{parameters.MoneyCount}'," +
-                                $" Pin = '{parameters.PIN}', CharProp = '{parameters.CharProp}'";
+                string msg = $"{DateTime.Now} - Calling Update() with paramsToChange '{paramsToChange}', paramsByWhichChange '{searchCriteria}'";
 
                 Console.WriteLine(msg);
                 writer.WriteLine(msg);
                 writer.Flush();
             }
 
-            this.service.EditRecord(id, parameters);
+            this.service.UpdateRecords(paramsToChange, searchCriteria);
         }
 
         /// <inheritdoc/>
@@ -156,24 +153,39 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void RemoveRecord(int id)
+        public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
         {
             using (StreamWriter writer = new StreamWriter(this.logPath, true))
             {
-                string msg = $"{DateTime.Now} - Calling Remove() with Id '{id}'";
+                string msg = $"{DateTime.Now} - Calling Insert() with Parameters '{parameters}'.";
 
                 Console.WriteLine(msg);
                 writer.WriteLine(msg);
                 writer.Flush();
             }
 
-            this.service.RemoveRecord(id);
+            this.service.InsertRecord(parameters);
         }
 
         /// <inheritdoc/>
-        public void Restore(FileCabinetServiceSnapshot serviceSnapshot)
+        public void DeleteRecords(string parameters)
         {
-            throw new NotSupportedException();
+            using (StreamWriter writer = new StreamWriter(this.logPath, true))
+            {
+                string msg = $"{DateTime.Now} - Calling Delete() with Parameters '{parameters}'.";
+
+                Console.WriteLine(msg);
+                writer.WriteLine(msg);
+                writer.Flush();
+            }
+
+            this.service.DeleteRecords(parameters);
         }
     }
 }

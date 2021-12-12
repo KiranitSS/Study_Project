@@ -107,32 +107,47 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
-            if (parameters is null)
+            if (paramsToChange is null)
             {
-                throw new ArgumentNullException(nameof(parameters));
+                throw new ArgumentNullException(nameof(paramsToChange));
             }
 
-            if (id > this.records.Count + 1 || id < 0)
+            if (searchCriteria is null)
             {
-                Console.WriteLine("ID can't be bigger than records count or lower than zero.");
+                throw new ArgumentNullException(nameof(searchCriteria));
+            }
+
+            if (paramsToChange.Count == 0 || searchCriteria.Count == 0)
+            {
+                Console.WriteLine("Not enough parameters.");
                 return;
             }
 
-            var currentRecord = this.records[id - 1];
-            this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
+            List<int> matchingIndexes = ServiceUtils.FindByProp(this.records, searchCriteria.First().Key, searchCriteria.First().Value);
 
-            currentRecords.Remove(currentRecord);
+            List<int> searchingIndexes;
 
-            currentRecord.FirstName = parameters.FirstName;
-            currentRecord.LastName = parameters.LastName;
-            currentRecord.DateOfBirth = parameters.DateOfBirth;
-            currentRecord.PIN = parameters.PIN;
-            currentRecord.MoneyCount = parameters.MoneyCount;
-            currentRecord.CharProp = parameters.CharProp;
+            foreach (var critria in searchCriteria)
+            {
+                searchingIndexes = ServiceUtils.FindByProp(this.records, critria.Key, critria.Value);
+                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+            }
 
-            this.AddRecordToFilterDictionaries(currentRecord);
+            if (matchingIndexes.Count == 0)
+            {
+                Console.WriteLine("No any records changed.");
+                return;
+            }
+
+            int recordIndex;
+
+            foreach (var id in matchingIndexes)
+            {
+                recordIndex = this.records.FindIndex(x => x.Id == id);
+                this.records[recordIndex] = GetUpdatedRecord(this.records[recordIndex], paramsToChange);
+            }
         }
 
         /// <inheritdoc/>
@@ -163,38 +178,118 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void RemoveRecord(int id)
+        public void DeleteRecords(string parameters)
         {
-            try
+            if (parameters is null)
             {
-                List<FileCabinetRecord> recordsForDeleting;
-                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
-
-                this.records.Remove(record);
-
-                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine($"Record #{id} doesn't exists.");
                 return;
             }
 
-            Console.WriteLine($"Record #{id} has been removed.");
+            parameters = parameters.Replace("where", string.Empty);
+            int separatorIndex = parameters.IndexOf('=');
+
+            string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1)..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+
+            if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
+            {
+                Console.WriteLine("Not enougth parameters");
+                return;
+            }
+
+            var targetIndexes = ServiceUtils.FindByProp(this.records, propName, propValue);
+
+            if (targetIndexes.Count == 0)
+            {
+                Console.WriteLine("No matching entries found");
+                return;
+            }
+
+            if (targetIndexes.Count == 1)
+            {
+                this.RemoveRecord(targetIndexes[0]);
+                Console.Write($"Record #{targetIndexes[0]} is deleted.\n");
+            }
+            else
+            {
+                Console.Write("Records ");
+
+                foreach (var index in targetIndexes)
+                {
+                    this.RemoveRecord(index);
+                }
+
+                string[] ids = new string[targetIndexes.Count];
+
+                for (int i = 0; i < targetIndexes.Count; i++)
+                {
+                    ids[i] = "#" + targetIndexes[i];
+                }
+
+                Console.Write(string.Join(", ", ids));
+                Console.WriteLine(" are deleted.");
+            }
         }
 
         /// <inheritdoc/>
         public void PurgeRecords()
         {
             Console.WriteLine("Nothing to purge.");
+        }
+
+        /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (parameters.Id < 0)
+            {
+                Console.WriteLine("Incorrect ID");
+            }
+
+            int index = this.records.FindIndex(rec => rec.Id == parameters.Id);
+
+            if (index < 0)
+            {
+                var record = new FileCabinetRecord
+                {
+                    Id = parameters.Id,
+                    FirstName = parameters.FirstName,
+                    LastName = parameters.LastName,
+                    DateOfBirth = parameters.DateOfBirth,
+                    PIN = parameters.PIN,
+                    MoneyCount = parameters.MoneyCount,
+                    CharProp = parameters.CharProp,
+                };
+
+                this.AddRecordToFilterDictionaries(record);
+
+                this.records.Add(record);
+            }
+            else
+            {
+                var currentRecord = this.records[index];
+                this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
+
+                currentRecords.Remove(currentRecord);
+
+                ReplaceRecordParameters(parameters, currentRecord);
+
+                this.AddRecordToFilterDictionaries(currentRecord);
+            }
+        }
+
+        private static void ReplaceRecordParameters(RecordParameters parameters, FileCabinetRecord currentRecord)
+        {
+            currentRecord.FirstName = parameters.FirstName;
+            currentRecord.LastName = parameters.LastName;
+            currentRecord.DateOfBirth = parameters.DateOfBirth;
+            currentRecord.PIN = parameters.PIN;
+            currentRecord.MoneyCount = parameters.MoneyCount;
+            currentRecord.CharProp = parameters.CharProp;
         }
 
         /// <summary>
@@ -231,12 +326,73 @@ namespace FileCabinetApp
             }
         }
 
+        private static FileCabinetRecord GetUpdatedRecord(FileCabinetRecord record, Dictionary<string, string> paramsToChange)
+        {
+            foreach (var parameter in paramsToChange)
+            {
+                switch (parameter.Key.ToUpperInvariant())
+                {
+                    case "ID":
+                        record.Id = int.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "FIRSTNAME":
+                        record.FirstName = parameter.Value;
+                        break;
+                    case "LASTNAME":
+                        record.LastName = parameter.Value;
+                        break;
+                    case "DATEOFBIRTH":
+                        record.DateOfBirth = DateTime.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "MONEYCOUNT":
+                        record.MoneyCount = decimal.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "PIN":
+                        record.PIN = short.Parse(parameter.Value, CultureInfo.InvariantCulture);
+                        break;
+                    case "CHARPROP":
+                        record.CharProp = parameter.Value[0];
+                        break;
+                    default:
+                        Console.WriteLine("Incorrect property name.");
+                        break;
+                }
+            }
+
+            return record;
+        }
+
         private void AddRecordToFilterDictionaries(FileCabinetRecord record)
         {
             string dateOfBirthKey = record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture);
             AddRecordToDictionary(record, record.FirstName, this.firstNameDictionary);
             AddRecordToDictionary(record, record.LastName, this.lastNameDictionary);
             AddRecordToDictionary(record, dateOfBirthKey, this.birthdateDictionary);
+        }
+
+        private void RemoveRecord(int id)
+        {
+            try
+            {
+                List<FileCabinetRecord> recordsForDeleting;
+                FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
+
+                this.records.Remove(record);
+
+                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+
+                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
+                recordsForDeleting.Remove(record);
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Record #{id} doesn't exists.");
+            }
         }
     }
 }

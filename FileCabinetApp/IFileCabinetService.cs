@@ -20,11 +20,11 @@ namespace FileCabinetApp
         public int CreateRecord(RecordParameters parameters);
 
         /// <summary>
-        /// Edits records properties.
+        /// Updates records properties.
         /// </summary>
-        /// <param name="id">Persons ID.</param>
-        /// <param name="parameters">Contains edit records parameters.</param>
-        public void EditRecord(int id, RecordParameters parameters);
+        /// <param name="paramsToChange">Records params which would be changed.</param>
+        /// <param name="searchCriteria">Params by which record would be founded.</param>
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria);
 
         /// <summary>
         /// Create copy of all records.
@@ -72,14 +72,20 @@ namespace FileCabinetApp
         public FileCabinetServiceSnapshot MakeSnapshot();
 
         /// <summary>
-        /// Removes record from records list.
+        /// Deletes record from records list.
         /// </summary>
-        /// <param name="id">ID of the record to delete.</param>
-        public void RemoveRecord(int id);
+        /// <param name="parameters">Parameters of the record to delete.</param>
+        public void DeleteRecords(string parameters);
 
         /// <summary>
         /// Purges removed records from storage.
         /// </summary>
         public void PurgeRecords();
+
+        /// <summary>
+        /// Insert record in records list.
+        /// </summary>
+        /// <param name="parameters">Record for insert.</param>
+        public void InsertRecord(RecordParameters parameters);
     }
 }

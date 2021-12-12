@@ -33,12 +33,12 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void EditRecord(int id, RecordParameters parameters)
+        public void UpdateRecords(Dictionary<string, string> paramsToChange, Dictionary<string, string> searchCriteria)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.EditRecord(id, parameters);
+            this.service.UpdateRecords(paramsToChange, searchCriteria);
             stopwatch.Stop();
-            Console.WriteLine($"Edit method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+            Console.WriteLine($"Update method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
 
         /// <inheritdoc/>
@@ -92,6 +92,15 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
+        public void InsertRecord(RecordParameters parameters)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.service.InsertRecord(parameters);
+            stopwatch.Stop();
+            Console.WriteLine($"Insert method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+        }
+
+        /// <inheritdoc/>
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
             throw new NotSupportedException();
@@ -107,12 +116,12 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public void RemoveRecord(int id)
+        public void DeleteRecords(string parameters)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.service.RemoveRecord(id);
+            this.service.DeleteRecords(parameters);
             stopwatch.Stop();
-            Console.WriteLine($"Remove method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+            Console.WriteLine($"Delete method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
 
         /// <inheritdoc/>

@@ -50,7 +50,7 @@ namespace FileCabinetApp
         /// <param name="args">Program start parameters.</param>
         public static void Main(string[] args)
         {
-            Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+            Console.WriteLine($"File Cabinet Application, developed by {DeveloperName}");
 
             IsLoggingStarted(args);
 
@@ -61,19 +61,19 @@ namespace FileCabinetApp
 
             var commandHandler = CreateCommandHandlers();
 
-            Console.WriteLine(Program.HintMessage);
+            Console.WriteLine(HintMessage);
             Console.WriteLine();
 
             do
             {
                 Console.Write("> ");
-                var inputs = Console.ReadLine().Split(' ', 2);
+                var inputs = Console.ReadLine().Trim().Split(' ', 2);
                 const int commandIndex = 0;
                 var command = inputs[commandIndex];
 
                 if (string.IsNullOrEmpty(command))
                 {
-                    Console.WriteLine(Program.HintMessage);
+                    Console.WriteLine(HintMessage);
                     continue;
                 }
 
@@ -133,7 +133,7 @@ namespace FileCabinetApp
             return parameters;
         }
 
-        public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
+        private static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
             if (builder is null)
             {
@@ -143,7 +143,7 @@ namespace FileCabinetApp
             return ImportValidator(builder, "default");
         }
 
-        public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
+        private static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
             if (builder is null)
             {
@@ -196,18 +196,20 @@ namespace FileCabinetApp
             var helpHandler = new HelpCommandHandler();
             var createHandler = new CreateCommandHandler(fileCabinetService);
             var statHandler = new StatCommandHandler(fileCabinetService);
-            var editHandler = new EditCommandHandler(fileCabinetService);
+            var updateHandler = new UpdateCommandHandler(fileCabinetService);
             var findHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
             var importHandler = new ImportCommandHandler(fileCabinetService);
-            var removeHandler = new RemoveCommandHandler(fileCabinetService);
+            var insertHandler = new InsertCommandHandler(fileCabinetService);
+            var deleteHandler = new DeleteCommandHandler(fileCabinetService);
             var purgehandler = new PurgeCommandHandler(fileCabinetService);
             var exitHandler = new ExitCommandHandler();
+            var correctionHandler = new CorrectionCommandHandler();
 
-            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(editHandler).SetNext(findHandler)
-                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(removeHandler)
-                .SetNext(purgehandler).SetNext(exitHandler);
+            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(updateHandler).SetNext(findHandler)
+                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
+                .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler).SetNext(correctionHandler);
 
             return helpHandler;
         }
