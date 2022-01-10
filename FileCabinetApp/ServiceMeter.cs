@@ -129,5 +129,14 @@ namespace FileCabinetApp
         {
             throw new NotSupportedException();
         }
+
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.service.SelectRecords(parameters);
+            stopwatch.Stop();
+            Console.WriteLine($"Select method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
+        }
     }
 }

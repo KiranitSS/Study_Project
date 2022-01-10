@@ -87,5 +87,11 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="parameters">Record for insert.</param>
         public void InsertRecord(RecordParameters parameters);
+
+        /// <summary>
+        /// Select records data and prints it.
+        /// </summary>
+        /// <param name="parameters">Parameters for prints records.</param>
+        public void SelectRecords(string parameters);
     }
 }

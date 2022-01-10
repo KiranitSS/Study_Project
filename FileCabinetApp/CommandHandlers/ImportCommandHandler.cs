@@ -59,7 +59,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            string[] importParams = parameters.Split(" ");
+            string[] importParams = parameters.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
             if (!IsAbleToImport(importParams))
             {

@@ -40,6 +40,11 @@ namespace FileCabinetApp.CommandHandlers
 
         private static void ShowSameCommands(string inputCommand)
         {
+            if (IsCommandExists(inputCommand))
+            {
+                return;
+            }
+
             foreach (var command in Commands)
             {
                 if (IsSameCommand(inputCommand, command))
@@ -47,6 +52,19 @@ namespace FileCabinetApp.CommandHandlers
                     Console.WriteLine($"The same command is {command}");
                 }
             }
+        }
+
+        private static bool IsCommandExists(string inputCommand)
+        {
+            foreach (var command in Commands)
+            {
+                if (inputCommand.Equals(command, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool IsSameCommand(string inputCommand, string command)

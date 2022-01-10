@@ -189,7 +189,7 @@ namespace FileCabinetApp
             int separatorIndex = parameters.IndexOf('=');
 
             string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
-            string propValue = parameters[(separatorIndex + 1)..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1) ..].Trim().Replace("'", string.Empty).ToUpperInvariant();
 
             if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
             {
@@ -280,6 +280,17 @@ namespace FileCabinetApp
 
                 this.AddRecordToFilterDictionaries(currentRecord);
             }
+        }
+
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Parameters can't be empty");
+            }
+
+            SelectCommandUtils.SelectRecordsData(parameters, this.records);
         }
 
         private static void ReplaceRecordParameters(RecordParameters parameters, FileCabinetRecord currentRecord)

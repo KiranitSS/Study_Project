@@ -19,7 +19,7 @@ namespace FileCabinetApp
     {
         private readonly Dictionary<string, int> baseOffSets = new Dictionary<string, int>
         {
-            { "status", 0 },
+            { "status", 0 }, 
             { "id", 2 },
             { "firstname", 6 },
             { "lastname", 126 },
@@ -347,6 +347,17 @@ namespace FileCabinetApp
                 Console.Write(string.Join(", ", ids));
                 Console.WriteLine(" are deleted.");
             }
+        }
+
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Parameters can't be empty");
+            }
+
+            SelectCommandUtils.SelectRecordsData(parameters, this.GetExistingRecords());
         }
 
         /// <summary>

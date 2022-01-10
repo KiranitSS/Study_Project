@@ -13,7 +13,7 @@ namespace FileCabinetApp
     public static class SearchingUtils
     {
         /// <summary>
-        /// Find records by property name and value.
+        /// Finds records by property name and value.
         /// </summary>
         /// <param name="records">Records in which the search is carried out.</param>
         /// <param name="propName">Property name.</param>
@@ -84,6 +84,42 @@ namespace FileCabinetApp
             }
 
             return indexes;
+        }
+
+        /// <summary>
+        /// Gets <see cref="Dictionary{string, string}"/> with properties names as keys and their values.
+        /// </summary>
+        /// <param name="parameters">Input command parameters.</param>
+        /// <param name="separator">Separator for splitting parameters.</param>
+        /// <returns>Returns splitted data for searching records by properties.</returns>
+        public static Dictionary<string, string> GetDataForFind(string parameters, string separator)
+        {
+            if (string.IsNullOrWhiteSpace(parameters) || string.IsNullOrWhiteSpace(separator))
+            {
+                Console.WriteLine("Incorrect parameters.");
+                return new Dictionary<string, string>();
+            }
+
+            Dictionary<string, string> searchCriteria = new Dictionary<string, string>();
+            var updateParameters = parameters
+                .Replace("'", string.Empty)
+                .Replace(" ", string.Empty)
+                .Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            int separatorIndex;
+
+            foreach (var parameter in updateParameters)
+            {
+                separatorIndex = parameter.IndexOf("=", StringComparison.OrdinalIgnoreCase);
+
+                if (separatorIndex == -1)
+                {
+                    continue;
+                }
+
+                searchCriteria.Add(parameter[..separatorIndex].ToUpperInvariant(), parameter[(separatorIndex + 1) ..]);
+            }
+
+            return searchCriteria;
         }
     }
 }

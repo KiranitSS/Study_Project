@@ -49,10 +49,13 @@ namespace FileCabinetApp.CommandHandlers
 
         private static bool TryGetInputData(string parameters, out Dictionary<string, string> inputData)
         {
-            var data = parameters.Replace(")", string.Empty).Replace("(", string.Empty).Replace(" ", string.Empty).Split("values");
+            var data = parameters.Replace(")", string.Empty)
+                .Replace("(", string.Empty)
+                .Replace(" ", string.Empty)
+                .Split("values");
 
             string[] keys = data[0].Split(",");
-            string[] values = data[1].Replace("'", string.Empty).Split(",");
+            string[] values = data[1].Replace("'", string.Empty).Split(",", StringSplitOptions.RemoveEmptyEntries);
 
             if (keys.Length != values.Length || keys.Length != typeof(FileCabinetRecord).GetProperties().Length)
             {

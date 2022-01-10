@@ -199,6 +199,7 @@ namespace FileCabinetApp
             var updateHandler = new UpdateCommandHandler(fileCabinetService);
             var findHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
+            var selectHandler = new SelectCommandHandler(fileCabinetService);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
             var importHandler = new ImportCommandHandler(fileCabinetService);
             var insertHandler = new InsertCommandHandler(fileCabinetService);
@@ -208,7 +209,7 @@ namespace FileCabinetApp
             var correctionHandler = new CorrectionCommandHandler();
 
             helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(updateHandler).SetNext(findHandler)
-                .SetNext(listHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
+                .SetNext(listHandler).SetNext(selectHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
                 .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler).SetNext(correctionHandler);
 
             return helpHandler;
