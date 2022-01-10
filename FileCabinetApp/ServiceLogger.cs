@@ -157,5 +157,11 @@ namespace FileCabinetApp
 
             this.service.SelectRecords(parameters);
         }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

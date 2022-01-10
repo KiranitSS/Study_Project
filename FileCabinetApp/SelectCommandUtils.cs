@@ -18,24 +18,25 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="parameters">Select command with parameters.</param>
         /// <param name="records">Records for searching and printing selected data.</param>
-        public static void SelectRecordsData(string parameters, List<FileCabinetRecord> records)
+        /// <returns>Returns string that contains prints result.</returns>
+        public static string SelectRecordsData(string parameters, List<FileCabinetRecord> records)
         {
             if (string.IsNullOrWhiteSpace(parameters))
             {
                 Console.WriteLine("Empty command parameters.");
-                return;
+                return string.Empty;
             }
 
             if (records is null)
             {
                 Console.WriteLine("Records are empty");
-                return;
+                return string.Empty;
             }
 
             if (!TryGetCorrectDataForSelect(parameters, out Dictionary<string, string> searchingCriteria, out string[] paramsToShow))
             {
                 Console.WriteLine("Incorrect parameters.");
-                return;
+                return string.Empty;
             }
 
             List<FileCabinetRecord> recordsToShow = GetRecordsToShow(records, searchingCriteria, GetSeparator(parameters));
@@ -43,10 +44,10 @@ namespace FileCabinetApp
             if (recordsToShow.Count == 0)
             {
                 Console.WriteLine("No such entries");
-                return;
+                return string.Empty;
             }
 
-            PrintRecordsAsTable(recordsToShow, new ReadOnlyCollection<string>(paramsToShow));
+            return PrintRecordsAsTable(recordsToShow, new ReadOnlyCollection<string>(paramsToShow));
         }
 
         private static bool TryGetCorrectDataForSelect(string parameters, out Dictionary<string, string> searchingCriteria, out string[] parametersToShow)
@@ -254,7 +255,7 @@ namespace FileCabinetApp
             return recordsToShow;
         }
 
-        private static void PrintRecordsAsTable(List<FileCabinetRecord> records, ReadOnlyCollection<string> paramsToShow)
+        private static string PrintRecordsAsTable(List<FileCabinetRecord> records, ReadOnlyCollection<string> paramsToShow)
         {
             int[] columnsWidth = GetColumnsWidth(records, paramsToShow);
 
@@ -289,6 +290,8 @@ namespace FileCabinetApp
 
             builder.AppendLine();
             Console.WriteLine(builder.ToString());
+
+            return builder.ToString();
         }
 
         private static string[][] GetPropertiesByNames(List<FileCabinetRecord> records, ReadOnlyCollection<string> propsNames)

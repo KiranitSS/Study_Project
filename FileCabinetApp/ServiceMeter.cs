@@ -105,5 +105,11 @@ namespace FileCabinetApp
             stopwatch.Stop();
             Console.WriteLine($"Select method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
         }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

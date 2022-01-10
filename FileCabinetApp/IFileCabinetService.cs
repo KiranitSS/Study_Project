@@ -72,5 +72,10 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="parameters">Parameters for prints records.</param>
         public void SelectRecords(string parameters);
+
+        /// <summary>
+        /// Clears searching methods buffered results.
+        /// </summary>
+        public void ClearBuffer();
     }
 }

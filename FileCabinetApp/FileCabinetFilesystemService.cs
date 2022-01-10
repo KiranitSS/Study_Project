@@ -35,6 +35,8 @@ namespace FileCabinetApp
         private readonly string path;
         private bool disposed;
         private FileStream fileStream;
+        private string searchingResultBuffer = string.Empty;
+        private string previousParameters = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
@@ -120,6 +122,7 @@ namespace FileCabinetApp
             }
             else
             {
+                this.ClearBuffer();
                 Console.WriteLine($"Record #{data.Id} is created.");
             }
 
@@ -163,6 +166,7 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
             int recordIndex;
 
             foreach (var id in matchingIndexes)
@@ -225,6 +229,8 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(parameters));
             }
 
+            this.ClearBuffer();
+
             var records = this.GetExistingRecords();
             int index = records.FindIndex(rec => rec.Id == parameters.Id);
 
@@ -284,6 +290,8 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
+
             if (targetIndexes.Count == 1)
             {
                 this.RemoveRecord(targetIndexes[0]);
@@ -318,7 +326,24 @@ namespace FileCabinetApp
                 Console.WriteLine("Parameters can't be empty");
             }
 
-            SelectCommandUtils.SelectRecordsData(parameters, this.GetExistingRecords());
+            if (!string.IsNullOrWhiteSpace(this.previousParameters)
+                && !string.IsNullOrWhiteSpace(this.searchingResultBuffer)
+                && this.previousParameters.Equals(parameters, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(this.searchingResultBuffer);
+            }
+            else
+            {
+                this.previousParameters = parameters;
+                this.searchingResultBuffer = SelectCommandUtils.SelectRecordsData(parameters, this.GetExistingRecords());
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            this.searchingResultBuffer = string.Empty;
+            this.previousParameters = string.Empty;
         }
 
         /// <summary>

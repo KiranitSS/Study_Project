@@ -18,8 +18,10 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
-
         private readonly IRecordValidator validator;
+
+        private string searchingResultBuffer = string.Empty;
+        private string previousParameters = string.Empty;
 
         private List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
@@ -72,6 +74,7 @@ namespace FileCabinetApp
             }
             else
             {
+                this.ClearBuffer();
                 Console.WriteLine($"Record #{record.Id} is created.");
             }
 
@@ -141,6 +144,8 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
+
             int recordIndex;
 
             foreach (var id in matchingIndexes)
@@ -187,6 +192,8 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
+
             if (targetIndexes.Count == 1)
             {
                 this.RemoveRecord(targetIndexes[0]);
@@ -230,7 +237,10 @@ namespace FileCabinetApp
             if (parameters.Id < 0)
             {
                 Console.WriteLine("Incorrect ID");
+                return;
             }
+
+            this.ClearBuffer();
 
             int index = this.records.FindIndex(rec => rec.Id == parameters.Id);
 
@@ -272,7 +282,24 @@ namespace FileCabinetApp
                 Console.WriteLine("Parameters can't be empty");
             }
 
-            SelectCommandUtils.SelectRecordsData(parameters, this.records);
+            if (!string.IsNullOrWhiteSpace(this.previousParameters)
+                && !string.IsNullOrWhiteSpace(this.searchingResultBuffer)
+                && this.previousParameters.Equals(parameters, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(this.searchingResultBuffer);
+            }
+            else
+            {
+                this.previousParameters = parameters;
+                this.searchingResultBuffer = SelectCommandUtils.SelectRecordsData(parameters, this.records);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            this.searchingResultBuffer = string.Empty;
+            this.previousParameters = string.Empty;
         }
 
         private static void ReplaceRecordParameters(RecordParameters parameters, FileCabinetRecord currentRecord)
