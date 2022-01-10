@@ -39,27 +39,6 @@ namespace FileCabinetApp
         public int GetStat();
 
         /// <summary>
-        /// Searches for an entry by firstname.
-        /// </summary>
-        /// <param name="firstName">Search key.</param>
-        /// <returns>Returns record.</returns>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName);
-
-        /// <summary>
-        /// Searches for an entry by lastname.
-        /// </summary>
-        /// <param name="lastname">Search key.</param>
-        /// <returns>>Returns record.</returns>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname);
-
-        /// <summary>
-        /// Searches for an entry by date of birth.
-        /// </summary>
-        /// <param name="dateOfBirth">Search key.</param>
-        /// <returns>>Returns record.</returns>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth);
-
-        /// <summary>
         /// Restores records.
         /// </summary>
         /// <param name="serviceSnapshot">Service which contains last records state.</param>
@@ -87,5 +66,16 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="parameters">Record for insert.</param>
         public void InsertRecord(RecordParameters parameters);
+
+        /// <summary>
+        /// Select records data and prints it.
+        /// </summary>
+        /// <param name="parameters">Parameters for prints records.</param>
+        public void SelectRecords(string parameters);
+
+        /// <summary>
+        /// Clears searching methods buffered results.
+        /// </summary>
+        public void ClearBuffer();
     }
 }

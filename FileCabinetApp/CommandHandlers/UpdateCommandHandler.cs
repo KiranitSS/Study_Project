@@ -41,13 +41,13 @@ namespace FileCabinetApp.CommandHandlers
 
             parameters = parameters.Replace("set", string.Empty).TrimStart();
 
-            return parameters.Contains('=') && parameters.Contains("where", StringComparison.OrdinalIgnoreCase);
+            return parameters.Contains('=') && parameters.Contains(" where ", StringComparison.OrdinalIgnoreCase);
         }
 
         private static Dictionary<string, string> GetDataForUpdate(string parameters)
         {
             Dictionary<string, string> dataForUpdate = new Dictionary<string, string>();
-            var updateParameters = parameters.Replace("'", string.Empty).Replace(" ", string.Empty).Split(',');
+            var updateParameters = parameters.Replace("'", string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries);
             int separatorIndex;
 
             foreach (var parameter in updateParameters)
@@ -71,27 +71,6 @@ namespace FileCabinetApp.CommandHandlers
             return dataForUpdate;
         }
 
-        private static Dictionary<string, string> GetDataForFind(string parameters)
-        {
-            Dictionary<string, string> searchCriteria = new Dictionary<string, string>();
-            var updateParameters = parameters.Replace("'", string.Empty).Replace(" ", string.Empty).Split("and");
-            int separatorIndex;
-
-            foreach (var parameter in updateParameters)
-            {
-                separatorIndex = parameter.IndexOf("=", StringComparison.OrdinalIgnoreCase);
-
-                if (separatorIndex == -1)
-                {
-                    continue;
-                }
-
-                searchCriteria.Add(parameter[..separatorIndex], parameter[(separatorIndex + 1) ..]);
-            }
-
-            return searchCriteria;
-        }
-
         private void Update(string parameters)
         {
             if (string.IsNullOrWhiteSpace(parameters))
@@ -108,7 +87,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            var inputs = parameters.Remove(0, 3).Split("where");
+            var inputs = parameters.Remove(0, 3).Replace(" where ", " WHERE ", StringComparison.OrdinalIgnoreCase).Split(" WHERE ");
             inputs[0] = inputs[0].Trim();
             inputs[1] = inputs[1].Trim();
 
@@ -118,7 +97,7 @@ namespace FileCabinetApp.CommandHandlers
                 return;
             }
 
-            this.Service.UpdateRecords(GetDataForUpdate(inputs[0]), GetDataForFind(inputs[1]));
+            this.Service.UpdateRecords(GetDataForUpdate(inputs[0]), SearchingUtils.GetDataForFind(inputs[1], "and"));
         }
     }
 }

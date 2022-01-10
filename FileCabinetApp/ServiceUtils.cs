@@ -100,20 +100,5 @@ namespace FileCabinetApp
 
             return indexes;
         }
-
-        public static List<int> GetMatchingIndexes(List<int> firstIndexes, List<int> secondIndexes)
-        {
-            if (firstIndexes is null)
-            {
-                throw new ArgumentNullException(nameof(firstIndexes));
-            }
-
-            if (secondIndexes is null)
-            {
-                throw new ArgumentNullException(nameof(secondIndexes));
-            }
-
-            return firstIndexes.Intersect(secondIndexes).ToList();
-        }
     }
 }

@@ -35,6 +35,8 @@ namespace FileCabinetApp
         private readonly string path;
         private bool disposed;
         private FileStream fileStream;
+        private string searchingResultBuffer = string.Empty;
+        private string previousParameters = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
@@ -120,6 +122,7 @@ namespace FileCabinetApp
             }
             else
             {
+                this.ClearBuffer();
                 Console.WriteLine($"Record #{data.Id} is created.");
             }
 
@@ -154,7 +157,7 @@ namespace FileCabinetApp
             foreach (var critria in searchCriteria)
             {
                 searchingIndexes = ServiceUtils.FindByProp(records, critria.Key, critria.Value);
-                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+                matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
             if (matchingIndexes.Count == 0)
@@ -163,6 +166,7 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
             int recordIndex;
 
             foreach (var id in matchingIndexes)
@@ -176,45 +180,6 @@ namespace FileCabinetApp
 
             records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
             this.GetRemovedRecords().ForEach(rec => this.SaveRecord(rec));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)
-                .Replace("\0", string.Empty)
-                .Equals(dateOfBirth, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.FirstName
-                .Replace("\0", string.Empty)
-                .Equals(firstName, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.LastName
-                .Replace("\0", string.Empty)
-                .Equals(lastname, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
         }
 
         /// <inheritdoc/>
@@ -263,6 +228,8 @@ namespace FileCabinetApp
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
+
+            this.ClearBuffer();
 
             var records = this.GetExistingRecords();
             int index = records.FindIndex(rec => rec.Id == parameters.Id);
@@ -323,6 +290,8 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
+
             if (targetIndexes.Count == 1)
             {
                 this.RemoveRecord(targetIndexes[0]);
@@ -347,6 +316,34 @@ namespace FileCabinetApp
                 Console.Write(string.Join(", ", ids));
                 Console.WriteLine(" are deleted.");
             }
+        }
+
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Parameters can't be empty");
+            }
+
+            if (!string.IsNullOrWhiteSpace(this.previousParameters)
+                && !string.IsNullOrWhiteSpace(this.searchingResultBuffer)
+                && this.previousParameters.Equals(parameters, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(this.searchingResultBuffer);
+            }
+            else
+            {
+                this.previousParameters = parameters;
+                this.searchingResultBuffer = SelectCommandUtils.SelectRecordsData(parameters, this.GetExistingRecords());
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            this.searchingResultBuffer = string.Empty;
+            this.previousParameters = string.Empty;
         }
 
         /// <summary>

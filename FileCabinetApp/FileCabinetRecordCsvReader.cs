@@ -37,7 +37,7 @@ namespace FileCabinetApp
 
             while (!this.reader.EndOfStream)
             {
-                string[] recordData = this.reader.ReadLine().Split(",");
+                string[] recordData = this.reader.ReadLine().Split(",", StringSplitOptions.RemoveEmptyEntries);
 
                 if (recordData.Length != paramsCount)
                 {

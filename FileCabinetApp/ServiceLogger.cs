@@ -66,51 +66,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            using (StreamWriter writer = new StreamWriter(this.logPath, true))
-            {
-                string msg = $"{DateTime.Now} - Calling FindByFirstName() with LastName '{firstName}'";
-
-                Console.WriteLine(msg);
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-
-            return this.service.FindByFirstName(firstName);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            using (StreamWriter writer = new StreamWriter(this.logPath, true))
-            {
-                string msg = $"{DateTime.Now} - Calling FindByLastName() with LastName '{lastname}'";
-
-                Console.WriteLine(msg);
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-
-            return this.service.FindByLastName(lastname);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            using (StreamWriter writer = new StreamWriter(this.logPath, true))
-            {
-                string msg = $"{DateTime.Now} - Calling FindByBirthDate() with DateOfBirth '{dateOfBirth}'";
-
-                Console.WriteLine(msg);
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-
-            return this.service.FindByBirthDate(dateOfBirth);
-        }
-
-        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             throw new NotSupportedException();
@@ -186,6 +141,27 @@ namespace FileCabinetApp
             }
 
             this.service.DeleteRecords(parameters);
+        }
+
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            using (StreamWriter writer = new StreamWriter(this.logPath, true))
+            {
+                string msg = $"{DateTime.Now} - Calling Select() with Parameters '{parameters}'.";
+
+                Console.WriteLine(msg);
+                writer.WriteLine(msg);
+                writer.Flush();
+            }
+
+            this.service.SelectRecords(parameters);
+        }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            throw new NotSupportedException();
         }
     }
 }

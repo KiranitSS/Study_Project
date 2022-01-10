@@ -18,8 +18,10 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
         private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
-
         private readonly IRecordValidator validator;
+
+        private string searchingResultBuffer = string.Empty;
+        private string previousParameters = string.Empty;
 
         private List<FileCabinetRecord> records = new List<FileCabinetRecord>();
 
@@ -72,6 +74,7 @@ namespace FileCabinetApp
             }
             else
             {
+                this.ClearBuffer();
                 Console.WriteLine($"Record #{record.Id} is created.");
             }
 
@@ -132,7 +135,7 @@ namespace FileCabinetApp
             foreach (var critria in searchCriteria)
             {
                 searchingIndexes = ServiceUtils.FindByProp(this.records, critria.Key, critria.Value);
-                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+                matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
             if (matchingIndexes.Count == 0)
@@ -141,6 +144,8 @@ namespace FileCabinetApp
                 return;
             }
 
+            this.ClearBuffer();
+
             int recordIndex;
 
             foreach (var id in matchingIndexes)
@@ -148,24 +153,6 @@ namespace FileCabinetApp
                 recordIndex = this.records.FindIndex(x => x.Id == id);
                 this.records[recordIndex] = GetUpdatedRecord(this.records[recordIndex], paramsToChange);
             }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            return new MemoryIterator(FindByKey(firstName, this.firstNameDictionary));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            return new MemoryIterator(FindByKey(lastname, this.lastNameDictionary));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            return new MemoryIterator(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
         /// <summary>
@@ -189,7 +176,7 @@ namespace FileCabinetApp
             int separatorIndex = parameters.IndexOf('=');
 
             string propName = parameters[..separatorIndex].Trim().ToUpperInvariant();
-            string propValue = parameters[(separatorIndex + 1)..].Trim().Replace("'", string.Empty).ToUpperInvariant();
+            string propValue = parameters[(separatorIndex + 1) ..].Trim().Replace("'", string.Empty).ToUpperInvariant();
 
             if (string.IsNullOrWhiteSpace(propName) || string.IsNullOrWhiteSpace(propValue))
             {
@@ -204,6 +191,8 @@ namespace FileCabinetApp
                 Console.WriteLine("No matching entries found");
                 return;
             }
+
+            this.ClearBuffer();
 
             if (targetIndexes.Count == 1)
             {
@@ -248,7 +237,10 @@ namespace FileCabinetApp
             if (parameters.Id < 0)
             {
                 Console.WriteLine("Incorrect ID");
+                return;
             }
+
+            this.ClearBuffer();
 
             int index = this.records.FindIndex(rec => rec.Id == parameters.Id);
 
@@ -282,6 +274,34 @@ namespace FileCabinetApp
             }
         }
 
+        /// <inheritdoc/>
+        public void SelectRecords(string parameters)
+        {
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Parameters can't be empty");
+            }
+
+            if (!string.IsNullOrWhiteSpace(this.previousParameters)
+                && !string.IsNullOrWhiteSpace(this.searchingResultBuffer)
+                && this.previousParameters.Equals(parameters, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(this.searchingResultBuffer);
+            }
+            else
+            {
+                this.previousParameters = parameters;
+                this.searchingResultBuffer = SelectCommandUtils.SelectRecordsData(parameters, this.records);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ClearBuffer()
+        {
+            this.searchingResultBuffer = string.Empty;
+            this.previousParameters = string.Empty;
+        }
+
         private static void ReplaceRecordParameters(RecordParameters parameters, FileCabinetRecord currentRecord)
         {
             currentRecord.FirstName = parameters.FirstName;
@@ -290,23 +310,6 @@ namespace FileCabinetApp
             currentRecord.PIN = parameters.PIN;
             currentRecord.MoneyCount = parameters.MoneyCount;
             currentRecord.CharProp = parameters.CharProp;
-        }
-
-        /// <summary>
-        /// Creates new record parameters validator.
-        /// </summary>
-        /// <returns>Returns <see cref="IRecordValidator"/> object
-        /// which contains record validation settings.</returns>
-        private static List<FileCabinetRecord> FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
-        {
-            bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
-
-            if (!contains)
-            {
-                return new List<FileCabinetRecord>();
-            }
-
-            return currentRecords;
         }
 
         private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
