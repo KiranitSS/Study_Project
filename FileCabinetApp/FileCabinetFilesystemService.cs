@@ -19,7 +19,7 @@ namespace FileCabinetApp
     {
         private readonly Dictionary<string, int> baseOffSets = new Dictionary<string, int>
         {
-            { "status", 0 }, 
+            { "status", 0 },
             { "id", 2 },
             { "firstname", 6 },
             { "lastname", 126 },
@@ -154,7 +154,7 @@ namespace FileCabinetApp
             foreach (var critria in searchCriteria)
             {
                 searchingIndexes = ServiceUtils.FindByProp(records, critria.Key, critria.Value);
-                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+                matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
             if (matchingIndexes.Count == 0)
@@ -176,45 +176,6 @@ namespace FileCabinetApp
 
             records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
             this.GetRemovedRecords().ForEach(rec => this.SaveRecord(rec));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)
-                .Replace("\0", string.Empty)
-                .Equals(dateOfBirth, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.FirstName
-                .Replace("\0", string.Empty)
-                .Equals(firstName, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            bool IsSearchable(FileCabinetRecord rec)
-            {
-                return rec.LastName
-                .Replace("\0", string.Empty)
-                .Equals(lastname, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return new FilesystemIterator(this.path, 277, IsSearchable);
         }
 
         /// <inheritdoc/>

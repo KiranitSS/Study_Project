@@ -42,39 +42,6 @@ namespace FileCabinetApp
         }
 
         /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            var result = this.service.FindByBirthDate(dateOfBirth);
-            stopwatch.Stop();
-            Console.WriteLine($"Find method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            var result = this.service.FindByFirstName(firstName);
-            stopwatch.Stop();
-            Console.WriteLine($"Find method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            var result = this.service.FindByLastName(lastname);
-            stopwatch.Stop();
-            Console.WriteLine($"Find method execution duration is {stopwatch.Elapsed.Ticks} ticks.");
-
-            return result;
-        }
-
-        /// <inheritdoc/>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             throw new NotSupportedException();

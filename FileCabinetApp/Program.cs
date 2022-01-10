@@ -197,8 +197,6 @@ namespace FileCabinetApp
             var createHandler = new CreateCommandHandler(fileCabinetService);
             var statHandler = new StatCommandHandler(fileCabinetService);
             var updateHandler = new UpdateCommandHandler(fileCabinetService);
-            var findHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
-            var listHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var selectHandler = new SelectCommandHandler(fileCabinetService);
             var exportHandler = new ExportCommandHandler(fileCabinetService);
             var importHandler = new ImportCommandHandler(fileCabinetService);
@@ -208,18 +206,11 @@ namespace FileCabinetApp
             var exitHandler = new ExitCommandHandler();
             var correctionHandler = new CorrectionCommandHandler();
 
-            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(updateHandler).SetNext(findHandler)
-                .SetNext(listHandler).SetNext(selectHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
+            helpHandler.SetNext(createHandler).SetNext(statHandler).SetNext(updateHandler)
+                .SetNext(selectHandler).SetNext(exportHandler).SetNext(importHandler).SetNext(insertHandler)
                 .SetNext(deleteHandler).SetNext(purgehandler).SetNext(exitHandler).SetNext(correctionHandler);
 
             return helpHandler;
-        }
-
-        private static void DefaultRecordPrint(IEnumerable<FileCabinetRecord> records)
-        {
-            records.ToList().ForEach(rec => Console.WriteLine($"#{rec.Id}, {rec.FirstName}, " +
-                $"{rec.LastName}, {rec.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture)}, " +
-                $"{rec.PIN}, {rec.MoneyCount}$, {rec.CharProp}"));
         }
 
         private static IRecordValidator GetValidator(string[] parameters)

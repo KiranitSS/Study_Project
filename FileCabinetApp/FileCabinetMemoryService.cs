@@ -132,7 +132,7 @@ namespace FileCabinetApp
             foreach (var critria in searchCriteria)
             {
                 searchingIndexes = ServiceUtils.FindByProp(this.records, critria.Key, critria.Value);
-                matchingIndexes = ServiceUtils.GetMatchingIndexes(searchingIndexes, matchingIndexes);
+                matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
             if (matchingIndexes.Count == 0)
@@ -148,24 +148,6 @@ namespace FileCabinetApp
                 recordIndex = this.records.FindIndex(x => x.Id == id);
                 this.records[recordIndex] = GetUpdatedRecord(this.records[recordIndex], paramsToChange);
             }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            return new MemoryIterator(FindByKey(firstName, this.firstNameDictionary));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByLastName(string lastname)
-        {
-            return new MemoryIterator(FindByKey(lastname, this.lastNameDictionary));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<FileCabinetRecord> FindByBirthDate(string dateOfBirth)
-        {
-            return new MemoryIterator(FindByKey(dateOfBirth, this.birthdateDictionary));
         }
 
         /// <summary>
@@ -301,23 +283,6 @@ namespace FileCabinetApp
             currentRecord.PIN = parameters.PIN;
             currentRecord.MoneyCount = parameters.MoneyCount;
             currentRecord.CharProp = parameters.CharProp;
-        }
-
-        /// <summary>
-        /// Creates new record parameters validator.
-        /// </summary>
-        /// <returns>Returns <see cref="IRecordValidator"/> object
-        /// which contains record validation settings.</returns>
-        private static List<FileCabinetRecord> FindByKey(string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
-        {
-            bool contains = filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
-
-            if (!contains)
-            {
-                return new List<FileCabinetRecord>();
-            }
-
-            return currentRecords;
         }
 
         private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
