@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents class for logging methods calls in a file.
+    /// </summary>
     public class ServiceLogger : IFileCabinetService
     {
         private readonly IFileCabinetService service;

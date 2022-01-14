@@ -8,10 +8,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents class for calculating methods execution duration.
+    /// </summary>
     public class ServiceMeter : IFileCabinetService
     {
         private readonly IFileCabinetService service;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceMeter"/> class.
+        /// </summary>
+        /// <param name="service">Service for working with records.</param>
         public ServiceMeter(IFileCabinetService service)
         {
             if (service is null)

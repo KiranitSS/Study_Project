@@ -56,6 +56,11 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Represents indexator for getting offsets of current field in db file.
+        /// </summary>
+        /// <param name="fieldName">Name of field for which is offsets searched.</param>
+        /// <returns>Returns list of offsets.</returns>
         public SortedList<string, List<int>> this[string fieldName]
         {
             get
@@ -150,13 +155,13 @@ namespace FileCabinetApp
 
             var records = this.GetExistingRecords();
 
-            List<int> matchingIndexes = ServiceUtils.FindByProp(records, searchCriteria.First().Key, searchCriteria.First().Value);
+            List<int> matchingIndexes = SearchingUtils.FindByProp(records, searchCriteria.First().Key, searchCriteria.First().Value);
 
             List<int> searchingIndexes;
 
             foreach (var critria in searchCriteria)
             {
-                searchingIndexes = ServiceUtils.FindByProp(records, critria.Key, critria.Value);
+                searchingIndexes = SearchingUtils.FindByProp(records, critria.Key, critria.Value);
                 matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
@@ -282,7 +287,7 @@ namespace FileCabinetApp
                 return;
             }
 
-            var targetIndexes = ServiceUtils.FindByProp(this.GetExistingRecords(), propName, propValue);
+            var targetIndexes = SearchingUtils.FindByProp(this.GetExistingRecords(), propName, propValue);
 
             if (targetIndexes.Count == 0)
             {

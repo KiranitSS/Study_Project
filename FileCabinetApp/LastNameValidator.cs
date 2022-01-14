@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator with setted rules for verifying lastname.
+    /// </summary>
     public class LastNameValidator : IRecordValidator
     {
         private readonly int minLength;
         private readonly int maxLength;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LastNameValidator"/> class.
+        /// </summary>
+        /// <param name="min">Minimal letters count.</param>
+        /// <param name="max">Maximum letters count.</param>
         public LastNameValidator(int min, int max)
         {
             this.minLength = min;

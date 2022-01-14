@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator with setted rules for char property.
+    /// </summary>
     public class CharPropValidator : IRecordValidator
     {
         private readonly bool mustBeLetter;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CharPropValidator"/> class.
+        /// </summary>
+        /// <param name="mustBeLetter">Checks, is the meaning of char value must be letter.</param>
         public CharPropValidator(bool mustBeLetter)
         {
             this.mustBeLetter = mustBeLetter;

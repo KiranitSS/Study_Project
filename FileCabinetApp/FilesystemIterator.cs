@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents iterator for traversing records from db file.
+    /// </summary>
     public class FilesystemIterator : IEnumerator<FileCabinetRecord>, IEnumerable<FileCabinetRecord>
     {
         private readonly string path;

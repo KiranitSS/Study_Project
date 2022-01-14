@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents iterator for traversing records from collection.
+    /// </summary>
     public class MemoryIterator : IEnumerator<FileCabinetRecord>, IEnumerable<FileCabinetRecord>
     {
         private readonly List<FileCabinetRecord> records;

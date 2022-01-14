@@ -128,13 +128,13 @@ namespace FileCabinetApp
                 return;
             }
 
-            List<int> matchingIndexes = ServiceUtils.FindByProp(this.records, searchCriteria.First().Key, searchCriteria.First().Value);
+            List<int> matchingIndexes = SearchingUtils.FindByProp(this.records, searchCriteria.First().Key, searchCriteria.First().Value);
 
             List<int> searchingIndexes;
 
             foreach (var critria in searchCriteria)
             {
-                searchingIndexes = ServiceUtils.FindByProp(this.records, critria.Key, critria.Value);
+                searchingIndexes = SearchingUtils.FindByProp(this.records, critria.Key, critria.Value);
                 matchingIndexes = searchingIndexes.Intersect(matchingIndexes).ToList();
             }
 
@@ -184,7 +184,7 @@ namespace FileCabinetApp
                 return;
             }
 
-            var targetIndexes = ServiceUtils.FindByProp(this.records, propName, propValue);
+            var targetIndexes = SearchingUtils.FindByProp(this.records, propName, propValue);
 
             if (targetIndexes.Count == 0)
             {

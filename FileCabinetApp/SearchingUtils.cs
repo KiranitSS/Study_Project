@@ -21,9 +21,14 @@ namespace FileCabinetApp
         /// <returns>Indexes of the required records.<returns>
         public static List<int> FindByProp(List<FileCabinetRecord> records, string propName, string propValue)
         {
+            if (propName is null)
+            {
+                throw new ArgumentNullException(nameof(propName));
+            }
+
             var indexes = new List<int>();
 
-            switch (propName)
+            switch (propName.ToUpperInvariant())
             {
                 case "ID":
                     indexes = records
