@@ -7,10 +7,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator with setted rules for verifying pin code.
+    /// </summary>
     public class PinValidator : IRecordValidator
     {
         private readonly int minLength;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PinValidator"/> class.
+        /// </summary>
+        /// <param name="minLength">Minimal pin code length.</param>
         public PinValidator(int minLength)
         {
             this.minLength = minLength;

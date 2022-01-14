@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator for verifying parameters of records.
+    /// </summary>
     public class CompositeValidator : IRecordValidator
     {
         private readonly List<IRecordValidator> validators;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositeValidator"/> class.
+        /// </summary>
+        /// <param name="validators">Collection of validation rules.</param>
         public CompositeValidator(IEnumerable<IRecordValidator> validators)
         {
             this.validators = validators.ToList();

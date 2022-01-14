@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator with setted rules for verifying money count.
+    /// </summary>
     public class MoneyCountValidator : IRecordValidator
     {
         private readonly int min;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoneyCountValidator"/> class.
+        /// </summary>
+        /// <param name="min">Minimal count of money.</param>
         public MoneyCountValidator(int min)
         {
             this.min = min;

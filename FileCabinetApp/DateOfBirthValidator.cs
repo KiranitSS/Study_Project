@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Represents validator with setted rules for verifying date of birth.
+    /// </summary>
     public class DateOfBirthValidator : IRecordValidator
     {
         private readonly DateTime from;
         private readonly DateTime to;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DateOfBirthValidator"/> class.
+        /// </summary>
+        /// <param name="from">The earliest date of birth.</param>
+        /// <param name="to">The last possible date of birth.</param>
         public DateOfBirthValidator(DateTime from, DateTime to)
         {
             this.from = from;
