@@ -20,6 +20,7 @@ namespace FileCabinetGenerator
 
         static void Main(string[] args)
         {
+            args = @"--output-type=csv --output=d:\data\records.csv --records-amount=10000 --start-id=30".Split(" ");
             if (args is null)
             {
                 Console.WriteLine($"{nameof(args)} is null");
@@ -28,6 +29,7 @@ namespace FileCabinetGenerator
 
             if (!TrySetOutput(args))
             {
+                Console.WriteLine("Incorrect parameters.");
                 return;
             }
 
@@ -42,7 +44,8 @@ namespace FileCabinetGenerator
 
             ExportRecordsData(records);
 
-            Console.ReadLine();
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadKey(true);
         }
 
         private static void ExportRecordsData(List<FileCabinetRecord> records)
@@ -156,7 +159,9 @@ namespace FileCabinetGenerator
 
         private static bool TrySetSetting(string longMsg, string shortMsg, Func<string, bool> settingsSetter)
         {
-            if (cmdParams.Count >= 1 && cmdParams[0].Length > longMsg.Length && cmdParams[0][..longMsg.Length].Equals(longMsg))
+            if (cmdParams.Count >= 1
+                && cmdParams[0].Length > longMsg.Length
+                && cmdParams[0][..longMsg.Length].Equals(longMsg, StringComparison.OrdinalIgnoreCase))
             {
                 if (settingsSetter(cmdParams[0].Remove(0, longMsg.Length)))
                 {
@@ -218,7 +223,6 @@ namespace FileCabinetGenerator
                 {
                     path = filePath;
                     return true;
-
                 }
             }
 
