@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
@@ -14,10 +11,6 @@ namespace FileCabinetApp
     /// </summary>
     public class FileCabinetMemoryService : IFileCabinetService
     {
-        private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
-        private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
-        private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>(Comparer);
-        private readonly Dictionary<string, List<FileCabinetRecord>> birthdateDictionary = new Dictionary<string, List<FileCabinetRecord>>();
         private readonly IRecordValidator validator;
 
         private string searchingResultBuffer = string.Empty;
@@ -63,8 +56,6 @@ namespace FileCabinetApp
                 MoneyCount = parameters.MoneyCount,
                 CharProp = parameters.CharProp,
             };
-
-            this.AddRecordToFilterDictionaries(record);
 
             this.records.Add(record);
 
@@ -257,20 +248,13 @@ namespace FileCabinetApp
                     CharProp = parameters.CharProp,
                 };
 
-                this.AddRecordToFilterDictionaries(record);
-
                 this.records.Add(record);
             }
             else
             {
                 var currentRecord = this.records[index];
-                this.firstNameDictionary.TryGetValue(currentRecord.FirstName, out List<FileCabinetRecord> currentRecords);
-
-                currentRecords.Remove(currentRecord);
 
                 ReplaceRecordParameters(parameters, currentRecord);
-
-                this.AddRecordToFilterDictionaries(currentRecord);
             }
         }
 
@@ -312,23 +296,6 @@ namespace FileCabinetApp
             currentRecord.CharProp = parameters.CharProp;
         }
 
-        private static void AddRecordToDictionary(FileCabinetRecord record, string key, Dictionary<string, List<FileCabinetRecord>> filterDictionary)
-        {
-            filterDictionary.TryGetValue(key, out List<FileCabinetRecord> currentRecords);
-
-            if (currentRecords == null)
-            {
-                currentRecords = new List<FileCabinetRecord>();
-            }
-
-            currentRecords.Add(record);
-
-            if (!filterDictionary.ContainsKey(key))
-            {
-                filterDictionary.Add(key, currentRecords);
-            }
-        }
-
         private static FileCabinetRecord GetUpdatedRecord(FileCabinetRecord record, Dictionary<string, string> paramsToChange)
         {
             foreach (var parameter in paramsToChange)
@@ -365,31 +332,13 @@ namespace FileCabinetApp
             return record;
         }
 
-        private void AddRecordToFilterDictionaries(FileCabinetRecord record)
-        {
-            string dateOfBirthKey = record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture);
-            AddRecordToDictionary(record, record.FirstName, this.firstNameDictionary);
-            AddRecordToDictionary(record, record.LastName, this.lastNameDictionary);
-            AddRecordToDictionary(record, dateOfBirthKey, this.birthdateDictionary);
-        }
-
         private void RemoveRecord(int id)
         {
             try
             {
-                List<FileCabinetRecord> recordsForDeleting;
                 FileCabinetRecord record = this.records.Find(rec => rec.Id == id);
 
                 this.records.Remove(record);
-
-                this.firstNameDictionary.TryGetValue(record.FirstName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.lastNameDictionary.TryGetValue(record.LastName, out recordsForDeleting);
-                recordsForDeleting.Remove(record);
-
-                this.birthdateDictionary.TryGetValue(record.DateOfBirth.ToString("yyyy-MMM-dd", CultureInfo.InvariantCulture), out recordsForDeleting);
-                recordsForDeleting.Remove(record);
             }
             catch (NullReferenceException ex)
             {

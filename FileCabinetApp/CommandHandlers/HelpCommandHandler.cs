@@ -18,13 +18,9 @@ namespace FileCabinetApp.CommandHandlers
         private static readonly string[][] HelpMessages = new string[][]
         {
             new string[] { "create", "create new record", "The 'create' command create new record." },
-            new string[] { "edit", "edit record", "The 'edit' command edit record by id." },
             new string[] { "stat", "prints the stat", "The 'stat' command prints the stat." },
-            new string[] { "list", "prints the records", "The 'list' command prints records list." },
-            new string[] { "find", "finds matching records", "The 'find' command prints found records." },
             new string[] { "export", "exports the records", "The 'export' command exports records to external file." },
             new string[] { "import", "imports the records", "The 'import' command imports records from external file." },
-            new string[] { "remove", "removes the record", "The 'remove' command removes record by id." },
             new string[] { "delete", "deletes the records", "The 'delete' command deletes records by condition." },
             new string[] { "purge", "purges the record", "The 'purge' command clear db from removed records." },
             new string[] { "insert", "insert the record", "The 'insert' command add record with parameters." },

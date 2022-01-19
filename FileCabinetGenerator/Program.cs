@@ -20,7 +20,6 @@ namespace FileCabinetGenerator
 
         static void Main(string[] args)
         {
-            args = @"--output-type=csv --output=d:\data\records.csv --records-amount=10000 --start-id=30".Split(" ");
             if (args is null)
             {
                 Console.WriteLine($"{nameof(args)} is null");
@@ -258,5 +257,5 @@ namespace FileCabinetGenerator
 
             return false;
         }
-    }  
+    }
 }

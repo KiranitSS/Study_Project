@@ -124,6 +124,12 @@ namespace FileCabinetApp
             FileCabinetRecordCsvReader csvReader = new FileCabinetRecordCsvReader(reader);
             List<FileCabinetRecord> importedRecords = csvReader.ReadAll().ToList();
 
+            if (importedRecords.Count == 0)
+            {
+                Console.WriteLine("No any records are imported.");
+                return;
+            }
+
             importedRecords = RemoveIncorrectRecords(importedRecords, validator);
             Console.WriteLine($"{importedRecords.Count} records were imported from {((FileStream)reader.BaseStream).Name}");
             this.RemoveDuplicatedRecords(importedRecords);
@@ -143,6 +149,12 @@ namespace FileCabinetApp
 
             FileCabinetRecordXmlReader xmlReader = new FileCabinetRecordXmlReader(reader);
             List<FileCabinetRecord> importedRecords = xmlReader.ReadAll().ToList();
+
+            if (importedRecords.Count == 0)
+            {
+                Console.WriteLine("No any records are imported.");
+                return;
+            }
 
             importedRecords = RemoveIncorrectRecords(importedRecords, validator);
             Console.WriteLine($"{importedRecords.Count} records were imported from {((FileStream)reader.BaseStream).Name}");

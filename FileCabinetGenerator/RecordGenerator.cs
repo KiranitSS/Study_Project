@@ -46,17 +46,19 @@ namespace FileCabinetGenerator
 
         private static string GenerateName(int min, int max, Random rnd)
         {
-            string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "sh", "zh", "t", "v", "w", "x" };
-            string[] vowels = { "a", "e", "i", "o", "u", "ae", "y" };
+            string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "sh", "zh", "hn", "t", "v", "w", "x" };
+            string[] vowels = { "a", "e", "i", "o", "u", "ae", "oe", "y" };
+            int longestInsert = 2;
 
             StringBuilder builder = new StringBuilder();
-            int length = rnd.Next(min, max);
+            int length = rnd.Next(min - (longestInsert * 2), max - (longestInsert * 2));
 
-            for (int i = 0; i < length / 2; i++)
+            do
             {
                 builder.Append(consonants[rnd.Next(consonants.Length)]);
                 builder.Append(vowels[rnd.Next(vowels.Length)]);
             }
+            while (builder.Length <= length);
 
             return builder.ToString();
         }
