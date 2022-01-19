@@ -47,7 +47,7 @@ namespace FileCabinetApp.CommandHandlers
         private static Dictionary<string, string> GetDataForUpdate(string parameters)
         {
             Dictionary<string, string> dataForUpdate = new Dictionary<string, string>();
-            var updateParameters = parameters.Replace("'", string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var updateParameters = parameters.Replace("'", string.Empty).Replace(" ", string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries);
             int separatorIndex;
 
             foreach (var parameter in updateParameters)
@@ -91,7 +91,7 @@ namespace FileCabinetApp.CommandHandlers
             inputs[0] = inputs[0].Trim();
             inputs[1] = inputs[1].Trim();
 
-            if (inputs.Length > 2 || inputs[0].Length < 0 || inputs[1].Length < 0)
+            if (inputs.Length > 2 || inputs[0].Length == 0 || inputs[1].Length == 0)
             {
                 Console.WriteLine("Incorrect parameters");
                 return;

@@ -185,6 +185,8 @@ namespace FileCabinetApp
 
             records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
             this.GetRemovedRecords().ForEach(rec => this.SaveRecord(rec));
+
+            Console.WriteLine("Records parameters successfully changed.");
         }
 
         /// <inheritdoc/>
@@ -236,14 +238,14 @@ namespace FileCabinetApp
 
             this.ClearBuffer();
 
+            this.fileStream.Dispose();
+            this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
+
             var records = this.GetExistingRecords();
             int index = records.FindIndex(rec => rec.Id == parameters.Id);
 
             if (index < 0)
             {
-                this.fileStream.Dispose();
-                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
-
                 this.SaveRecord(new RecordDataConverter(parameters));
             }
             else
@@ -260,9 +262,6 @@ namespace FileCabinetApp
                 };
 
                 records[index] = record;
-
-                this.fileStream.Dispose();
-                this.fileStream = new FileStream(this.path, FileMode.OpenOrCreate);
                 records.ForEach(rec => this.SaveRecord(new RecordDataConverter(rec)));
             }
         }
@@ -393,7 +392,7 @@ namespace FileCabinetApp
         {
             foreach (var parameter in paramsToChange)
             {
-                switch (parameter.Key.ToUpperInvariant())
+                switch (parameter.Key.Trim().ToUpperInvariant())
                 {
                     case "ID":
                         record.Id = int.Parse(parameter.Value, CultureInfo.InvariantCulture);
