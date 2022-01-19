@@ -99,20 +99,18 @@ namespace FileCabinetApp
         /// <returns>Returns splitted data for searching records by properties.</returns>
         public static Dictionary<string, string> GetDataForFind(string parameters, string separator)
         {
-            if (string.IsNullOrWhiteSpace(parameters) || string.IsNullOrWhiteSpace(separator))
+            if (string.IsNullOrWhiteSpace(parameters) || separator is null)
             {
                 Console.WriteLine("Incorrect parameters.");
                 return new Dictionary<string, string>();
             }
 
             Dictionary<string, string> searchCriteria = new Dictionary<string, string>();
-            var updateParameters = parameters
-                .Replace("'", string.Empty)
-                .Replace(" ", string.Empty)
-                .Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] searchingParameters = GetSearchingParameters(parameters, separator);
+
             int separatorIndex;
 
-            foreach (var parameter in updateParameters)
+            foreach (var parameter in searchingParameters)
             {
                 separatorIndex = parameter.IndexOf("=", StringComparison.OrdinalIgnoreCase);
 
@@ -121,10 +119,32 @@ namespace FileCabinetApp
                     continue;
                 }
 
-                searchCriteria.Add(parameter[..separatorIndex].ToUpperInvariant(), parameter[(separatorIndex + 1) ..]);
+                searchCriteria.Add(parameter[..separatorIndex].ToUpperInvariant(), parameter[(separatorIndex + 1)..]);
             }
 
             return searchCriteria;
+        }
+
+        private static string[] GetSearchingParameters(string parameters, string separator)
+        {
+            string[] updateParameters;
+
+            if (string.IsNullOrWhiteSpace(separator))
+            {
+                updateParameters = parameters
+                    .Replace("'", string.Empty)
+                    .Replace(" ", string.Empty)
+                    .Split(" ", 1);
+            }
+            else
+            {
+                updateParameters = parameters
+                    .Replace("'", string.Empty)
+                    .Replace(" ", string.Empty)
+                    .Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            }
+
+            return updateParameters;
         }
     }
 }

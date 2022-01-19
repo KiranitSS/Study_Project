@@ -35,13 +35,16 @@ namespace FileCabinetApp
 
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<FileCabinetRecord>), new[] { typeof(FileCabinetRecord) });
 
-            using (XmlReader xmlReader = XmlReader.Create(this.reader))
+            try
             {
-                records = xmlSerializer.Deserialize(xmlReader) as List<FileCabinetRecord>;
+                using (XmlReader xmlReader = XmlReader.Create(this.reader))
+                {
+                    records = xmlSerializer.Deserialize(xmlReader) as List<FileCabinetRecord>;
+                }
             }
-
-            if (records.Count == 0)
+            catch (InvalidOperationException)
             {
+                Console.WriteLine("Incorrect file type.");
                 records = new List<FileCabinetRecord>();
             }
 

@@ -163,7 +163,7 @@ namespace FileCabinetApp
 
         private static List<FileCabinetRecord> GetRecordsToShow(List<FileCabinetRecord> records, Dictionary<string, string> searchingCriteria, string separator)
         {
-            if (separator.Equals("or", StringComparison.OrdinalIgnoreCase))
+            if (searchingCriteria.Count == 1 || separator.Equals("or", StringComparison.OrdinalIgnoreCase))
             {
                 return GetRecordsByOr(records, searchingCriteria);
             }

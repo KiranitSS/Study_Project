@@ -15,6 +15,7 @@ namespace FileCabinetGenerator
         {
             this.id = startId;
         }
+
         public FileCabinetRecord GenerateRecord(int seedChanger)
         {
             Random rnd = new Random(DateTime.UtcNow.Millisecond + seedChanger);
@@ -35,23 +36,29 @@ namespace FileCabinetGenerator
 
         private static string GenerateFirstname(Random rnd)
         {
-            return GenerateString(2, 60, rnd);
+            return GenerateName(2, 60, rnd);
         }
 
         private static string GenerateLastname(Random rnd)
         {
-            return GenerateString(2, 60, rnd);
+            return GenerateName(2, 60, rnd);
         }
 
-        private static string GenerateString(int min, int max, Random rnd)
+        private static string GenerateName(int min, int max, Random rnd)
         {
-            StringBuilder builder = new StringBuilder();
-            int size = rnd.Next(min, max);
+            string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "sh", "zh", "hn", "t", "v", "w", "x" };
+            string[] vowels = { "a", "e", "i", "o", "u", "ae", "oe", "y" };
+            int longestInsert = 2;
 
-            for (int i = 0; i < size; i++)
+            StringBuilder builder = new StringBuilder();
+            int length = rnd.Next(min - (longestInsert * 2), max - (longestInsert * 2));
+
+            do
             {
-                builder.Append(GenerateChar(rnd));
+                builder.Append(consonants[rnd.Next(consonants.Length)]);
+                builder.Append(vowels[rnd.Next(vowels.Length)]);
             }
+            while (builder.Length <= length);
 
             return builder.ToString();
         }
